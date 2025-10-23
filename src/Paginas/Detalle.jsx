@@ -1,4 +1,4 @@
-// src/components/DetallePelicula.jsx (CON FORMATO ELEGANTE)
+// src/components/DetallePelicula.jsx (CON CARRITO FUNCIONAL)
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import peliculas from "../Componentes/PeliculasData";
@@ -16,8 +16,30 @@ function DetallePelicula() {
     );
   }
 
+  // 💡 FUNCIÓN MEJORADA: Añade la película a localStorage (carrito)
   const handleAddToCart = () => {
-    alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
+    // 1. Recuperar el carrito actual del localStorage
+    const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    // 2. Usar el ID para verificar si la película ya existe
+    const existe = carritoActual.some(p => p.id === pelicula.id);
+
+    if (!existe) {
+      // 3. Crear el objeto del item para el carrito
+      const itemNuevo = {
+        id: pelicula.id,
+        titulo: pelicula.titulo,
+        imagen: pelicula.imagen,
+      };
+
+      // 4. Añadir el item y guardar en localStorage
+      const nuevoCarrito = [...carritoActual, itemNuevo];
+      localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+
+      alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
+    } else {
+      alert(`¡"${pelicula.titulo}" ya está en tu carrito!`);
+    }
   };
 
   return (
@@ -48,7 +70,7 @@ function DetallePelicula() {
             {/* Botón Centrado y de Ancho Moderado */}
             <div className="flex justify-center">
               <button
-                onClick={handleAddToCart}
+                onClick={handleAddToCart} // 💡 Esta es la función modificada
                 className="w-full md:w-3/4 flex items-center justify-center bg-cyan-600 text-gray-900 py-3 px-6 rounded-lg font-bold hover:bg-cyan-500 transition duration-300 shadow-md text-base uppercase"
               >
                 🛒 Añadir al Carrito

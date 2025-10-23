@@ -10,7 +10,7 @@ import "./index.css";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     {/* Proveedores globales */}
-    <BrowserRouter basename="/">
+    <BrowserRouter basename="/Cine-Verso">
       <ThemeProvider> {/* 👈 Mueve ThemeProvider afuera para que cubra toda la app */}
         <UserProvider>
           <App />
