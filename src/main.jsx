@@ -11,11 +11,11 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     {/* Proveedores globales */}
     <BrowserRouter basename="/">
-      <UserProvider>
-        <ThemeProvider>
+      <ThemeProvider> {/* 👈 Mueve ThemeProvider afuera para que cubra toda la app */}
+        <UserProvider>
           <App />
-        </ThemeProvider>
-      </UserProvider>
+        </UserProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );

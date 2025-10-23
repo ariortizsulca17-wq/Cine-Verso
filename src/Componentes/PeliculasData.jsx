@@ -4,11 +4,11 @@ const peliculas = [
   // ===============================
   {
     id: 1,
-    titulo: "Harry Potter",
+    titulo: "Harry Potter y la Piedra Filosofal",
     anio: 2001,
     genero: "Fantasía / Aventura",
     categoria: "Basadas en Libros",
-    imagen: "https://m.media-amazon.com/images/I/81YOuOGFCJL._AC_UF894,1000_QL80_.jpg",
+    imagen: "https://m.media-amazon.com/images/M/MV5BYTkyYjVkNDItODc1Ny00NzA1LTkwY2YtZDUwNTlhMDk3MTZiXkEyXkFqcGc@._V1_.jpg",
     rangoEdad: "+7",
     autor: "J.K. Rowling (Libro)",
     reseña: "Una adaptación mágica que captura la esencia de la amistad y la lucha contra el mal, perfecta para iniciar una saga épica.",
@@ -23,7 +23,7 @@ const peliculas = [
     anio: 2005,
     genero: "Romance / Drama",
     categoria: "Basadas en Libros",
-    imagen: "https://m.media-amazon.com/images/I/91rMno0XUzL._AC_UF894,1000_QL80_.jpg",
+    imagen: "https://m.media-amazon.com/images/M/MV5BZjBlODgwZWEtODcxMi00OTY5LWEyOTItODE2MDBjZjU0ZDU3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
     rangoEdad: "+12",
     autor: "Jane Austen (Libro)",
     reseña: "Una hermosa adaptación visualmente impactante que honra el clásico literario de Jane Austen.",

@@ -18,6 +18,7 @@ import DetallePelicula from "./Paginas/Detalle";
 
 // 🧱 Componentes
 import Navbar from "./Componentes/Navbar";
+import Footer from "./Componentes/Footer";
 
 // 🎨 Estilos globales
 import "./App.css";
@@ -34,7 +35,7 @@ export default function App() {
   return (
     <div className={theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}>
       {/* ✅ Navbar global con buscador y rutas */}
-      <Navbar onSearch={handleSearch} />
+      <Navbar onSearch={handleSearch} />  
 
       {/* ✅ Contenido principal con rutas activas */}
       <main className="p-4">
@@ -45,10 +46,12 @@ export default function App() {
           {/* Páginas de películas */}
           <Route path="/PeliculasTops" element={<PeliTops />} />
           <Route path="/PeliculasKids" element={<PeliKids />} />
-          <Route path="/peliasiaticas" element={<PeliAsiaticas />} />
+          <Route path="/PeliAsiaticas" element={<PeliAsiaticas />} />
           <Route path="/PeliDocumentales" element={<PeliDocumentales />} />
           <Route path="/PeliLibros" element={<PeliLibros />} />
           <Route path="/Detalle/:id" element={<DetallePelicula />} />
+
+        
 
           {/* Página de contacto */}
           <Route path="/Contacto" element={<Contacto />} />
@@ -60,6 +63,8 @@ export default function App() {
           {/* Carrito */}
           <Route path="/carrito" element={<Carrito />} />
         </Routes>
+       <Footer> 
+        </Footer>
       </main>
     </div>
   );

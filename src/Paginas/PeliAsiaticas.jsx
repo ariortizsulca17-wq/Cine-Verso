@@ -1,86 +1,183 @@
-import React, { useState } from "react";
-import peliculas from "../Componentes/PeliculasData"; // ✅ Importamos el mismo dataset
+import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { useTheme } from "../Context/ThemeContext";
+import peliculas from "../Componentes/PeliculasData";
 
 export default function PeliAsiaticas() {
+  const { theme } = useTheme();
+  
+  // 1. Estados para los dos niveles de filtro
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   const [generoSeleccionado, setGeneroSeleccionado] = useState("Todos");
 
-  // ✅ Filtramos solo películas asiáticas o de anime
-  const peliculasAsiaticas = peliculas.filter(
-    (p) => p.categoria === "Asiaticas" || p.categoria === "Anime"
-  );
+  // 2. Filtramos solo películas asiáticas/anime (la base)
+  const peliculasAsiaticasBase = useMemo(() => peliculas.filter(
+    (p) =>
+      p.categoria === "Asiaticas" ||
+      p.categoria === "Asiáticas" ||
+      p.categoria === "Animes"
+  ), []);
 
-  // ✅ Extraemos géneros únicos
-  const generos = [
-    "Todos",
-    ...new Set(peliculasAsiaticas.map((p) => p.genero)),
-  ];
+  // 3. Obtenemos categorías únicas y géneros únicos para los desplegables
+  const categoriasUnicas = useMemo(() => [
+    "Todas", 
+    ...new Set(peliculasAsiaticasBase.map((p) => p.categoria.replace(/s$/, '')))] // Normalizamos el nombre
+  , [peliculasAsiaticasBase]);
+    
+  // 4. Películas filtradas por la categoría principal
+  const peliculasPorCategoria = useMemo(() => {
+    if (categoriaSeleccionada === "Todas") {
+      return peliculasAsiaticasBase;
+    }
+    return peliculasAsiaticasBase.filter(
+      (p) => p.categoria.replace(/s$/, '') === categoriaSeleccionada
+    );
+  }, [categoriaSeleccionada, peliculasAsiaticasBase]);
+  
+  // 5. Géneros disponibles basados en la categoría actual
+  const generosDisponibles = useMemo(() => [
+    "Todos", 
+    ...new Set(peliculasPorCategoria.map((p) => p.genero))
+  ], [peliculasPorCategoria]);
 
-  // ✅ Filtramos según el género seleccionado
-  const peliculasFiltradas =
-    generoSeleccionado === "Todos"
-      ? peliculasAsiaticas
-      : peliculasAsiaticas.filter((p) => p.genero === generoSeleccionado);
+  // 6. Filtro final
+  const peliculasFiltradas = useMemo(() => {
+    if (generoSeleccionado === "Todos") {
+      return peliculasPorCategoria;
+    }
+    return peliculasPorCategoria.filter((p) => p.genero === generoSeleccionado);
+  }, [generoSeleccionado, peliculasPorCategoria]);
+
+  // Manejar el cambio de categoría y resetear el género
+  const handleCategoriaChange = (nuevaCategoria) => {
+    setCategoriaSeleccionada(nuevaCategoria);
+    setGeneroSeleccionado("Todos"); // Resetear género al cambiar de categoría
+  };
 
   return (
-    <div className="flex flex-col md:flex-row p-6 bg-[#0B1014] min-h-screen text-white">
-      {/* --- MENÚ LATERAL DE GÉNEROS --- */}
-      <aside className="md:w-1/5 mb-6 md:mb-0 md:mr-6 bg-[#1A1F25] p-4 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold text-[#00C8D7] mb-3">🎭 Géneros</h2>
-        <ul className="space-y-2">
-          {generos.map((g, i) => (
-            <li
-              key={i}
-              onClick={() => setGeneroSeleccionado(g)}
-              className={`cursor-pointer p-2 rounded-lg text-sm transition-colors ${
-                generoSeleccionado === g
-                  ? "bg-[#00C8D7] text-black font-semibold"
-                  : "hover:bg-[#00C8D7]/30"
+    <div
+      className={`flex flex-col p-6 min-h-screen transition-colors duration-500 ${
+        theme === "dark" ? "bg-[#0B1014] text-white" : "bg-[#f2f5f7] text-black"
+      }`}
+    >
+      {/* 🎭 Contenedor de Desplegables de Filtro (Reemplaza el Aside) */}
+      <div 
+        className={`w-full mb-6 p-4 rounded-xl shadow-md flex flex-col sm:flex-row gap-4 ${
+          theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
+        }`}
+      >
+        {/* Desplegable de Categoría */}
+        <div className="flex-1">
+          <label 
+            htmlFor="categoria-select" 
+            className="block text-sm font-medium mb-1 text-[#00C8D7]"
+          >
+            Seleccionar Categoría
+          </label>
+          <select
+            id="categoria-select"
+            value={categoriaSeleccionada}
+            onChange={(e) => handleCategoriaChange(e.target.value)}
+            className={`w-full p-2 rounded-lg border-2 appearance-none cursor-pointer 
+              ${theme === "dark" 
+                ? "bg-[#0B1014] border-[#00C8D7] text-white" 
+                : "bg-white border-gray-300 text-black"
               }`}
-            >
-              {g}
-            </li>
-          ))}
-        </ul>
-      </aside>
+          >
+            {categoriasUnicas.map((c, i) => (
+              <option key={i} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* --- LISTA DE PELÍCULAS ASIÁTICAS Y ANIME --- */}
+        {/* Desplegable de Género (Dependiente de la Categoría) */}
+        <div className="flex-1">
+          <label 
+            htmlFor="genero-select" 
+            className="block text-sm font-medium mb-1 text-[#00C8D7]"
+          >
+            Seleccionar Género
+          </label>
+          <select
+            id="genero-select"
+            value={generoSeleccionado}
+            onChange={(e) => setGeneroSeleccionado(e.target.value)}
+            className={`w-full p-2 rounded-lg border-2 appearance-none cursor-pointer 
+              ${theme === "dark" 
+                ? "bg-[#0B1014] border-[#00C8D7] text-white" 
+                : "bg-white border-gray-300 text-black"
+              }`}
+            disabled={categoriaSeleccionada === "Todas" && generosDisponibles.length <= 1}
+          >
+            {generosDisponibles.map((g, i) => (
+              <option key={i} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* 🎥 Listado principal */}
       <main className="flex-1">
         <h1 className="text-3xl font-bold text-[#00C8D7] mb-4">
-          🎌 Películas Asiáticas y Anime
+          🎥 {categoriaSeleccionada}
         </h1>
-        <p className="text-gray-300 mb-6">
-          Aquí podrás encontrar películas coreanas, japonesas y de animación con
-          historias únicas y emocionantes.
+        <p
+          className={`mb-6 ${
+            theme === "dark" ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
+          Explora lo mejor del cine asiático y de animación oriental 🌸.
         </p>
 
+        {/* 📭 Si no hay películas */}
         {peliculasFiltradas.length === 0 ? (
-          <p className="text-gray-400 text-center">
-            No hay películas disponibles en este género.
+          <p
+            className={`text-center ${
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            No hay películas disponibles en este género 😢
           </p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {peliculasFiltradas.map((p, i) => (
               <div
-                key={i}
-                className="bg-[#1A1F25] rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform"
+                key={p.id || i}
+                className={`rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform ${
+                  theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
+                }`}
               >
-                <img
-                  src={p.imagen}
-                  alt={p.titulo}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-3">
-                  <h2 className="text-lg font-semibold mb-1">{p.titulo}</h2>
-                  <p className="text-gray-400 text-sm mb-2">{p.genero}</p>
-                  <button className="w-full bg-[#00C8D7] text-black py-1 rounded-md hover:bg-[#00E0FF] font-bold transition-colors">
-                    Ver más
-                  </button>
-                </div>
-              </div>
+                <Link to={`/detalle/${p.id}`}>
+                  <img
+                    src={p.imagen}
+                    alt={p.titulo}
+                    className="w-full h-48 object-cover cursor-pointer"
+                  />
+                  <div className="p-3">
+                    <h2 className="text-lg font-semibold mb-1 truncate hover:text-[#00C8D7] transition-colors">{p.titulo}</h2>
+            </div>
+                </Link>
+
+                    <p
+                      className={`text-sm mb-2 ${
+                        theme === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      {p.genero} • {p.anio}
+                    </p>
+                    <Link to={`/detalle/${p.id}`} className="block w-full text-center bg-[#00C8D7] text-black py-1 rounded-md hover:bg-[#00E0FF] font-bold transition-colors text-sm">
+                      Ver detalle
+                    </Link>
+                  </div>
+              
             ))}
           </div>
-        )}
+        )}  
       </main>
     </div>
   );
-}
+} 

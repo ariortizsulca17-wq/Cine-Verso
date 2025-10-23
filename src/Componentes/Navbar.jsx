@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
 import { useUser } from "../Context/UserContext";
-import { FaBars, FaTimes, FaShoppingCart, FaSun, FaMoon, FaUserCircle } from "react-icons/fa"; // 🌙 Añadidos iconos de sol/luna y usuario
+import {
+  FaBars,
+  FaTimes,
+  FaShoppingCart,
+  FaSun,
+  FaMoon,
+  FaUserCircle,
+} from "react-icons/fa";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,37 +17,43 @@ export default function Navbar() {
   const closeMenu = () => setIsOpen(false);
   const navigate = useNavigate();
 
-  // 📝 Usando 'dark' como default para un mejor contraste con turquesa
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useUser();
 
-  // 📌 El fondo del navbar y el texto de los enlaces se han ajustado a tu paleta (negro/turquesa).
-  const navbarClasses = "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700";
-  const navLinkBaseClasses = "font-medium hover:text-cyan-400 transition-colors";
-  const navLinkActiveClasses = "text-cyan-400 border-b-2 border-cyan-400 pb-1"; // Estilo de activo más sutil y moderno
+  // 🌈 NUEVO: aplica la clase global del tema al <body>
+  useEffect(() => {
+    document.body.classList.remove("light", "dark");
+    document.body.classList.add(theme);
+  }, [theme]);
 
-  // ✅ Items del menú
+  // 📝 Ajuste de estilos del navbar según el tema
+  const navbarClasses =
+    theme === "dark"
+      ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700"
+      : "bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-cyan-200";
+
+  const navLinkBaseClasses = "font-medium hover:text-cyan-400 transition-colors";
+  const navLinkActiveClasses =
+    "text-cyan-400 border-b-2 border-cyan-400 pb-1";
+
   const menuItems = [
     { path: "/", label: "Inicio" },
     { path: "/PeliculasTops", label: "Peli Tops" },
     { path: "/PeliculasKids", label: "Peli Kids" },
-    { path: "/PeliAsiáticas", label: "Peli Asiáticas" },
-    { path: "/PeliDocumentales", label: "Peli Docs" }, // Abreviado para más espacio
+    { path: "/PeliAsiaticas", label: "Peli Asiáticas" },
+    { path: "/PeliDocumentales", label: "Peli Docs" },
     { path: "/PeliLibros", label: "Peli Libros" },
     { path: "/Contacto", label: "Contacto" },
   ];
 
-  // ⚙️ Botón de acción (para login, registro, cerrar sesión) - Turquesa/Negro
   const actionBtn =
     "inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-gray-900 " +
     "hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition shadow-lg";
 
-  // ⚙️ Botón de acción para el menú móvil - Estilo secundario
   const mobileActionBtn =
     "w-full text-center py-2 px-4 rounded-lg font-semibold transition " +
     "bg-gray-800 text-cyan-400 hover:bg-gray-700";
 
-  // ⚙️ Botón de iconos (tema, carrito, menú)
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
 
   return (
@@ -48,9 +61,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
         {/* 🌟 Logo Cineverso */}
         <Link to="/" className="flex items-center gap-3" onClick={closeMenu}>
-          {/* Un ícono de película o similar podría ir aquí en lugar de un div blanco */}
-          <span className="text-3xl text-cyan-400">🎬</span> 
-          <span className="font-extrabold text-2xl tracking-wide text-white">
+          <span className="text-3xl text-cyan-400">🎬</span>
+          <span className="font-extrabold text-2xl tracking-wide">
             Cineverso
           </span>
         </Link>
@@ -63,7 +75,13 @@ export default function Navbar() {
               to={path}
               end
               className={({ isActive }) =>
-                `${navLinkBaseClasses} ${isActive ? navLinkActiveClasses : "text-gray-300"}`
+                `${navLinkBaseClasses} ${
+                  isActive
+                    ? navLinkActiveClasses
+                    : theme === "dark"
+                    ? "text-gray-300"
+                    : "text-gray-700"
+                }`
               }
             >
               {label}
@@ -73,26 +91,27 @@ export default function Navbar() {
 
         {/* ⚙️ Acciones (Tema, Carrito, Usuario, Menú móvil) */}
         <div className="flex items-center gap-4">
-          
           {/* 🌓 Cambiar tema (Sol/Luna) */}
-          <button onClick={toggleTheme} className={`${iconBtn} text-white`} title="Cambiar tema">
+          <button
+            onClick={toggleTheme}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+            title="Cambiar tema"
+          >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
           </button>
 
           {/* 🛒 Carrito */}
           <button
             onClick={() => navigate("/carrito")}
-            className={`${iconBtn} text-white`}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
             title="Ver carrito"
           >
             <FaShoppingCart />
           </button>
 
-
           {/* 👤 Usuario / Login */}
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              {/* Imagen/Avatar del usuario */}
               {user?.avatar ? (
                 <img
                   src={user.avatar}
@@ -102,15 +121,21 @@ export default function Navbar() {
                   title={user?.nombre}
                 />
               ) : (
-                <FaUserCircle className="h-9 w-9 text-cyan-600" title={user?.nombre ?? "Usuario"} />
+                <FaUserCircle
+                  className="h-9 w-9 text-cyan-600"
+                  title={user?.nombre ?? "Usuario"}
+                />
               )}
-              {/* Información del usuario (Opcional) */}
               <div className="hidden lg:block leading-4 text-left">
-                <p className="text-sm font-semibold text-white">{user?.nombre}</p>
+                <p className="text-sm font-semibold">
+                  {user?.nombre}
+                </p>
                 <p className="text-xs text-cyan-400">{user?.cargo}</p>
               </div>
-              {/* Botón de Cerrar Sesión (Más compacto) */}
-              <button onClick={logout} className={`${actionBtn} hidden md:inline-flex px-3 py-1.5`}>
+              <button
+                onClick={logout}
+                className={`${actionBtn} hidden md:inline-flex px-3 py-1.5`}
+              >
                 Cerrar
               </button>
             </div>
@@ -123,11 +148,12 @@ export default function Navbar() {
           )}
 
           {/* 📱 Botón de menú móvil */}
-          <button
-            className={`md:hidden ${iconBtn}`}
-            onClick={toggleMenu}
-          >
-            {isOpen ? <FaTimes className="text-cyan-400" /> : <FaBars />}
+          <button className={`md:hidden ${iconBtn}`} onClick={toggleMenu}>
+            {isOpen ? (
+              <FaTimes className="text-cyan-400" />
+            ) : (
+              <FaBars />
+            )}
           </button>
         </div>
       </div>
@@ -142,7 +168,9 @@ export default function Navbar() {
               onClick={closeMenu}
               className={({ isActive }) =>
                 `w-full text-center py-2 transition-colors ${
-                  isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
+                  isActive
+                    ? "bg-cyan-900 text-cyan-400"
+                    : "text-white hover:bg-gray-700"
                 }`
               }
             >
@@ -154,21 +182,30 @@ export default function Navbar() {
             {!isAuthenticated ? (
               <>
                 <button
-                  onClick={() => { closeMenu(); navigate("/login"); }}
+                  onClick={() => {
+                    closeMenu();
+                    navigate("/login");
+                  }}
                   className={actionBtn}
                 >
                   <FaUserCircle /> Iniciar sesión
                 </button>
                 <button
-                  onClick={() => { closeMenu(); navigate("/register"); }}
-                  className={mobileActionBtn} // Estilo secundario en móvil para registro
+                  onClick={() => {
+                    closeMenu();
+                    navigate("/register");
+                  }}
+                  className={mobileActionBtn}
                 >
                   Registrarse
                 </button>
               </>
             ) : (
               <button
-                onClick={() => { logout(); closeMenu(); }}
+                onClick={() => {
+                  logout();
+                  closeMenu();
+                }}
                 className={actionBtn}
               >
                 Cerrar sesión
@@ -176,7 +213,10 @@ export default function Navbar() {
             )}
 
             <button
-              onClick={() => { closeMenu(); navigate("/carrito"); }}
+              onClick={() => {
+                closeMenu();
+                navigate("/carrito");
+              }}
               className={`${mobileActionBtn} flex items-center justify-center gap-2`}
             >
               <FaShoppingCart /> Ver carrito
