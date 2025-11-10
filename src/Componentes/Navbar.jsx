@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
-import { useUser } from "../Context/UserContext";
+// ❌ ELIMINAMOS: import { useUser } from "../Context/UserContext";
+
+// ✅ NUEVOS IMPORTS:
+import { useAuth } from "../Context/AuthContext.jsx";
+import  {ZonaUsuario}  from "./ZonaUsuario";
 import {
   FaBars,
   FaTimes,
@@ -18,7 +22,9 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const { theme, toggleTheme } = useTheme();
-  const { user, isAuthenticated, logout } = useUser();
+  // ✅ USAMOS useAuth:
+  const { user, loading } = useAuth();
+  const isAuthenticated = !!user; // Determinar si está autenticado
 
   // 🌈 NUEVO: aplica la clase global del tema al <body>
   useEffect(() => {
@@ -36,6 +42,7 @@ export default function Navbar() {
   const navLinkActiveClasses =
     "text-cyan-400 border-b-2 border-cyan-400 pb-1";
 
+  // Agregamos el Dashboard si está autenticado
   const menuItems = [
     { path: "/", label: "Inicio" },
     { path: "/PeliculasTops", label: "Peli Tops" },
@@ -44,17 +51,24 @@ export default function Navbar() {
     { path: "/PeliDocumentales", label: "Peli Docs" },
     { path: "/PeliLibros", label: "Peli Libros" },
     { path: "/Contacto", label: "Contacto" },
+    // 💡 Añadir ruta de Dashboard si está autenticado y no está cargando
+    ...(isAuthenticated && !loading
+      ? [{ path: "/dashboard", label: "Mi Cuenta" }]
+      : []),
   ];
 
-  const actionBtn =
-    "inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-gray-900 " +
-    "hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition shadow-lg";
-
-  const mobileActionBtn =
-    "w-full text-center py-2 px-4 rounded-lg font-semibold transition " +
-    "bg-gray-800 text-cyan-400 hover:bg-gray-700";
-
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
+
+  // Función para manejar el clic en Iniciar Sesión/Registrarse
+  const handleAuthRedirect = (path) => {
+    closeMenu();
+    navigate(path);
+  };
+
+  // Función dummy para pasar a ZonaUsuario (ya que navegas a la página de login)
+  const handleAbrirLogin = () => {
+    navigate("/login");
+  };
 
   return (
     <nav className={navbarClasses}>
@@ -94,7 +108,9 @@ export default function Navbar() {
           {/* 🌓 Cambiar tema (Sol/Luna) */}
           <button
             onClick={toggleTheme}
-            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+            className={`${iconBtn} ${
+              theme === "dark" ? "text-white" : "text-gray-800"
+            }`}
             title="Cambiar tema"
           >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
@@ -103,49 +119,20 @@ export default function Navbar() {
           {/* 🛒 Carrito */}
           <button
             onClick={() => navigate("/carrito")}
-            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+            className={`${iconBtn} ${
+              theme === "dark" ? "text-white" : "text-gray-800"
+            }`}
             title="Ver carrito"
           >
             <FaShoppingCart />
           </button>
 
-          {/* 👤 Usuario / Login */}
-          {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.nombre ?? "Usuario"}
-                  referrerPolicy="no-referrer"
-                  className="h-9 w-9 rounded-full object-cover border-2 border-cyan-600"
-                  title={user?.nombre}
-                />
-              ) : (
-                <FaUserCircle
-                  className="h-9 w-9 text-cyan-600"
-                  title={user?.nombre ?? "Usuario"}
-                />
-              )}
-              <div className="hidden lg:block leading-4 text-left">
-                <p className="text-sm font-semibold">
-                  {user?.nombre}
-                </p>
-                <p className="text-xs text-cyan-400">{user?.cargo}</p>
-              </div>
-              <button
-                onClick={logout}
-                className={`${actionBtn} hidden md:inline-flex px-3 py-1.5`}
-              >
-                Cerrar
-              </button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-2">
-              <button onClick={() => navigate("/login")} className={actionBtn}>
-                <FaUserCircle className="text-lg" /> Iniciar sesión
-              </button>
-            </div>
-          )}
+          {/* 👤 Usuario / Login (Reemplazo por ZonaUsuario) */}
+          <div className="hidden md:block">
+            {/* Si no está cargando, mostramos la ZonaUsuario */}
+            {!loading && <ZonaUsuario onAbrirLogin={handleAbrirLogin} />}
+            {/* Opcional: mostrar un spinner si loading es true */}
+          </div>
 
           {/* 📱 Botón de menú móvil */}
           <button className={`md:hidden ${iconBtn}`} onClick={toggleMenu}>
@@ -179,45 +166,35 @@ export default function Navbar() {
           ))}
 
           <div className="w-11/12 pt-3 space-y-3 border-t border-cyan-800 mt-4">
+            {/* Reemplazamos la lógica de botones por navegación directa */}
             {!isAuthenticated ? (
               <>
                 <button
-                  onClick={() => {
-                    closeMenu();
-                    navigate("/login");
-                  }}
-                  className={actionBtn}
+                  onClick={() => handleAuthRedirect("/login")}
+                  className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
                 >
-                  <FaUserCircle /> Iniciar sesión
+                  <FaUserCircle className="inline mr-2" /> Iniciar sesión
                 </button>
                 <button
-                  onClick={() => {
-                    closeMenu();
-                    navigate("/register");
-                  }}
-                  className={mobileActionBtn}
+                  onClick={() => handleAuthRedirect("/registro")}
+                  className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700"
                 >
                   Registrarse
                 </button>
               </>
             ) : (
+              // Para el logout en móvil, usamos la funcionalidad de ZonaUsuario
               <button
-                onClick={() => {
-                  logout();
-                  closeMenu();
-                }}
-                className={actionBtn}
+                onClick={() => handleAuthRedirect("/dashboard")}
+                className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
               >
-                Cerrar sesión
+                Ir a Mi Cuenta
               </button>
             )}
 
             <button
-              onClick={() => {
-                closeMenu();
-                navigate("/carrito");
-              }}
-              className={`${mobileActionBtn} flex items-center justify-center gap-2`}
+              onClick={() => handleAuthRedirect("/carrito")}
+              className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700 flex items-center justify-center gap-2"
             >
               <FaShoppingCart /> Ver carrito
             </button>

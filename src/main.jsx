@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./Context/ThemeContext.jsx";
 import { UserProvider } from "./Context/UserContext.jsx";
+import { AuthProvider } from "./Context/AuthContext.jsx";
 import App from "./App.jsx";
 import "./index.css";
 
@@ -12,9 +13,11 @@ createRoot(document.getElementById("root")).render(
     {/* Proveedores globales */}
     <BrowserRouter basename="/Cine-Verso">
       <ThemeProvider> {/* 👈 Mueve ThemeProvider afuera para que cubra toda la app */}
-        <UserProvider>
-          <App />
-        </UserProvider>
+        <AuthProvider>
+          <UserProvider>
+            <App />
+          </UserProvider>
+        </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
