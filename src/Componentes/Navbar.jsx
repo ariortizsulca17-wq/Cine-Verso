@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
-// ❌ ELIMINAMOS: import { useUser } from "../Context/UserContext";
-
-// ✅ NUEVOS IMPORTS:
 import { useAuth } from "../Context/AuthContext.jsx";
-import  {ZonaUsuario}  from "./ZonaUsuario";
+import { ZonaUsuario } from "./ZonaUsuario";
 import {
   FaBars,
   FaTimes,
@@ -22,17 +19,18 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const { theme, toggleTheme } = useTheme();
-  // ✅ USAMOS useAuth:
+
+  // USAMOS useAuth
   const { user, loading } = useAuth();
   const isAuthenticated = !!user; // Determinar si está autenticado
 
-  // 🌈 NUEVO: aplica la clase global del tema al <body>
+  // NUEVO: aplica la clase global del tema al <body>
   useEffect(() => {
     document.body.classList.remove("light", "dark");
     document.body.classList.add(theme);
   }, [theme]);
 
-  // 📝 Ajuste de estilos del navbar según el tema
+  
   const navbarClasses =
     theme === "dark"
       ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700"
@@ -42,7 +40,7 @@ export default function Navbar() {
   const navLinkActiveClasses =
     "text-cyan-400 border-b-2 border-cyan-400 pb-1";
 
-  // Agregamos el Dashboard si está autenticado
+  
   const menuItems = [
     { path: "/", label: "Inicio" },
     { path: "/PeliculasTops", label: "Peli Tops" },
@@ -51,10 +49,6 @@ export default function Navbar() {
     { path: "/PeliDocumentales", label: "Peli Docs" },
     { path: "/PeliLibros", label: "Peli Libros" },
     { path: "/Contacto", label: "Contacto" },
-    // 💡 Añadir ruta de Dashboard si está autenticado y no está cargando
-    ...(isAuthenticated && !loading
-      ? [{ path: "/dashboard", label: "Mi Cuenta" }]
-      : []),
   ];
 
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
@@ -89,10 +83,9 @@ export default function Navbar() {
               to={path}
               end
               className={({ isActive }) =>
-                `${navLinkBaseClasses} ${
-                  isActive
-                    ? navLinkActiveClasses
-                    : theme === "dark"
+                `${navLinkBaseClasses} ${isActive
+                  ? navLinkActiveClasses
+                  : theme === "dark"
                     ? "text-gray-300"
                     : "text-gray-700"
                 }`
@@ -108,9 +101,8 @@ export default function Navbar() {
           {/* 🌓 Cambiar tema (Sol/Luna) */}
           <button
             onClick={toggleTheme}
-            className={`${iconBtn} ${
-              theme === "dark" ? "text-white" : "text-gray-800"
-            }`}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"
+              }`}
             title="Cambiar tema"
           >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
@@ -119,9 +111,8 @@ export default function Navbar() {
           {/* 🛒 Carrito */}
           <button
             onClick={() => navigate("/carrito")}
-            className={`${iconBtn} ${
-              theme === "dark" ? "text-white" : "text-gray-800"
-            }`}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"
+              }`}
             title="Ver carrito"
           >
             <FaShoppingCart />
@@ -129,9 +120,7 @@ export default function Navbar() {
 
           {/* 👤 Usuario / Login (Reemplazo por ZonaUsuario) */}
           <div className="hidden md:block">
-            {/* Si no está cargando, mostramos la ZonaUsuario */}
             {!loading && <ZonaUsuario onAbrirLogin={handleAbrirLogin} />}
-            {/* Opcional: mostrar un spinner si loading es true */}
           </div>
 
           {/* 📱 Botón de menú móvil */}
@@ -154,10 +143,9 @@ export default function Navbar() {
               to={path}
               onClick={closeMenu}
               className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${
-                  isActive
-                    ? "bg-cyan-900 text-cyan-400"
-                    : "text-white hover:bg-gray-700"
+                `w-full text-center py-2 transition-colors ${isActive
+                  ? "bg-cyan-900 text-cyan-400"
+                  : "text-white hover:bg-gray-700"
                 }`
               }
             >
@@ -166,7 +154,7 @@ export default function Navbar() {
           ))}
 
           <div className="w-11/12 pt-3 space-y-3 border-t border-cyan-800 mt-4">
-            {/* Reemplazamos la lógica de botones por navegación directa */}
+            {/* Si no está autenticado, mostramos Iniciar sesión/Registrarse */}
             {!isAuthenticated ? (
               <>
                 <button
@@ -183,13 +171,9 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              // Para el logout en móvil, usamos la funcionalidad de ZonaUsuario
-              <button
-                onClick={() => handleAuthRedirect("/dashboard")}
-                className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
-              >
-                Ir a Mi Cuenta
-              </button>
+              <div>
+                <span className="text-sm text-gray-400">Sesión iniciada</span>
+              </div>
             )}
 
             <button
