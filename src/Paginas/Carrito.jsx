@@ -1,29 +1,70 @@
-// Carrito.jsx (MEJORADO con useState y useEffect)
 import React, { useState, useEffect } from "react";
+import { db } from "../lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../Context/AuthContext";
 
 export default function Carrito() {
-  // 💡 USAR ESTADO LOCAL para almacenar el carrito y forzar la re-renderización
   const [carrito, setCarrito] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
-  // 💡 USAR useEffect para cargar el carrito al montar el componente
   useEffect(() => {
     const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
     setCarrito(carritoGuardado);
-  }, []); // Se ejecuta solo una vez al cargar
+  }, []);
 
-  // 💡 FUNCIÓN MEJORADA: Ya no usa window.location.reload()
   const eliminar = (id) => {
-    // 1. Filtrar el array
     const nuevoCarrito = carrito.filter((p) => p.id !== id);
-
-    // 2. Actualizar localStorage
     localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-
-    // 3. Actualizar el estado para re-renderizar
     setCarrito(nuevoCarrito);
   };
 
   const totalItems = carrito.length;
+
+  // Calcula total si tus items tienen price, si no quedará 0
+  const totalAmount = carrito.reduce((acc, it) => acc + (it.price || 0), 0);
+
+  const finalizarCompra = async () => {
+    if (!user) {
+      alert("Debes iniciar sesión para realizar una compra.");
+      return;
+    }
+
+    if (carrito.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      // Guardamos título e imagen de cada película
+const itemsConImagen = carrito.map((p) => ({
+  titulo: p.titulo || p.title || "Sin título",
+  imagen: p.imagen || "https://via.placeholder.com/150x220/1f2937/67e8f9?text=🎬"
+}));
+
+const compra = {
+  uid: user.uid,
+  email: user.email || null,
+  items: itemsConImagen, // 👈 guardamos objetos con imagen y título
+  cantidad: carrito.length,
+  total: totalAmount,
+  fecha: serverTimestamp(),
+};
+
+      await addDoc(collection(db, "compras"), compra);
+
+      alert("✅ ¡Compra realizada con éxito!");
+      localStorage.removeItem("carrito");
+      setCarrito([]);
+    } catch (error) {
+      console.error("Error al guardar la compra:", error);
+      alert("❌ Ocurrió un error al guardar la compra.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-gray-100">
@@ -43,25 +84,21 @@ export default function Carrito() {
                 key={p.id}
                 className="bg-gray-700 p-4 rounded-lg flex items-center shadow-md transition-shadow hover:shadow-cyan-500/20"
               >
-                {/* Miniatura de la imagen (si está disponible) */}
                 <img
                   src={p.imagen}
                   alt={p.titulo}
                   className="w-16 h-20 object-cover rounded-md mr-4 border border-cyan-500/50"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/100x120/4a5568/99f6e4?text=🎥";
+                    e.target.src =
+                      "https://via.placeholder.com/100x120/4a5568/99f6e4?text=🎥";
                   }}
                 />
-
-                {/* Título */}
                 <span className="flex-grow text-lg font-semibold text-white">
                   {p.titulo}
                 </span>
-
-                {/* Botón Eliminar */}
                 <button
-                  onClick={() => eliminar(p.id)} // 💡 Usar el ID para eliminar, más seguro que el título
+                  onClick={() => eliminar(p.id)}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition duration-200 ml-4 shadow-md"
                 >
                   Eliminar
@@ -69,13 +106,21 @@ export default function Carrito() {
               </div>
             ))}
 
-            {/* Botón de Pago (Ejemplo) */}
+            {/* Info opcional de total */}
+            {totalAmount > 0 && (
+              <div className="text-right text-gray-300 font-semibold">
+                Total: S/ {totalAmount.toFixed(2)}
+              </div>
+            )}
+
             <div className="pt-6 border-t border-gray-700 mt-6">
               <button
-                className="w-full bg-cyan-600 text-gray-900 py-3 rounded-lg font-bold hover:bg-cyan-500 transition duration-300 shadow-xl shadow-cyan-500/50 uppercase text-lg tracking-widest"
-                onClick={() => alert(`Procediendo al pago de ${totalItems} películas...`)}
+                onClick={finalizarCompra}
+                disabled={isSaving}
+                className={`w-full py-3 rounded-lg font-bold uppercase text-lg tracking-widest shadow-xl transition
+                  ${isSaving ? "bg-gray-700 text-gray-400 cursor-not-allowed" : "bg-cyan-600 text-gray-900 hover:bg-cyan-500"}`}
               >
-                Finalizar Compra
+                {isSaving ? "Procesando..." : "Finalizar Compra"}
               </button>
             </div>
           </div>

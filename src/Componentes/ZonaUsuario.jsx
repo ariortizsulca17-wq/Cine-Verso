@@ -111,7 +111,7 @@ export function ZonaUsuario({ onAbrirLogin }){
                                 onClick={() => handleMenuItemClick('/dashboard')}
                             >
                                 <User className={iconClasses} />
-                                **MI CUENTA**
+                                MI CUENTA
                             </div>
                             
                             {/* Botón de Cerrar Sesión */}

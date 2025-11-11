@@ -29,7 +29,7 @@ export default function Navbar() {
     document.body.classList.remove("light", "dark");
     document.body.classList.add(theme);
   }, [theme]);
-
+  //Comentario
   
   const navbarClasses =
     theme === "dark"
