@@ -19,6 +19,7 @@ import Navbar from "./Componentes/Navbar";
 import Footer from "./Componentes/Footer";
 import Modal from "./Componentes/Modal";
 import Dashboard from "./Componentes/Dashboard";
+import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
 
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/PeliLibros" element={<PeliLibros />} />
           <Route path="/Detalle/:id" element={<DetallePelicula />} />
           <Route path="/Contacto" element={<Contacto />} />
+          <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
 
           {/* 🔐 Dashboard protegido */}
