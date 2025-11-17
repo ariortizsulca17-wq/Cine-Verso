@@ -99,7 +99,7 @@ export function ZonaUsuario({ onAbrirLogin }){
                         <div className="py-1">
                             <div 
                                 className={itemClasses} 
-                                onClick={() => handleMenuItemClick('/mis-compras')}
+                                onClick={() => handleMenuItemClick('/dashboard')}
                             >
                                 <ShoppingCart className={iconClasses} />
                                 MIS COMPRAS

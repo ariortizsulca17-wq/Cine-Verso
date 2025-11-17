@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom"; // Importar useNavigate
 import { useTheme } from "./Context/ThemeContext";
 import { useAuth } from "./Context/AuthContext.jsx"; // ✅ IMPORTAR useAuth
+import { Toaster } from "react-hot-toast";
 
 // 🧭 Páginas (Rutas públicas)
 import Inicio from "./Paginas/Inicio";
@@ -56,6 +57,7 @@ function RutaProtegida({ element }) {
 export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
+  
 
   // ✅ Estados para manejar los modales
   // (Estados de modal removidos: actualmente no se usan en esta versión)
@@ -77,6 +79,7 @@ export default function App() {
     // para un mejor manejo de rutas completas.
     <div className={theme === 'dark' ? 'min-h-screen bg-gray-900' : 'min-h-screen bg-gray-100'}>
   <Navbar onSearch={handleSearch} />
+  
 
       <main className="min-h-[calc(100vh-64px)]"> {/* Asegura que el contenido ocupe la altura restante */}
         <Routes>
@@ -123,7 +126,33 @@ export default function App() {
           
         </Routes>
       </main>
-      
+      <Toaster
+  position="bottom-right"
+  reverseOrder={false}
+  toastOptions={{
+    style: {
+      background: theme === "dark" ? "#1A1F25" : "#FFFFFF",
+      color: theme === "dark" ? "#FFFFFF" : "#000000",
+      border: theme === "dark" ? "1px solid #00C8D7" : "1px solid #00A6B2",
+      boxShadow:
+        theme === "dark"
+          ? "0px 2px 10px rgba(0, 200, 215, 0.3)"
+          : "0px 2px 10px rgba(0, 200, 215, 0.1)",
+    },
+    success: {
+      iconTheme: {
+        primary: "#00C8D7",
+        secondary: theme === "dark" ? "#1A1F25" : "#FFFFFF",
+      },
+    },
+    error: {
+      iconTheme: {
+        primary: "#FF4C4C",
+        secondary: theme === "dark" ? "#1A1F25" : "#FFFFFF",
+      },
+    },
+  }}
+/>
       {/* El Footer puede ir fuera del <Routes> si es estático */}
       <Footer />
     </div>

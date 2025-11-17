@@ -25,46 +25,48 @@ export default function Carrito() {
   const totalAmount = carrito.reduce((acc, it) => acc + (it.price || 0), 0);
 
   const finalizarCompra = async () => {
-    if (!user) {
-      alert("Debes iniciar sesión para realizar una compra.");
-      return;
-    }
+  if (!user || !user.uid) {
+    alert("Debes iniciar sesión para realizar una compra.");
+    return;
+  }
 
-    if (carrito.length === 0) {
-      alert("Tu carrito está vacío.");
-      return;
-    }
+  if (carrito.length === 0) {
+    alert("Tu carrito está vacío.");
+    return;
+  }
 
-    setIsSaving(true);
+  setIsSaving(true);
 
-    try {
-      // Guardamos título e imagen de cada película
-const itemsConImagen = carrito.map((p) => ({
-  titulo: p.titulo || p.title || "Sin título",
-  imagen: p.imagen || "https://via.placeholder.com/150x220/1f2937/67e8f9?text=🎬"
-}));
+  try {
+    const itemsConImagen = carrito.map((p) => ({
+      titulo: p.titulo || p.title || "Sin título",
+      imagen:
+        p.imagen ||
+        "https://via.placeholder.com/150x220/1f2937/67e8f9?text=🎬",
+    }));
 
-const compra = {
-  uid: user.uid,
-  email: user.email || null,
-  items: itemsConImagen, // 👈 guardamos objetos con imagen y título
-  cantidad: carrito.length,
-  total: totalAmount,
-  fecha: serverTimestamp(),
+    const compra = {
+      uid: user.uid, // 🔒 Garantizamos que siempre exista
+      email: user.email || null,
+      items: itemsConImagen,
+      cantidad: carrito.length,
+      total: totalAmount,
+      fecha: serverTimestamp(),
+    };
+
+    // ✅ Esperamos que el usuario esté autenticado completamente
+    await addDoc(collection(db, "compras"), compra);
+
+    alert("✅ ¡Compra realizada con éxito!");
+    localStorage.removeItem("carrito");
+    setCarrito([]);
+  } catch (error) {
+    console.error("Error al guardar la compra:", error);
+    alert("❌ Ocurrió un error al guardar la compra.");
+  } finally {
+    setIsSaving(false);
+  }
 };
-
-      await addDoc(collection(db, "compras"), compra);
-
-      alert("✅ ¡Compra realizada con éxito!");
-      localStorage.removeItem("carrito");
-      setCarrito([]);
-    } catch (error) {
-      console.error("Error al guardar la compra:", error);
-      alert("❌ Ocurrió un error al guardar la compra.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-gray-100">
