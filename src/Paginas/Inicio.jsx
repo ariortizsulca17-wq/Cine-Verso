@@ -1,12 +1,13 @@
+//Inicio.jsx//
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "../Context/ThemeContext.jsx"; // 👈 Importar el contexto
+import { useTheme } from "../Context/ThemeContext.jsx";
 import peliculas from "../Componentes/PeliculasData";
 
 export default function Inicio({ searchQuery = "" }) {
   const categorias = ["Top 10", "Basadas en Libros", "Kids", "Documentales", "Asiáticas"];
   const carruseles = useRef({});
-  const { theme } = useTheme(); // 👈 Usamos el contexto del tema
+  const { theme } = useTheme();
 
   const scroll = (categoria, direccion) => {
     const contenedor = carruseles.current[categoria];
@@ -16,12 +17,29 @@ export default function Inicio({ searchQuery = "" }) {
     }
   };
 
+  // ⭐ Carrusel automático INFINITO ⭐
   useEffect(() => {
     const interval = setInterval(() => {
-      categorias.forEach((categoria) => scroll(categoria, "right"));
-    }, 10000);
+      categorias.forEach((categoria) => {
+        const contenedor = carruseles.current[categoria];
+        if (!contenedor) return;
+
+        const maxScroll = contenedor.scrollWidth - contenedor.clientWidth;
+
+        // Si ya llegó al final, vuelve al inicio
+        if (contenedor.scrollLeft >= maxScroll - 10) {
+          contenedor.scrollTo({ left: 0, behavior: "smooth" });
+        } 
+        // Si aún no llega, sigue avanzando
+        else {
+          contenedor.scrollBy({ left: 300, behavior: "smooth" });
+        }
+      });
+    }, 6000); // ⏱ Cada 6 segundos
+
     return () => clearInterval(interval);
   }, []);
+  // ---------------------------------------------------------
 
   const peliculasFiltradas = peliculas.filter((peli) => {
     const query = searchQuery.toLowerCase();
@@ -41,7 +59,6 @@ export default function Inicio({ searchQuery = "" }) {
           : "bg-[#F9F9F9] text-gray-900"
       }`}
     >
-      {/* Título principal */}
       <h1
         className={`text-3xl font-bold mb-6 text-center ${
           theme === "dark" ? "text-[#00C8D7]" : "text-[#008A91]"
@@ -50,7 +67,6 @@ export default function Inicio({ searchQuery = "" }) {
         🎬 Todas las películas
       </h1>
 
-      {/* Mensaje si no hay resultados */}
       {peliculasFiltradas.length === 0 ? (
         <p
           className={`text-center text-lg mt-10 ${
@@ -69,7 +85,6 @@ export default function Inicio({ searchQuery = "" }) {
 
           return (
             <div key={categoria} className="mb-12 relative">
-              {/* Título de categoría */}
               <h2
                 className={`text-2xl font-semibold mb-3 ${
                   theme === "dark" ? "text-[#00C8D7]" : "text-[#007D85]"
@@ -78,7 +93,6 @@ export default function Inicio({ searchQuery = "" }) {
                 {categoria}
               </h2>
 
-              {/* Botones de flechas */}
               <button
                 onClick={() => scroll(categoria, "left")}
                 className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-10 transition-all ${
@@ -89,18 +103,18 @@ export default function Inicio({ searchQuery = "" }) {
               >
                 ◀
               </button>
+
               <button
                 onClick={() => scroll(categoria, "right")}
                 className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-10 transition-all ${
                   theme === "dark"
-                    ? "bg-[#0B1014]/70 hover:bg-[#00C8D7] text-white"
+                    ? "bg-[#0B1014]/70 hover:bg-[#ffffff] text-white"
                     : "bg-[#E0E0E0]/70 hover:bg-[#00C8D7] text-gray-900"
                 }`}
               >
                 ▶
               </button>
 
-              {/* Carrusel */}
               <div
                 ref={(el) => (carruseles.current[categoria] = el)}
                 className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
@@ -114,7 +128,6 @@ export default function Inicio({ searchQuery = "" }) {
                         : "bg-white border border-gray-200"
                     }`}
                   >
-                    {/* Imagen y título llevan a la página Detalle */}
                     <Link to={`/detalle/${peli.id}`}>
                       <img
                         src={peli.imagen}

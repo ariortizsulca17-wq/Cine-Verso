@@ -1,5 +1,4 @@
 // src/components/DetallePelicula.jsx (CON CARRITO + MODO CLARO/OSCURO GLOBAL)
-import React from "react";
 import { useParams, Link } from "react-router-dom";
 import peliculas from "../Componentes/PeliculasData";
 import ComentariosPelicula from "../Componentes/Comentarios";

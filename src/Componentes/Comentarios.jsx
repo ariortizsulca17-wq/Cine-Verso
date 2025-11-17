@@ -1,108 +1,163 @@
 // src/Componentes/Comentarios.jsx
 import React, { useState, useEffect } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
-// 👇 Usa tu contexto real: useAuth() o useUser()
+import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 import { useAuth } from "../Context/AuthContext";
-import { comentariosPeliculas } from "../assets/comentariospeli";
+import { useTheme } from "../Context/ThemeContext";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+  orderBy,
+  query,
+} from "firebase/firestore";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/es";
+
+dayjs.extend(relativeTime);
+dayjs.locale("es");
 
 function ComentariosPelicula({ peliculaId }) {
-  const { user } = useAuth(); // 👈 el usuario actual logueado (user.displayName o user.email)
+  const { user } = useAuth();
+  const { theme } = useTheme();
   const [comentarios, setComentarios] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [puntuacion, setPuntuacion] = useState(0);
   const [editandoId, setEditandoId] = useState(null);
+  const [, setHover] = useState(0);
 
-  // 🔹 Cargar comentarios guardados o base inicial
+  // 🟣 Cargar comentarios desde Firebase en tiempo real
   useEffect(() => {
-    const guardados =
-      JSON.parse(localStorage.getItem(`comentarios_${peliculaId}`)) || [];
-    if (guardados.length > 0) {
-      setComentarios(guardados);
-    } else {
-      const iniciales = comentariosPeliculas.filter(
-        (c) => c.peliculaId === peliculaId
-      );
-      setComentarios(iniciales);
-    }
+    const q = query(
+      collection(db, "peliculas", `${peliculaId}`, "comentarios"),
+      orderBy("timestamp", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const datos = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComentarios(datos);
+    });
+    return () => unsubscribe();
   }, [peliculaId]);
 
-  // 🔹 Guardar cambios en localStorage
-  const guardarComentarios = (nuevos) => {
-    setComentarios(nuevos);
-    localStorage.setItem(`comentarios_${peliculaId}`, JSON.stringify(nuevos));
-  };
-
-  // 🔹 Agregar comentario
-  const handleAgregar = () => {
+  // 🟣 Añadir comentario
+  const handleAgregar = async () => {
     if (!nuevoComentario.trim() || puntuacion === 0) {
       alert("Por favor, escribe un comentario y selecciona una puntuación ⭐");
       return;
     }
-
     if (!user) {
       alert("Debes iniciar sesión para comentar.");
       return;
     }
 
-    const nuevo = {
-      id: Date.now(),
-      peliculaId,
-      nombreUsuario: user.displayName || user.email || "Usuario anónimo",
+    await addDoc(collection(db, "peliculas", `${peliculaId}`, "comentarios"), {
       mensaje: nuevoComentario,
       puntuacion,
+      usuarioNombre: user.displayName || user.email || "Usuario anónimo",
       uid: user.uid,
-    };
+      timestamp: serverTimestamp(),
+    });
 
-    guardarComentarios([...comentarios, nuevo]);
     setNuevoComentario("");
     setPuntuacion(0);
   };
 
-  // 🔹 Editar
-  const handleEditar = (id) => {
-    const comentario = comentarios.find((c) => c.id === id);
-    setNuevoComentario(comentario.mensaje);
-    setPuntuacion(comentario.puntuacion);
+  // 🟣 Editar comentario
+  const handleEditar = async (id, mensaje, puntuacion) => {
+    setNuevoComentario(mensaje);
+    setPuntuacion(puntuacion);
     setEditandoId(id);
   };
 
-  const handleGuardarEdicion = () => {
-    const actualizados = comentarios.map((c) =>
-      c.id === editandoId
-        ? { ...c, mensaje: nuevoComentario, puntuacion }
-        : c
-    );
-    guardarComentarios(actualizados);
-    setNuevoComentario("");
-    setPuntuacion(0);
-    setEditandoId(null);
-  };
-
-  // 🔹 Eliminar
-  const handleEliminar = (id) => {
-    if (window.confirm("¿Eliminar este comentario?")) {
-      const filtrados = comentarios.filter((c) => c.id !== id);
-      guardarComentarios(filtrados);
+  const handleGuardarEdicion = async () => {
+    if (editandoId) {
+      const ref = doc(db, "peliculas", `${peliculaId}`, "comentarios", editandoId);
+      await updateDoc(ref, {
+        mensaje: nuevoComentario,
+        puntuacion,
+        timestamp: serverTimestamp(),
+      });
+      setEditandoId(null);
+      setNuevoComentario("");
+      setPuntuacion(0);
     }
   };
 
-  // 🔹 Estrellas visuales
-  const renderPuntuacion = (valor) => (
-    <div className="flex text-yellow-500">
-      {[...Array(5)].map((_, i) => (
-        <svg
-          key={i}
-          className={`w-4 h-4 ${
-            i < valor ? "fill-current" : "text-gray-600"
-          }`}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-        >
-          <path d="M10 15l-5.878 3.09 1.123-6.545L.487 7.71l6.568-.955L10 1l2.945 5.755 6.568.955-4.758 4.835 1.123 6.545z" />
-        </svg>
-      ))}
+  // 🟣 Eliminar comentario
+  const handleEliminar = async (id) => {
+    if (window.confirm("¿Eliminar este comentario?")) {
+      await deleteDoc(doc(db, "peliculas", `${peliculaId}`, "comentarios", id));
+    }
+  };
+
+  // 🟣 Renderizar estrellas (con medias)
+  const renderPuntuacionEditable = (valor, setValor) => (
+    <div className="flex space-x-1 text-yellow-400">
+      {[...Array(5)].map((_, i) => {
+        const starValue = i + 1;
+        const halfValue = i + 0.5;
+        return (
+          <span key={i} className="cursor-pointer text-2xl">
+            {valor >= starValue ? (
+              <FaStar
+                onClick={() => setValor(starValue)}
+                onMouseEnter={() => setHover(starValue)}
+                onMouseLeave={() => setHover(0)}
+              />
+            ) : valor >= halfValue ? (
+              <FaStarHalfAlt
+                onClick={() => setValor(halfValue)}
+                onMouseEnter={() => setHover(halfValue)}
+                onMouseLeave={() => setHover(0)}
+              />
+            ) : (
+              <FaRegStar
+                onClick={() => setValor(halfValue)}
+                onMouseEnter={() => setHover(halfValue)}
+                onMouseLeave={() => setHover(0)}
+              />
+            )}
+          </span>
+        );
+      })}
     </div>
   );
+
+  const renderPuntuacion = (valor) => (
+    <div className="flex text-yellow-400 text-sm">
+      {[...Array(5)].map((_, i) => {
+        const starValue = i + 1;
+        const halfValue = i + 0.5;
+        return valor >= starValue ? (
+          <FaStar key={i} />
+        ) : valor >= halfValue ? (
+          <FaStarHalfAlt key={i} />
+        ) : (
+          <FaRegStar key={i} />
+        );
+      })}
+    </div>
+  );
+
+  // 🕒 Mostrar tiempo
+  const mostrarTiempo = (timestamp) => {
+    if (!timestamp) return "";
+    const fecha = timestamp.toDate();
+    const diffHoras = dayjs().diff(dayjs(fecha), "hour");
+
+    return diffHoras < 24
+      ? `Hace ${dayjs(fecha).fromNow()}`
+      : `${dayjs(fecha).format("DD/MM/YYYY - HH:mm")}`;
+  };
 
   return (
     <div className="mt-10 pt-6">
@@ -110,46 +165,43 @@ function ComentariosPelicula({ peliculaId }) {
         Comentarios y Reseñas ({comentarios.length})
       </h2>
 
+      {/* 📜 Lista de comentarios */}
       {comentarios.length === 0 ? (
         <p className="text-gray-400 italic">
           Aún no hay comentarios para esta película. ¡Sé el primero!
         </p>
       ) : (
         <div className="space-y-4">
-          {comentarios.map((comentario) => (
+          {comentarios.map((c) => (
             <div
-              key={comentario.id}
-              className="bg-gray-700 p-4 rounded-lg border-l-4 border-cyan-500 shadow-lg relative group hover:shadow-cyan-500/20 transition"
+              key={c.id}
+              className={`p-4 rounded-lg border-l-4 shadow-md transition ${
+                theme === "dark"
+                  ? "bg-gray-800 border-cyan-500 text-gray-100"
+                  : "bg-gray-100 border-cyan-600 text-gray-800"
+              }`}
             >
-              {/* Cabecera */}
-              <div className="flex justify-between items-start mb-2">
-                <p className="text-md font-semibold text-gray-200">
-                  {comentario.nombreUsuario}
-                </p>
-                {renderPuntuacion(comentario.puntuacion)}
+              <div className="flex justify-between items-center mb-2">
+                <p className="font-semibold">{c.usuarioNombre}</p>
+                {renderPuntuacion(c.puntuacion)}
               </div>
+              <p className="italic mb-1">{c.mensaje}</p>
+              <p className="text-xs text-gray-500">{mostrarTiempo(c.timestamp)}</p>
 
-              {/* Texto */}
-              <p className="text-gray-300 text-sm leading-relaxed italic">
-                {comentario.mensaje}
-              </p>
-
-              {/* Botones visibles SOLO si el usuario actual escribió el comentario */}
-              {user && comentario.uid === user.uid && (
-                <div className="absolute top-2 right-2 flex space-x-2 opacity-80 group-hover:opacity-100 transition">
+              {/* Solo el autor puede editar/eliminar */}
+              {user && c.uid === user.uid && (
+                <div className="flex space-x-3 mt-2 text-sm">
                   <button
-                    onClick={() => handleEditar(comentario.id)}
-                    className="text-black hover:text-cyan-400 transition-colors"
-                    title="Editar comentario"
+                    onClick={() => handleEditar(c.id, c.mensaje, c.puntuacion)}
+                    className="flex items-center space-x-1 text-cyan-400 hover:text-cyan-200"
                   >
-                    <FiEdit size={17} />
+                    <FiEdit /> <span>Editar</span>
                   </button>
                   <button
-                    onClick={() => handleEliminar(comentario.id)}
-                    className="text-black hover:text-red-500 transition-colors"
-                    title="Eliminar comentario"
+                    onClick={() => handleEliminar(c.id)}
+                    className="flex items-center space-x-1 text-red-400 hover:text-red-300"
                   >
-                    <FiTrash2 size={17} />
+                    <FiTrash2 /> <span>Eliminar</span>
                   </button>
                 </div>
               )}
@@ -158,43 +210,49 @@ function ComentariosPelicula({ peliculaId }) {
         </div>
       )}
 
-      {/* Formulario */}
-      <div className="mt-8 p-6 bg-gray-900 border border-gray-700 rounded-lg shadow-xl">
+      {/* ✍️ Formulario */}
+      <div
+        className={`mt-8 p-6 rounded-lg border shadow-lg transition ${
+          theme === "dark"
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-300"
+        }`}
+      >
         <h3 className="text-xl font-bold text-cyan-400 mb-4">
           {editandoId ? "Editar comentario" : "¡Deja tu opinión!"}
         </h3>
 
-        <textarea
-          placeholder="Escribe tu comentario..."
-          value={nuevoComentario}
-          onChange={(e) => setNuevoComentario(e.target.value)}
-          className="w-full mb-3 p-3 rounded bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          rows="3"
-        />
-
-        <div className="flex items-center mb-4">
-          <span className="text-gray-300 mr-3">Tu puntuación:</span>
-          {[1, 2, 3, 4, 5].map((num) => (
-            <button
-              key={num}
-              onClick={() => setPuntuacion(num)}
-              className={`text-2xl transition ${
-                num <= puntuacion
-                  ? "text-yellow-400"
-                  : "text-gray-500 hover:text-yellow-300"
+        {user ? (
+          <>
+            <textarea
+              placeholder="Escribe tu comentario..."
+              value={nuevoComentario}
+              onChange={(e) => setNuevoComentario(e.target.value)}
+              className={`w-full mb-3 p-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-gray-100"
+                  : "bg-gray-100 text-gray-900"
               }`}
-            >
-              ★
-            </button>
-          ))}
-        </div>
+              rows="3"
+            />
 
-        <button
-          onClick={editandoId ? handleGuardarEdicion : handleAgregar}
-          className="w-full bg-cyan-600 text-gray-900 py-2 rounded-lg font-semibold hover:bg-cyan-500 transition shadow-md"
-        >
-          {editandoId ? "Guardar Cambios" : "Publicar Comentario"}
-        </button>
+            <div className="flex items-center mb-4">
+              <span className="mr-3 text-gray-400">Tu puntuación:</span>
+              {renderPuntuacionEditable(puntuacion, setPuntuacion)}
+            </div>
+
+            <button
+              onClick={editandoId ? handleGuardarEdicion : handleAgregar}
+              className="w-full bg-cyan-600 text-gray-900 py-2 rounded-lg font-semibold hover:bg-cyan-500 transition"
+            >
+              {editandoId ? "Guardar Cambios" : "Publicar Comentario"}
+            </button>
+          </>
+        ) : (
+          <p className="text-gray-500 italic">
+            🔒 Debes iniciar sesión para comentar.
+          </p>
+        )}
       </div>
     </div>
   );

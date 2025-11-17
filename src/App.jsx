@@ -18,7 +18,6 @@ import DetallePelicula from "./Paginas/Detalle";
 // 🧱 Componentes (UI Global)
 import Navbar from "./Componentes/Navbar";
 import Footer from "./Componentes/Footer";
-import Modal from "./Componentes/Modal"; // ✅ IMPORTAR MODAL
 import Dashboard from "./Componentes/Dashboard"; // ✅ IMPORTAR DASHBOARD
 import Login from "./Componentes/Login"; // ✅ IMPORTAR LOGIN
 import Registro from "./Componentes/Registro"; // ✅ IMPORTAR REGISTRO
