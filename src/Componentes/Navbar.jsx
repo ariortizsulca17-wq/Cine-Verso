@@ -12,7 +12,7 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 
-export default function Navbar() {
+export default function Navbar({onAbrirLogin}) {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -61,8 +61,8 @@ export default function Navbar() {
 
   // Función dummy para pasar a ZonaUsuario (ya que navegas a la página de login)
   const handleAbrirLogin = () => {
-    navigate("/login");
-  };
+  onAbrirLogin && onAbrirLogin();
+};
 
   return (
     <nav className={navbarClasses}>
