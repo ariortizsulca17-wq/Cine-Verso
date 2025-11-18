@@ -23,23 +23,26 @@ function DetallePelicula() {
 
   // 💡 FUNCIÓN: Añade la película al carrito
   const handleAddToCart = () => {
-    const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
-    const existe = carritoActual.some((p) => p.id === pelicula.id);
+  const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+  const existe = carritoActual.some((p) => p.id === pelicula.id);
 
-    if (!existe) {
-      const itemNuevo = {
-        id: pelicula.id,
-        titulo: pelicula.titulo,
-        imagen: pelicula.imagen,
-      };
-      const nuevoCarrito = [...carritoActual, itemNuevo];
-      localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-      alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
-    } else {
-      alert(`¡"${pelicula.titulo}" ya está en tu carrito!`);
-    }
-  };
+  if (!existe) {
+    const itemNuevo = {
+      id: pelicula.id,
+      titulo: pelicula.titulo,
+      imagen: pelicula.imagen,
+    };
+    const nuevoCarrito = [...carritoActual, itemNuevo];
+    localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
 
+    // 🔔 Avisamos al navbar
+    window.dispatchEvent(new Event("carritoActualizado"));
+
+    alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
+  } else {
+    alert(`¡"${pelicula.titulo}" ya está en tu carrito!`);
+  }
+};
   return (
     <div
       className={`min-h-screen p-4 sm:p-8 transition-colors duration-500 ${

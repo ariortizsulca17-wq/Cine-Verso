@@ -18,6 +18,7 @@ export default function Navbar({ onAbrirLogin }) {
   const [isOpen, setIsOpen] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [sugerencias, setSugerencias] = useState([]);
+  const [carritoCount, setCarritoCount] = useState(0);
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -31,6 +32,22 @@ export default function Navbar({ onAbrirLogin }) {
     document.body.classList.remove("light", "dark");
     document.body.classList.add(theme);
   }, [theme]);
+
+  useEffect(() => {
+  const cargarCarrito = () => {
+    const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
+    setCarritoCount(carritoGuardado.length);
+  };
+
+  cargarCarrito();
+
+  // Escuchamos cambios de carrito desde otras partes de la app
+  window.addEventListener("carritoActualizado", cargarCarrito);
+
+  return () => {
+    window.removeEventListener("carritoActualizado", cargarCarrito);
+  };
+}, []);
 
   const navbarClasses =
     theme === "dark"
@@ -173,7 +190,15 @@ const seleccionarSugerencia = (titulo) => {
             className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
             title="Ver carrito"
           >
-            <FaShoppingCart />
+            <div className="relative">
+  <FaShoppingCart />
+
+  {carritoCount > 0 && (
+    <span className="absolute -top-2 -right-2 bg-cyan-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+      {carritoCount}
+    </span>
+  )}
+</div>
           </button>
 
           {/* 👤 Usuario */}
