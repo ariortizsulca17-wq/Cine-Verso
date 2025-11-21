@@ -15,11 +15,13 @@ import {
   updateDoc,
   orderBy,
   query,
-} 
-from "firebase/firestore";
+} from "firebase/firestore";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/es";
+
+// ⭐ IMPORTANTE: Agregado para usar tus comentarios locales
+import { comentariosPeliculas } from "../assets/comentariospeli";
 
 dayjs.extend(relativeTime);
 dayjs.locale("es");
@@ -33,19 +35,28 @@ function ComentariosPelicula({ peliculaId }) {
   const [editandoId, setEditandoId] = useState(null);
   const [, setHover] = useState(0);
 
-  // 🟣 Cargar comentarios desde Firebase en tiempo real
+  // 🟣 Cargar comentarios desde Firebase en tiempo real + comentarios locales
   useEffect(() => {
     const q = query(
       collection(db, "peliculas", `${peliculaId}`, "comentarios"),
       orderBy("timestamp", "desc")
     );
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const datos = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setComentarios(datos);
+
+      // ⭐ AÑADIDO: filtrar comentarios locales según la película
+      const comentariosLocales = comentariosPeliculas.filter(
+        (c) => c.peliculaId === Number(peliculaId)
+      );
+
+      // ⭐ AÑADIDO: unir locales + Firebase
+      setComentarios([...comentariosLocales, ...datos]);
     });
+
     return () => unsubscribe();
   }, [peliculaId]);
 
@@ -193,7 +204,9 @@ function ComentariosPelicula({ peliculaId }) {
               {user && c.uid === user.uid && (
                 <div className="flex space-x-3 mt-2 text-sm">
                   <button
-                    onClick={() => handleEditar(c.id, c.mensaje, c.puntuacion)}
+                    onClick={() =>
+                      handleEditar(c.id, c.mensaje, c.puntuacion)
+                    }
                     className="flex items-center space-x-1 text-cyan-400 hover:text-cyan-200"
                   >
                     <FiEdit /> <span>Editar</span>

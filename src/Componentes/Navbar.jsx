@@ -1,9 +1,10 @@
+// src/Componentes/Navbar.jsx
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { ZonaUsuario } from "./ZonaUsuario";
-import PeliculasData from "../Componentes/PeliculasData.jsx"
+import PeliculasData from "../Componentes/PeliculasData.jsx";
 
 import {
   FaBars,
@@ -34,8 +35,8 @@ export default function Navbar({ onAbrirLogin }) {
 
   const navbarClasses =
     theme === "dark"
-      ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700"
-      : "bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-cyan-200";
+      ? "bg-gray-900 text-white shadow-lg fixed top-0 left-0 right-0 z-50 border-b border-cyan-700"
+      : "bg-white text-gray-900 shadow-md fixed top-0 left-0 right-0 z-50 border-b border-cyan-200";
 
   const navLinkBaseClasses = "font-medium hover:text-cyan-400 transition-colors";
   const navLinkActiveClasses =
@@ -53,7 +54,7 @@ export default function Navbar({ onAbrirLogin }) {
 
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
 
-  // 👉 Manejo de búsqueda
+  // 👉 Submit búsqueda
   const manejarSubmitBusqueda = (e) => {
     e.preventDefault();
     if (busqueda.trim() !== "") {
@@ -64,29 +65,28 @@ export default function Navbar({ onAbrirLogin }) {
   };
 
   const manejarCambioBusqueda = (e) => {
-  const value = e.target.value;
-  setBusqueda(value);
+    const value = e.target.value;
+    setBusqueda(value);
 
-  if (value.trim() === "") {
+    if (value.trim() === "") {
+      setSugerencias([]);
+      return;
+    }
+
+    const filtradas = PeliculasData.filter((peli) =>
+      peli.titulo.toLowerCase().includes(value.toLowerCase())
+    ).slice(0, 6);
+
+    setSugerencias(filtradas);
+  };
+
+  const seleccionarSugerencia = (titulo) => {
+    setBusqueda("");
     setSugerencias([]);
-    return;
-  }
+    navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
+  };
 
-  // Filtra sugerencias
-  const filtradas = PeliculasData.filter((peli) =>
-    peli.titulo.toLowerCase().includes(value.toLowerCase())
-  ).slice(0, 6);
-
-  setSugerencias(filtradas);
-};
-
-const seleccionarSugerencia = (titulo) => {
-  setBusqueda("");
-  setSugerencias([]);
-  navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
-};
-
-  // 👉 Abrir login modal
+  // 👉 Abrir modal login
   const handleAbrirLogin = () => {
     onAbrirLogin && onAbrirLogin();
   };
@@ -127,42 +127,41 @@ const seleccionarSugerencia = (titulo) => {
         {/* ⚙️ Acciones */}
         <div className="flex items-center gap-4">
 
+          {/* 🔍 Buscador escritorio */}
           <div className="hidden md:block relative">
-  <form
-    onSubmit={manejarSubmitBusqueda}
-    className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-lg px-3 py-1"
-  >
-    <input
-      type="text"
-      value={busqueda}
-      onChange={manejarCambioBusqueda}
-      placeholder="Buscar película..."
-      className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
-    />
-    <button type="submit" className="text-cyan-500 text-lg ml-2">🔍</button>
-  </form>
+            <form
+              onSubmit={manejarSubmitBusqueda}
+              className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-lg px-3 py-1"
+            >
+              <input
+                type="text"
+                value={busqueda}
+                onChange={manejarCambioBusqueda}
+                placeholder="Buscar película..."
+                className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200"
+              />
+              <button type="submit" className="text-cyan-500 text-lg ml-2">🔍</button>
+            </form>
 
-  {/* 🔽 AUTOCOMPLETADO (ESCRITORIO) */}
-  {sugerencias.length > 0 && (
-    <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
-      {sugerencias.map((peli) => (
-        <li
-          key={peli.id}
-          onClick={() => seleccionarSugerencia(peli.titulo)}
-          className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
-        >
-          {peli.titulo}
-        </li>
-      ))}
-    </ul>
-  )}
-</div>      
+            {sugerencias.length > 0 && (
+              <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
+                {sugerencias.map((peli) => (
+                  <li
+                    key={peli.id}
+                    onClick={() => seleccionarSugerencia(peli.titulo)}
+                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+                  >
+                    {peli.titulo}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-          {/* 🌓 Cambiar tema */}
+          {/* 🌓 Tema */}
           <button
             onClick={toggleTheme}
             className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
-            title="Cambiar tema"
           >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
           </button>
@@ -171,7 +170,6 @@ const seleccionarSugerencia = (titulo) => {
           <button
             onClick={() => navigate("/carrito")}
             className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
-            title="Ver carrito"
           >
             <FaShoppingCart />
           </button>
@@ -181,104 +179,102 @@ const seleccionarSugerencia = (titulo) => {
             {!loading && <ZonaUsuario onAbrirLogin={handleAbrirLogin} />}
           </div>
 
-          {/* 📱 Menú móvil */}
+          {/* 📱 Botón menú */}
           <button className={`md:hidden ${iconBtn}`} onClick={toggleMenu}>
-            {isOpen ? (
-              <FaTimes className="text-cyan-400" />
-            ) : (
-              <FaBars />
-            )}
+            {isOpen ? <FaTimes className="text-cyan-400" /> : <FaBars />}
           </button>
+
         </div>
       </div>
 
-      {/* 📱 Menú móvil */}
+      {/* 📱 MENÚ MÓVIL — REPARADO */}
       {isOpen && (
-        <div className="md:hidden bg-gray-800/95 backdrop-blur-sm flex flex-col items-center space-y-4 py-5 text-lg font-medium border-t border-cyan-800">
+        <div className="md:hidden fixed top-16 left-0 right-0 bg-gray-900 text-white border-t border-cyan-700 py-5 z-40 flex flex-col items-center space-y-5">
 
+          {/* 🔍 Buscador móvil */}
           <div className="w-11/12 relative">
-  <form
-    onSubmit={manejarSubmitBusqueda}
-    className="flex items-center bg-gray-700 rounded-lg px-3 py-2"
-  >
-    <input
-      type="text"
-      value={busqueda}
-      onChange={manejarCambioBusqueda}
-      placeholder="Buscar película..."
-      className="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-400"
-    />
-    <button type="submit" className="text-cyan-400 text-xl ml-2">🔍</button>
-  </form>
+            <form
+              onSubmit={manejarSubmitBusqueda}
+              className="flex items-center bg-gray-700 rounded-lg px-3 py-2"
+            >
+              <input
+                type="text"
+                value={busqueda}
+                onChange={manejarCambioBusqueda}
+                placeholder="Buscar película..."
+                className="flex-1 bg-transparent outline-none text-gray-200"
+              />
+              <button type="submit" className="text-cyan-400 text-xl ml-2">🔍</button>
+            </form>
 
-  {/* 🔽 AUTOCOMPLETADO (MÓVIL) */}
-  {sugerencias.length > 0 && (
-    <ul className="absolute left-0 right-0 bg-gray-800 rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
-      {sugerencias.map((peli) => (
-        <li
-          key={peli.id}
-          onClick={() => {
-            seleccionarSugerencia(peli.titulo);
-            closeMenu();
-          }}
-          className="px-3 py-2 hover:bg-gray-700 text-gray-200 cursor-pointer"
-        >
-          {peli.titulo}
-        </li>
-      ))}
-    </ul>
-  )}
-</div>
+            {sugerencias.length > 0 && (
+              <ul className="absolute left-0 right-0 bg-gray-800 rounded-lg mt-2 max-h-64 overflow-y-auto z-50">
+                {sugerencias.map((peli) => (
+                  <li
+                    key={peli.id}
+                    onClick={() => {
+                      seleccionarSugerencia(peli.titulo);
+                      closeMenu();
+                    }}
+                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer"
+                  >
+                    {peli.titulo}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-
+          {/* ⭐ LINKS */}
           {menuItems.map(({ path, label }) => (
             <NavLink
               key={path}
               to={path}
               onClick={closeMenu}
-              className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${isActive
-                  ? "bg-cyan-900 text-cyan-400"
-                  : "text-white hover:bg-gray-700"
-                }`
-              }
+              className="w-full text-center py-2 text-lg hover:bg-gray-700"
             >
               {label}
             </NavLink>
           ))}
 
-          <div className="w-11/12 pt-3 space-y-3 border-t border-cyan-800 mt-4">
+          {/* 👤 Login/Register */}
+          <div className="w-11/12 pt-3 border-t border-cyan-700 space-y-3">
 
             {!isAuthenticated ? (
               <>
                 <button
-                  onClick={() => navigate("/login")}
-                  className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
+                  onClick={handleAbrirLogin}
+                  className="w-full py-2 rounded-lg bg-cyan-600 text-gray-900 font-semibold"
                 >
                   <FaUserCircle className="inline mr-2" /> Iniciar sesión
                 </button>
+
                 <button
                   onClick={() => navigate("/registro")}
-                  className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700"
+                  className="w-full py-2 rounded-lg bg-gray-800 text-cyan-400"
                 >
                   Registrarse
                 </button>
               </>
             ) : (
-              <div>
-                <span className="text-sm text-gray-400">Sesión iniciada</span>
+              <div className="text-gray-400 text-sm text-center">
+                Sesión iniciada ✔
               </div>
             )}
 
+            {/* 🛒 Carrito móvil */}
             <button
               onClick={() => navigate("/carrito")}
-              className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700 flex items-center justify-center gap-2"
+              className="w-full py-2 rounded-lg bg-gray-800 text-cyan-400 flex items-center justify-center gap-2"
             >
               <FaShoppingCart /> Ver carrito
             </button>
+
           </div>
+
         </div>
       )}
+
     </nav>
   );
 }

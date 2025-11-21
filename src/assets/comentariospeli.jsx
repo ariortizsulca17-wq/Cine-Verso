@@ -1,3 +1,4 @@
+// src/assets/comentariospeli.jsx
 export const comentariosPeliculas = [
   // =========================================================
   // 📚 BASADAS EN LIBROS (ID 1 - 20)
@@ -34,18 +35,18 @@ export const comentariosPeliculas = [
 
   // --- El Padrino (ID 6) ---
   { id: 601, peliculaId: 6, nombreUsuario: "OldSchool", mensaje: "Simplemente la perfección en el cine. Cada diálogo, cada escena, es icónica.", puntuacion: 5 },
-  { id: 602, peliculaId: 6, nombreUsuario: "PadrinoGod", mensaje: "La mejor película de la historia. El ascenso de Michael Corleone es un estudio de la tragedia humana.", puntuacion: 5 },
+  { id: 602, peliculaId: 6, nombreUsuario: "PadrinoGod", mensaje: "La mejor película de la historia. El ascenso de Michael Corleone es un estudio de la tragedia humana.", puntuacion: 4 },
   { id: 603, peliculaId: 6, nombreUsuario: "CoppolaGenio", mensaje: "La dirección, la música de Nino Rota, Marlon Brando... No hay fallas.", puntuacion: 5 },
   { id: 604, peliculaId: 6, nombreUsuario: "DramaFamiliar", mensaje: "Más que una película de gángsters, es un drama familiar sobre el poder y la pérdida de la inocencia.", puntuacion: 5 },
 
   // --- El Resplandor (ID 7) ---
-  { id: 701, peliculaId: 7, nombreUsuario: "TerrorRetro", mensaje: "El Resplandor es terror psicológico puro. La atmósfera opresiva del hotel es aterradora.", puntuacion: 5 },
+  { id: 701, peliculaId: 7, nombreUsuario: "TerrorRetro", mensaje: "El Resplandor es terror psicológico puro. La atmósfera opresiva del hotel es aterradora.", puntuacion: 4 },
   { id: 702, peliculaId: 7, nombreUsuario: "KubrickFan", mensaje: "Una joya cinematográfica, aunque se tome libertades con el libro. La locura de Jack Nicholson es legendaria.", puntuacion: 5 },
   { id: 703, peliculaId: 7, nombreUsuario: "HeresJohnny", mensaje: "Una película que te hace sentir incómodo de principio a fin. El diseño de laberinto es genial.", puntuacion: 4 },
   { id: 704, peliculaId: 7, nombreUsuario: "PsicoThriller", mensaje: "No hay muchos 'jump scares', pero el miedo se instala en tu cabeza. ¡Excelente!", puntuacion: 5 },
 
   // --- Mujercitas (ID 8) ---
-  { id: 801, peliculaId: 8, nombreUsuario: "FeministaFilm", mensaje: "La versión de Greta Gerwig es fresca y respeta la esencia de las hermanas. Amé la edición no lineal.", puntuacion: 5 },
+  { id: 801, peliculaId: 8, nombreUsuario: "FeministaFilm", mensaje: "La versión de Greta Gerwig es fresca y respeta la esencia de las hermanas. Amé la edición no lineal.", puntuacion: 4 },
   { id: 802, peliculaId: 8, nombreUsuario: "ClasicoNuevo", mensaje: "Una adaptación necesaria y llena de vida. Saoirse Ronan y Florence Pugh brillan.", puntuacion: 5 },
   { id: 803, peliculaId: 8, nombreUsuario: "HistóricoFan", mensaje: "El vestuario y la ambientación son preciosos. Es una película sobre el valor de las mujeres en la historia.", puntuacion: 4 },
   { id: 804, peliculaId: 8, nombreUsuario: "JoFan", mensaje: "El enfoque en la carrera y las elecciones de Jo fue inspirador. ¡Gran mensaje!", puntuacion: 5 },
@@ -57,9 +58,9 @@ export const comentariosPeliculas = [
   { id: 904, peliculaId: 9, nombreUsuario: "AmigosParaSiempre", mensaje: "La parte 'coming of age' es la mejor, la dinámica del grupo es lo que hace que funcione.", puntuacion: 4 },
 
   // --- Psicosis (ID 10) ---
-  { id: 1001, peliculaId: 10, nombreUsuario: "HitchcockMaster", mensaje: "Psicosis es la definición del suspenso. La tensión se acumula de forma magistral.", puntuacion: 5 },
-  { id: 1002, peliculaId: 10, nombreUsuario: "CineNegro", mensaje: "La escena de la ducha cambió la historia del cine para siempre. Norman Bates es aterrador.", puntuacion: 5 },
-  { id: 1003, peliculaId: 10, nombreUsuario: "ThrillerOriginal", mensaje: "El giro de la trama es legendario, incluso sabiendo la sorpresa, la atmósfera es inigualable.", puntuacion: 5 },
+  { id: 1001, peliculaId: 10, nombreUsuario: "HitchcockMaster", mensaje: "Psicosis es la definición del suspenso. La tensión se acumula de forma magistral.", puntuacion: 4 },
+  { id: 1002, peliculaId: 10, nombreUsuario: "CineNegro", mensaje: "La escena de la ducha cambió la historia del cine para siempre. Norman Bates es aterrador.", puntuacion: 3 },
+  { id: 1003, peliculaId: 10, nombreUsuario: "ThrillerOriginal", mensaje: "El giro de la trama es legendario, incluso sabiendo la sorpresa, la atmósfera es inigualable.", puntuacion: 4 },
   { id: 1004, peliculaId: 10, nombreUsuario: "AnthonyPerkins", mensaje: "Anthony Perkins es perfecto como Norman. Logra un equilibrio entre inocencia y perturbación.", puntuacion: 5 },
 
   // --- Los Juegos del Hambre (ID 11) ---
@@ -71,7 +72,7 @@ export const comentariosPeliculas = [
   // --- El Código Da Vinci (ID 12) ---
   { id: 1201, peliculaId: 12, nombreUsuario: "ConspiracyGeek", mensaje: "Me encantan las películas que mezclan historia, arte y conspiraciones. Tom Hanks hace un buen trabajo.", puntuacion: 3 },
   { id: 1202, peliculaId: 12, nombreUsuario: "MisterioTotal", mensaje: "Un thriller de misterio que te mantiene adivinando hasta el final. Muy entretenida y rápida.", puntuacion: 4 },
-  { id: 1203, peliculaId: 12, nombreUsuario: "RobertLangdon", mensaje: "Una buena película si te gustó el libro. Quizás un poco larga, pero llena de acción.", puntuacion: 3 },
+  { id: 1203, peliculaId: 12, nombreUsuario: "RobertLangdon", mensaje: "Una buena película si te gustó el libro. Quizás un poco larga, pero llena de acción.", puntuacion: 2 },
   { id: 1204, peliculaId: 12, nombreUsuario: "Simbolista", mensaje: "Me gustó la forma en que el misterio se desarrolla en lugares históricos de París y Londres.", puntuacion: 4 },
 
   // --- Las ventajas de ser invisible (ID 13) ---
@@ -95,30 +96,30 @@ export const comentariosPeliculas = [
   // --- Forrest Gump (ID 16) ---
   { id: 1601, peliculaId: 16, nombreUsuario: "FeelGoodMovie", mensaje: "La película más conmovedora. Te hace creer en la bondad humana a pesar de todo.", puntuacion: 5 },
   { id: 1602, peliculaId: 16, nombreUsuario: "OscarLegend", mensaje: "Merecidos sus 6 Oscars. La forma en que Forrest se cruza con la historia es brillante.", puntuacion: 5 },
-  { id: 1603, peliculaId: 16, nombreUsuario: "TomHanksLegend", mensaje: "Tom Hanks nació para este papel. Su actuación es un icono de la cultura pop.", puntuacion: 5 },
+  { id: 1603, peliculaId: 16, nombreUsuario: "TomHanksLegend", mensaje: "Tom Hanks nació para este papel. Su actuación es un icono de la cultura pop.", puntuacion: 3 },
   { id: 1604, peliculaId: 16, nombreUsuario: "JennyForever", mensaje: "La historia de amor entre Forrest y Jenny es el núcleo emocional de la película. Hermosa.", puntuacion: 5 },
 
   // --- Las Crónicas de Narnia: El león, la bruja y el armario (ID 17) ---
   { id: 1701, peliculaId: 17, nombreUsuario: "NarniaChild", mensaje: "Un clásico de mi infancia. La llegada a Narnia a través del armario es un momento mágico del cine.", puntuacion: 4 },
-  { id: 1702, peliculaId: 17, nombreUsuario: "LionKing", mensaje: "Aslan es majestuoso. Una película familiar de fantasía muy bien lograda y con un buen mensaje.", puntuacion: 4 },
+  { id: 1702, peliculaId: 17, nombreUsuario: "LionKing", mensaje: "Aslan es majestuoso. Una película familiar de fantasía muy bien lograda y con un buen mensaje.", puntuacion: 3 },
   { id: 1703, peliculaId: 17, nombreUsuario: "AventuraEpica", mensaje: "Muy buena acción y efectos para la época. La batalla final es emocionante.", puntuacion: 4 },
   { id: 1704, peliculaId: 17, nombreUsuario: "CSLewisFan", mensaje: "Logra capturar el tono alegórico de Lewis. Muy recomendable para introducir a los niños a la fantasía épica.", puntuacion: 4 },
 
   // --- Duna (Parte Uno) (ID 18) ---
   { id: 1801, peliculaId: 18, nombreUsuario: "SciFiMasterpiece", mensaje: "Denis Villeneuve logró lo imposible. Una adaptación visualmente perfecta y fiel al tono complejo de Herbert.", puntuacion: 5 },
-  { id: 1802, peliculaId: 18, nombreUsuario: "EpicCinema", mensaje: "Absolutamente majestuosa en la pantalla grande. Las escenas en Arrakis son impresionantes.", puntuacion: 5 },
-  { id: 1803, peliculaId: 18, nombreUsuario: "ChalametFan", mensaje: "Timothée Chalamet es un gran Paul Atreides. La película te deja con ganas de la segunda parte.", puntuacion: 5 },
-  { id: 1804, peliculaId: 18, nombreUsuario: "GusanosArena", mensaje: "El diseño de producción es inigualable. Sentí la arena, el viento y la escala del universo.", puntuacion: 5 },
+  { id: 1802, peliculaId: 18, nombreUsuario: "EpicCinema", mensaje: "Absolutamente majestuosa en la pantalla grande. Las escenas en Arrakis son impresionantes.", puntuacion: 4 },
+  { id: 1803, peliculaId: 18, nombreUsuario: "ChalametFan", mensaje: "Timothée Chalamet es un gran Paul Atreides. La película te deja con ganas de la segunda parte.", puntuacion: 4 },
+  { id: 1804, peliculaId: 18, nombreUsuario: "GusanosArena", mensaje: "El diseño de producción es inigualable. Sentí la arena, el viento y la escala del universo.", puntuacion: 4 },
 
   // --- La chica del tren (ID 19) ---
   { id: 1901, peliculaId: 19, nombreUsuario: "ThrillerTrain", mensaje: "Un thriller psicológico muy sólido. La narrativa no fiable de la protagonista te mantiene desorientado.", puntuacion: 4 },
   { id: 1902, peliculaId: 19, nombreUsuario: "EmilyBlunt", mensaje: "Emily Blunt está fantástica en este papel. Transmite perfectamente la confusión y el dolor.", puntuacion: 4 },
   { id: 1903, peliculaId: 19, nombreUsuario: "SuspensoBook", mensaje: "Si te gustó el libro, te gustará la película. Es oscura y te lleva por un camino lleno de giros.", puntuacion: 3 },
-  { id: 1904, peliculaId: 19, nombreUsuario: "GiroInesperado", mensaje: "Me mantuvo enganchado, preguntándome quién decía la verdad. Un buen ejercicio de suspenso.", puntuacion: 4 },
+  { id: 1904, peliculaId: 19, nombreUsuario: "GiroInesperado", mensaje: "Me mantuvo enganchado, preguntándome quién decía la verdad. Un buen ejercicio de suspenso.", puntuacion: 3.5 },
 
   // --- El Gran Gatsby (ID 20) ---
   { id: 2001, peliculaId: 20, nombreUsuario: "BazLuhrmann", mensaje: "Visualmente es un espectáculo. La música moderna con la estética de los años 20 es un acierto.", puntuacion: 4 },
-  { id: 2002, peliculaId: 20, nombreUsuario: "DiCaprioClassic", mensaje: "Leonardo DiCaprio es el Gatsby perfecto. Triste, soñador y misterioso.", puntuacion: 5 },
+  { id: 2002, peliculaId: 20, nombreUsuario: "DiCaprioClassic", mensaje: "Leonardo DiCaprio es el Gatsby perfecto. Triste, soñador y misterioso.", puntuacion: 4 },
   { id: 2003, peliculaId: 20, nombreUsuario: "JazzAge", mensaje: "Un derroche de diseño de vestuario y producción. Captura la decadencia de la 'Era del Jazz'.", puntuacion: 4 },
   { id: 2004, peliculaId: 20, nombreUsuario: "RomanceTragico", mensaje: "Una historia de amor y obsesión trágica. Fiel al mensaje de crítica social de Fitzgerald.", puntuacion: 4 },
 
@@ -127,21 +128,21 @@ export const comentariosPeliculas = [
   // =========================================================
   // --- Cómo entrenar a tu dragón (ID 21) ---
   { id: 2101, peliculaId: 21, nombreUsuario: "HTTYDFan", mensaje: "Tengo miedo del live-action, pero si mantienen la emotividad y la banda sonora, será un éxito. ¡Confío en DeBlois!", puntuacion: 4 },
-  { id: 2102, peliculaId: 21, nombreUsuario: "DragonLover", mensaje: "Espero que Chimuelo sea tan adorable como en la animación. La historia de Hipo es mágica.", puntuacion: 5 },
+  { id: 2102, peliculaId: 21, nombreUsuario: "DragonLover", mensaje: "Espero que Chimuelo sea tan adorable como en la animación. La historia de Hipo es mágica.", puntuacion: 4 },
   { id: 2103, peliculaId: 21, nombreUsuario: "2025Anticipada", mensaje: "Una de las adaptaciones más esperadas. Si captura la relación entre Hipo y su dragón, será épico.", puntuacion: 5 },
   { id: 2104, peliculaId: 21, nombreUsuario: "AnimationRules", mensaje: "Me pregunto cómo harán el vuelo. Las escenas aéreas son lo más importante de la saga.", puntuacion: 4 },
 
   // --- Superman (ID 22) ---
-  { id: 2201, peliculaId: 22, nombreUsuario: "DCFanatic", mensaje: "¡Larga vida a Superman de James Gunn! Por fin un enfoque optimista. Estoy listo para el DCU.", puntuacion: 5 },
+  { id: 2201, peliculaId: 22, nombreUsuario: "DCFanatic", mensaje: "¡Larga vida a Superman de James Gunn! Por fin un enfoque optimista. Estoy listo para el DCU.", puntuacion: 4 },
   { id: 2202, peliculaId: 22, nombreUsuario: "NuevoClark", mensaje: "El nuevo actor tiene zapatos grandes que llenar, pero la premisa de un Superman más clásico me emociona.", puntuacion: 4 },
   { id: 2203, peliculaId: 22, nombreUsuario: "HopeBegins", mensaje: "La película que debe restaurar la fe en DC. Esperando ver cómo se equilibra su vida como Clark Kent y héroe.", puntuacion: 5 },
   { id: 2204, peliculaId: 22, nombreUsuario: "ActionHero", mensaje: "Ojalá tenga el equilibrio perfecto entre corazón, humor y acción de superhéroes.", puntuacion: 4 },
 
   // --- La Hora De La Desaparición (ID 23) ---
-  { id: 2301, peliculaId: 23, nombreUsuario: "MisterioAddict", mensaje: "El título es muy intrigante. Espero que sea un thriller psicológico denso y con buen misterio.", puntuacion: 4 },
-  { id: 2302, peliculaId: 23, nombreUsuario: "SuspenseLover", mensaje: "Con ese género, solo espero que el giro final sea inesperado y bien construido.", puntuacion: 4 },
+  { id: 2301, peliculaId: 23, nombreUsuario: "MisterioAddict", mensaje: "El título es muy intrigante. Espero que sea un thriller psicológico denso y con buen misterio.", puntuacion: 2 },
+  { id: 2302, peliculaId: 23, nombreUsuario: "SuspenseLover", mensaje: "Con ese género, solo espero que el giro final sea inesperado y bien construido.", puntuacion: 3 },
   { id: 2303, peliculaId: 23, nombreUsuario: "IndieFilm", mensaje: "Tengo altas expectativas. Un buen thriller de desapariciones es difícil de lograr.", puntuacion: 3 },
-  { id: 2304, peliculaId: 23, nombreUsuario: "Peliculas2025", mensaje: "Lista para una película que me haga dudar de todo y de todos. Ojalá sea oscura.", puntuacion: 4 },
+  { id: 2304, peliculaId: 23, nombreUsuario: "Peliculas2025", mensaje: "Lista para una película que me haga dudar de todo y de todos. Ojalá sea oscura.", puntuacion: 2.5 },
 
   // --- Caught Stealing (ID 24) ---
   { id: 2401, peliculaId: 24, nombreUsuario: "NoirFan", mensaje: "Un thriller neo-noir de Aronofsky con ese elenco... tiene pinta de ser cruda y estilizada.", puntuacion: 5 },
@@ -174,10 +175,10 @@ export const comentariosPeliculas = [
   { id: 2804, peliculaId: 28, nombreUsuario: "UCMDarkSide", mensaje: "Me emociona que exploren el lado sobrenatural y de terror del universo. Gran elección de personaje.", puntuacion: 5 },
 
   // --- Guardianes de la noche (ID 29) ---
-  { id: 2901, peliculaId: 29, nombreUsuario: "AnimeOfTheYear", mensaje: "Demon Slayer no decepciona. La animación de Ufotable siempre es un espectáculo en el cine.", puntuacion: 5 },
-  { id: 2902, peliculaId: 29, nombreUsuario: "KimetsuNoYaiba", mensaje: "Cada nueva película es una obra de arte visual. Espero que adapten un arco crucial de la historia.", puntuacion: 5 },
-  { id: 2903, peliculaId: 29, nombreUsuario: "VisualEpic", mensaje: "La acción de Tanjiro es la mejor animada que he visto. ¡Comprando boletos para el día del estreno!", puntuacion: 5 },
-  { id: 2904, peliculaId: 29, nombreUsuario: "FantasyAction", mensaje: "Para fans y no fans. La historia es emocionante y la calidad de la animación es la mejor del mundo.", puntuacion: 5 },
+  { id: 2901, peliculaId: 29, nombreUsuario: "AnimeOfTheYear", mensaje: "Demon Slayer no decepciona. La animación de Ufotable siempre es un espectáculo en el cine.", puntuacion: 4 },
+  { id: 2902, peliculaId: 29, nombreUsuario: "KimetsuNoYaiba", mensaje: "Cada nueva película es una obra de arte visual. Espero que adapten un arco crucial de la historia.", puntuacion: 4.5 },
+  { id: 2903, peliculaId: 29, nombreUsuario: "VisualEpic", mensaje: "La acción de Tanjiro es la mejor animada que he visto. ¡Comprando boletos para el día del estreno!", puntuacion: 3.5 },
+  { id: 2904, peliculaId: 29, nombreUsuario: "FantasyAction", mensaje: "Para fans y no fans. La historia es emocionante y la calidad de la animación es la mejor del mundo.", puntuacion: 4 },
 
   // --- F1 (ID 30) ---
   { id: 3001, peliculaId: 30, nombreUsuario: "F1Fan", mensaje: "Una película de F1 de verdad, con tomas reales y Brad Pitt. Esto será lo más cerca que estemos de conducir.", puntuacion: 5 },
@@ -219,10 +220,10 @@ export const comentariosPeliculas = [
   { id: 3504, peliculaId: 35, nombreUsuario: "DragonWarrior", mensaje: "La animación inspirada en el arte chino es bellísima. Muy subestimada.", puntuacion: 5 },
 
   // --- Los Increíbles (ID 36) ---
-  { id: 3601, peliculaId: 36, nombreUsuario: "SuperheroesKids", mensaje: "La mejor película de los 4 Fantásticos que no es de los 4 Fantásticos. ¡Genial guion de superhéroes!", puntuacion: 5 },
-  { id: 3602, peliculaId: 36, nombreUsuario: "BradBirdBest", mensaje: "Una obra maestra de Pixar, con una banda sonora que suena a James Bond. Mr. Increíble es muy *cool*.", puntuacion: 5 },
-  { id: 3603, peliculaId: 36, nombreUsuario: "FamiliaParr", mensaje: "La dinámica familiar es el corazón. Y Edna Moda es un personaje icónico.", puntuacion: 5 },
-  { id: 3604, peliculaId: 36, nombreUsuario: "ActionAnimation", mensaje: "Las escenas de acción son de primer nivel. Una película que disfrutan tanto adultos como niños.", puntuacion: 5 },
+  { id: 3601, peliculaId: 36, nombreUsuario: "SuperheroesKids", mensaje: "La mejor película de los 4 Fantásticos que no es de los 4 Fantásticos. ¡Genial guion de superhéroes!", puntuacion: 4.5 },
+  { id: 3602, peliculaId: 36, nombreUsuario: "BradBirdBest", mensaje: "Una obra maestra de Pixar, con una banda sonora que suena a James Bond. Mr. Increíble es muy *cool*.", puntuacion: 3 },
+  { id: 3603, peliculaId: 36, nombreUsuario: "FamiliaParr", mensaje: "La dinámica familiar es el corazón. Y Edna Moda es un personaje icónico.", puntuacion: 3 },
+  { id: 3604, peliculaId: 36, nombreUsuario: "ActionAnimation", mensaje: "Las escenas de acción son de primer nivel. Una película que disfrutan tanto adultos como niños.", puntuacion: 4.5 },
 
   // --- Coco (ID 37) ---
   { id: 3701, peliculaId: 37, nombreUsuario: "VivaMexico", mensaje: "Qué hermosa celebración de la cultura mexicana y el Día de Muertos. Lloré mucho con la canción 'Recuérdame'.", puntuacion: 5 },
@@ -231,10 +232,10 @@ export const comentariosPeliculas = [
   { id: 3704, peliculaId: 37, nombreUsuario: "MusicIsLife", mensaje: "La música es fantástica, te dan ganas de aprender a tocar la guitarra.", puntuacion: 5 },
 
   // --- Encanto (ID 38) ---
-  { id: 3801, peliculaId: 38, nombreUsuario: "ColombiaMagic", mensaje: "Una explosión de alegría y colores inspirada en Colombia. El mensaje sobre la presión familiar es muy real.", puntuacion: 5 },
+  { id: 3801, peliculaId: 38, nombreUsuario: "ColombiaMagic", mensaje: "Una explosión de alegría y colores inspirada en Colombia. El mensaje sobre la presión familiar es muy real.", puntuacion: 4.5 },
   { id: 3802, peliculaId: 38, nombreUsuario: "WeDontTalk", mensaje: "No se habla de Bruno... pero es la mejor canción de la película. Un musical moderno de Disney.", puntuacion: 4 },
-  { id: 3803, peliculaId: 38, nombreUsuario: "MirabelHero", mensaje: "Me encantó que la heroína fuera la que no tenía el don. Un buen cambio de paradigma.", puntuacion: 5 },
-  { id: 3804, peliculaId: 38, nombreUsuario: "Generational", mensaje: "Trata muy bien el tema del trauma generacional y la sanación familiar. Muy profunda.", puntuacion: 5 },
+  { id: 3803, peliculaId: 38, nombreUsuario: "MirabelHero", mensaje: "Me encantó que la heroína fuera la que no tenía el don. Un buen cambio de paradigma.", puntuacion: 3.5 },
+  { id: 3804, peliculaId: 38, nombreUsuario: "Generational", mensaje: "Trata muy bien el tema del trauma generacional y la sanación familiar. Muy profunda.", puntuacion: 4 },
 
   // --- Ratatouille (ID 39) ---
   { id: 3901, peliculaId: 39, nombreUsuario: "FoodieMovie", mensaje: "Me hace querer cocinar cada vez que la veo. Una celebración del arte culinario.", puntuacion: 5 },
