@@ -1,13 +1,79 @@
-//Inicio.jsx//
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext.jsx";
+import { useAuth } from "../Context/AuthContext.jsx";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  addDoc,
+  deleteDoc,
+  getDocs,
+  doc,
+} from "firebase/firestore";
+import { Heart } from "lucide-react";
 import peliculas from "../Componentes/PeliculasData";
+import toast from "react-hot-toast";
 
 export default function Inicio({ searchQuery = "" }) {
   const categorias = ["Top 10", "Basadas en Libros", "Kids", "Documentales", "Asiáticas"];
   const carruseles = useRef({});
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const [favoritos, setFavoritos] = useState([]);
+
+  // Cargar favoritos del usuario
+  useEffect(() => {
+    if (!user) return;
+    const cargarFavoritos = async () => {
+      const q = query(collection(db, "favoritos"), where("uid", "==", user.uid));
+      const snapshot = await getDocs(q);
+      const favs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFavoritos(favs);
+    };
+    cargarFavoritos();
+  }, [user]);
+
+  const handleToggleFavorite = async (peli) => {
+  if (!user) {
+    toast.error("Inicia sesión para agregar a favoritos ❤️");
+    return;
+  }
+
+  const q = query(
+    collection(db, "favoritos"),
+    where("uid", "==", user.uid),
+    where("titulo", "==", peli.titulo)
+  );
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    await addDoc(collection(db, "favoritos"), {
+      uid: user.uid,
+      titulo: peli.titulo,
+      imagen: peli.imagen,
+      genero: peli.genero,
+      createdAt: new Date(),
+    });
+    toast.success(`Agregado a favoritos ❤️`);
+  } else {
+    await deleteDoc(doc(db, "favoritos", snapshot.docs[0].id));
+    toast("Eliminado de favoritos 💔", { icon: "🗑️" });
+  }
+
+  // refrescar estado
+  const newSnapshot = await getDocs(
+    query(collection(db, "favoritos"), where("uid", "==", user.uid))
+  );
+  setFavoritos(newSnapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+};
+
+  const esFavorito = (titulo) =>
+    favoritos.some((fav) => fav.titulo === titulo);
 
   const scroll = (categoria, direccion) => {
     const contenedor = carruseles.current[categoria];
@@ -93,6 +159,7 @@ export default function Inicio({ searchQuery = "" }) {
                 {categoria}
               </h2>
 
+              {/* Botones de desplazamiento */}
               <button
                 onClick={() => scroll(categoria, "left")}
                 className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-10 transition-all ${
@@ -115,6 +182,7 @@ export default function Inicio({ searchQuery = "" }) {
                 ▶
               </button>
 
+              {/* Carrusel con botón de favorito */}
               <div
                 ref={(el) => (carruseles.current[categoria] = el)}
                 className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
@@ -122,12 +190,27 @@ export default function Inicio({ searchQuery = "" }) {
                 {peliculasCategoria.map((peli, index) => (
                   <div
                     key={peli.id || index}
-                    className={`rounded-lg p-3 shadow-md hover:scale-105 transition-transform duration-300 min-w-[180px] ${
+                    className={`rounded-lg p-3 shadow-md hover:scale-105 transition-transform duration-300 min-w-[180px] relative ${
                       theme === "dark"
                         ? "bg-[#1A1F25]"
                         : "bg-white border border-gray-200"
                     }`}
                   >
+                    {/* ❤️ Botón de favoritos */}
+                    <button
+                      onClick={() => handleToggleFavorite(peli)}
+                      className={`absolute top-2 right-2 p-2 rounded-full transition-all ${
+                        esFavorito(peli.titulo)
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-700 text-white hover:bg-red-500"
+                      }`}
+                    >
+                      <Heart
+                        size={18}
+                        fill={esFavorito(peli.titulo) ? "white" : "none"}
+                      />
+                    </button>
+
                     <Link to={`/detalle/${peli.id}`}>
                       <img
                         src={peli.imagen}

@@ -1,25 +1,33 @@
-// src/components/Modal.jsx
-export default function Modal({ children, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Fondo oscuro */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-      ></div>
+// ✅ src/Componentes/Modal.jsx
+import { useEffect } from "react";
 
-      {/* Contenedor del modal */}
-      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-        {/* Botón cerrar (X) */}
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+export default function Modal({ isOpen, onClose, children }) {
+    // Bloquear scroll cuando el modal esté abierto
+    useEffect(() => {
+        document.body.style.overflow = isOpen ? "hidden" : "auto";
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div 
+            className="fixed inset-0 bg-black/40 flex justify-center items-center z-999"
+            onClick={onClose}
         >
-          ✕
-        </button>
+            <div 
+                className="bg-gray-900 text-white rounded-xl p-6 w-full max-w-md shadow-xl relative animate-fadeIn"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Botón de cerrar */}
+                <button 
+                    className="absolute top-3 right-3 text-gray-300 hover:text-white text-xl"
+                    onClick={onClose}
+                >
+                    ✕
+                </button>
 
-        {children}
-      </div>
-    </div>
-  );
+                {children}
+            </div>
+        </div>
+    );
 }

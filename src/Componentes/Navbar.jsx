@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
-// ❌ ELIMINAMOS: import { useUser } from "../Context/UserContext";
-
-// ✅ NUEVOS IMPORTS:
 import { useAuth } from "../Context/AuthContext.jsx";
-import  {ZonaUsuario}  from "./ZonaUsuario";
+import { ZonaUsuario } from "./ZonaUsuario";
+import PeliculasData from "../Componentes/PeliculasData.jsx"
+
 import {
   FaBars,
   FaTimes,
@@ -15,24 +14,24 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 
-export default function Navbar() {
+export default function Navbar({ onAbrirLogin }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+  const [sugerencias, setSugerencias] = useState([]);
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
   const navigate = useNavigate();
 
   const { theme, toggleTheme } = useTheme();
-  // ✅ USAMOS useAuth:
   const { user, loading } = useAuth();
-  const isAuthenticated = !!user; // Determinar si está autenticado
+  const isAuthenticated = !!user;
 
-  // 🌈 NUEVO: aplica la clase global del tema al <body>
   useEffect(() => {
     document.body.classList.remove("light", "dark");
     document.body.classList.add(theme);
   }, [theme]);
 
-  // 📝 Ajuste de estilos del navbar según el tema
   const navbarClasses =
     theme === "dark"
       ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700"
@@ -42,7 +41,6 @@ export default function Navbar() {
   const navLinkActiveClasses =
     "text-cyan-400 border-b-2 border-cyan-400 pb-1";
 
-  // Agregamos el Dashboard si está autenticado
   const menuItems = [
     { path: "/", label: "Inicio" },
     { path: "/PeliculasTops", label: "Peli Tops" },
@@ -51,29 +49,53 @@ export default function Navbar() {
     { path: "/PeliDocumentales", label: "Peli Docs" },
     { path: "/PeliLibros", label: "Peli Libros" },
     { path: "/Contacto", label: "Contacto" },
-    // 💡 Añadir ruta de Dashboard si está autenticado y no está cargando
-    ...(isAuthenticated && !loading
-      ? [{ path: "/dashboard", label: "Mi Cuenta" }]
-      : []),
   ];
 
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
 
-  // Función para manejar el clic en Iniciar Sesión/Registrarse
-  const handleAuthRedirect = (path) => {
-    closeMenu();
-    navigate(path);
+  // 👉 Manejo de búsqueda
+  const manejarSubmitBusqueda = (e) => {
+    e.preventDefault();
+    if (busqueda.trim() !== "") {
+      navigate(`/buscar?q=${encodeURIComponent(busqueda.trim())}`);
+      setBusqueda("");
+      closeMenu();
+    }
   };
 
-  // Función dummy para pasar a ZonaUsuario (ya que navegas a la página de login)
+  const manejarCambioBusqueda = (e) => {
+  const value = e.target.value;
+  setBusqueda(value);
+
+  if (value.trim() === "") {
+    setSugerencias([]);
+    return;
+  }
+
+  // Filtra sugerencias
+  const filtradas = PeliculasData.filter((peli) =>
+    peli.titulo.toLowerCase().includes(value.toLowerCase())
+  ).slice(0, 6);
+
+  setSugerencias(filtradas);
+};
+
+const seleccionarSugerencia = (titulo) => {
+  setBusqueda("");
+  setSugerencias([]);
+  navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
+};
+
+  // 👉 Abrir login modal
   const handleAbrirLogin = () => {
-    navigate("/login");
+    onAbrirLogin && onAbrirLogin();
   };
 
   return (
     <nav className={navbarClasses}>
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-        {/* 🌟 Logo Cineverso */}
+
+        {/* 🌟 Logo */}
         <Link to="/" className="flex items-center gap-3" onClick={closeMenu}>
           <span className="text-3xl text-cyan-400">🎬</span>
           <span className="font-extrabold text-2xl tracking-wide">
@@ -89,10 +111,9 @@ export default function Navbar() {
               to={path}
               end
               className={({ isActive }) =>
-                `${navLinkBaseClasses} ${
-                  isActive
-                    ? navLinkActiveClasses
-                    : theme === "dark"
+                `${navLinkBaseClasses} ${isActive
+                  ? navLinkActiveClasses
+                  : theme === "dark"
                     ? "text-gray-300"
                     : "text-gray-700"
                 }`
@@ -103,14 +124,44 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* ⚙️ Acciones (Tema, Carrito, Usuario, Menú móvil) */}
+        {/* ⚙️ Acciones */}
         <div className="flex items-center gap-4">
-          {/* 🌓 Cambiar tema (Sol/Luna) */}
+
+          <div className="hidden md:block relative">
+  <form
+    onSubmit={manejarSubmitBusqueda}
+    className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-lg px-3 py-1"
+  >
+    <input
+      type="text"
+      value={busqueda}
+      onChange={manejarCambioBusqueda}
+      placeholder="Buscar película..."
+      className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+    />
+    <button type="submit" className="text-cyan-500 text-lg ml-2">🔍</button>
+  </form>
+
+  {/* 🔽 AUTOCOMPLETADO (ESCRITORIO) */}
+  {sugerencias.length > 0 && (
+    <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
+      {sugerencias.map((peli) => (
+        <li
+          key={peli.id}
+          onClick={() => seleccionarSugerencia(peli.titulo)}
+          className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+        >
+          {peli.titulo}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>      
+
+          {/* 🌓 Cambiar tema */}
           <button
             onClick={toggleTheme}
-            className={`${iconBtn} ${
-              theme === "dark" ? "text-white" : "text-gray-800"
-            }`}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
             title="Cambiar tema"
           >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
@@ -119,22 +170,18 @@ export default function Navbar() {
           {/* 🛒 Carrito */}
           <button
             onClick={() => navigate("/carrito")}
-            className={`${iconBtn} ${
-              theme === "dark" ? "text-white" : "text-gray-800"
-            }`}
+            className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
             title="Ver carrito"
           >
             <FaShoppingCart />
           </button>
 
-          {/* 👤 Usuario / Login (Reemplazo por ZonaUsuario) */}
+          {/* 👤 Usuario */}
           <div className="hidden md:block">
-            {/* Si no está cargando, mostramos la ZonaUsuario */}
             {!loading && <ZonaUsuario onAbrirLogin={handleAbrirLogin} />}
-            {/* Opcional: mostrar un spinner si loading es true */}
           </div>
 
-          {/* 📱 Botón de menú móvil */}
+          {/* 📱 Menú móvil */}
           <button className={`md:hidden ${iconBtn}`} onClick={toggleMenu}>
             {isOpen ? (
               <FaTimes className="text-cyan-400" />
@@ -145,19 +192,54 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 📱 Menú móvil desplegable */}
+      {/* 📱 Menú móvil */}
       {isOpen && (
         <div className="md:hidden bg-gray-800/95 backdrop-blur-sm flex flex-col items-center space-y-4 py-5 text-lg font-medium border-t border-cyan-800">
+
+          <div className="w-11/12 relative">
+  <form
+    onSubmit={manejarSubmitBusqueda}
+    className="flex items-center bg-gray-700 rounded-lg px-3 py-2"
+  >
+    <input
+      type="text"
+      value={busqueda}
+      onChange={manejarCambioBusqueda}
+      placeholder="Buscar película..."
+      className="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-400"
+    />
+    <button type="submit" className="text-cyan-400 text-xl ml-2">🔍</button>
+  </form>
+
+  {/* 🔽 AUTOCOMPLETADO (MÓVIL) */}
+  {sugerencias.length > 0 && (
+    <ul className="absolute left-0 right-0 bg-gray-800 rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
+      {sugerencias.map((peli) => (
+        <li
+          key={peli.id}
+          onClick={() => {
+            seleccionarSugerencia(peli.titulo);
+            closeMenu();
+          }}
+          className="px-3 py-2 hover:bg-gray-700 text-gray-200 cursor-pointer"
+        >
+          {peli.titulo}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
           {menuItems.map(({ path, label }) => (
             <NavLink
               key={path}
               to={path}
               onClick={closeMenu}
               className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${
-                  isActive
-                    ? "bg-cyan-900 text-cyan-400"
-                    : "text-white hover:bg-gray-700"
+                `w-full text-center py-2 transition-colors ${isActive
+                  ? "bg-cyan-900 text-cyan-400"
+                  : "text-white hover:bg-gray-700"
                 }`
               }
             >
@@ -166,34 +248,30 @@ export default function Navbar() {
           ))}
 
           <div className="w-11/12 pt-3 space-y-3 border-t border-cyan-800 mt-4">
-            {/* Reemplazamos la lógica de botones por navegación directa */}
+
             {!isAuthenticated ? (
               <>
                 <button
-                  onClick={() => handleAuthRedirect("/login")}
+                  onClick={() => navigate("/login")}
                   className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
                 >
                   <FaUserCircle className="inline mr-2" /> Iniciar sesión
                 </button>
                 <button
-                  onClick={() => handleAuthRedirect("/registro")}
+                  onClick={() => navigate("/registro")}
                   className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700"
                 >
                   Registrarse
                 </button>
               </>
             ) : (
-              // Para el logout en móvil, usamos la funcionalidad de ZonaUsuario
-              <button
-                onClick={() => handleAuthRedirect("/dashboard")}
-                className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
-              >
-                Ir a Mi Cuenta
-              </button>
+              <div>
+                <span className="text-sm text-gray-400">Sesión iniciada</span>
+              </div>
             )}
 
             <button
-              onClick={() => handleAuthRedirect("/carrito")}
+              onClick={() => navigate("/carrito")}
               className="w-full text-center py-2 px-4 rounded-lg font-semibold transition bg-gray-800 text-cyan-400 hover:bg-gray-700 flex items-center justify-center gap-2"
             >
               <FaShoppingCart /> Ver carrito

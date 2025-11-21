@@ -41,7 +41,7 @@ export default function Footer() {
               📧 info@cineverso.com
             </Link>
             <p className="text-gray-500 pt-2">
-              Creado en 2024
+              Creado en 2025
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function Footer() {
               ¡Próximamente! 🚀
             </h3>
             <p className="text-gray-200 text-xs">
-              **MANGA-VERSO**. Tu portal de anime y manga. ¡Lanzamiento en 2025!
+              MANGAVERSO. Tu portal de anime y manga. ¡Lanzamiento en 2026!
             </p>
           </div>
         </div>

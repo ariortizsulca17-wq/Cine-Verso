@@ -15,7 +15,8 @@ import {
   updateDoc,
   orderBy,
   query,
-} from "firebase/firestore";
+} 
+from "firebase/firestore";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/es";
