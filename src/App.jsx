@@ -23,7 +23,8 @@ import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
 
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
-
+import AdminPanel from "./Paginas/AdminPanel";
+import ProtectedRoute from "./Componentes/AdminRoute";
 import "./App.css";
 
 function RutaProtegida({ element }) {
@@ -87,6 +88,12 @@ export default function App() {
           <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
 
+          <Route 
+            path="/admin" 
+            element={<ProtectedRoute rolRequerido="admin">
+            <AdminPanel/>
+           </ProtectedRoute>}
+          />
           {/* 🔐 Dashboard protegido */}
           <Route 
             path="/dashboard" 

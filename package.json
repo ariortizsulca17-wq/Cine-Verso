@@ -12,6 +12,8 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@headlessui/tailwindcss": "^0.2.2",
     "@tailwindcss/vite": "^4.1.17",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
