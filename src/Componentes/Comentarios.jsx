@@ -81,7 +81,7 @@ function ComentariosPelicula({ peliculaId }) {
 
   const handleGuardarEdicion = async () => {
     if (editandoId) {
-      const ref = doc(db, "peliculas", `${peliculaId}`, "comentarios", editandoId);
+      const ref = doc(db, "comentarios", `${peliculaId}`, "comentario", editandoId);
       await updateDoc(ref, {
         mensaje: nuevoComentario,
         puntuacion,

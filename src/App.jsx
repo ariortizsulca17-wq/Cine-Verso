@@ -23,8 +23,15 @@ import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
 
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
-import AdminPanel from "./Paginas/AdminPanel";
 import ProtectedRoute from "./Componentes/AdminRoute";
+
+import AdminUsuarios from "./Componentes/DashboardAdmi/AdminUsuarios";
+import AdminPeliculas from "./Componentes/DashboardAdmi/AdminPeliculas";
+import AdminAgregarPelicula from "./Componentes/DashboardAdmi/AdminAgregarPelicula";
+import AdminEditarPelicula from "./Componentes/DashboardAdmi/AdminEditarPelicula";
+import DashboardLayout from "./Componentes/DashboardAdmi/DashboardLayaout"
+
+
 import "./App.css";
 
 function RutaProtegida({ element }) {
@@ -57,7 +64,7 @@ export default function App() {
 
   // === 🟦 ESTADOS DEL MODAL ===
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [modalContenido, setModalContenido] = useState("login"); 
+  const [modalContenido, setModalContenido] = useState("login");
   // "login" o "registro"
 
   const abrirLogin = () => {
@@ -88,16 +95,27 @@ export default function App() {
           <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
 
-          <Route 
-            path="/admin" 
-            element={<ProtectedRoute rolRequerido="admin">
-            <AdminPanel/>
-           </ProtectedRoute>}
-          />
-          {/* 🔐 Dashboard protegido */}
-          <Route 
-            path="/dashboard" 
-            element={<RutaProtegida element={<Dashboard />} />} 
+          {/* ️⃣ Dashboard ADMIN protegido */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute rolRequerido="admin">
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            {/* RUTAS INTERNAS DEL DASHBOARD */}
+            <Route index element={<AdminUsuarios />} />
+            <Route path="usuarios" element={<AdminUsuarios />} />
+            <Route path="peliculas" element={<AdminPeliculas />} />
+            <Route path="agregar" element={<AdminAgregarPelicula />} />
+            <Route path="editar/:id" element={<AdminEditarPelicula />} />
+          </Route>
+
+          {/* 🔐 Dashboard del usuario normal */}
+          <Route
+            path="/dashboard"
+            element={<RutaProtegida element={<Dashboard />} />}
           />
         </Routes>
       </main>
@@ -107,14 +125,14 @@ export default function App() {
       {/* === 🟧 MODAL GLOBAL === */}
       <Modal isOpen={modalAbierto} onClose={cerrarModal}>
         {modalContenido === "login" && (
-          <Login 
+          <Login
             onLoginExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
             irARegistro={() => setModalContenido("registro")}
           />
         )}
 
         {modalContenido === "registro" && (
-          <Registro 
+          <Registro
             onRegistroExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
             irALogin={() => setModalContenido("login")}
           />
