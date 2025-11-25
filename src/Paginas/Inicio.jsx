@@ -1,3 +1,4 @@
+// src/Paginas/Inicio.jsx
 import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext.jsx";
@@ -15,8 +16,6 @@ import {
 import { Heart } from "lucide-react";
 import peliculas from "../Componentes/PeliculasData";
 import toast from "react-hot-toast";
-
-// ⭐ IMPORTAMOS TUS COMENTARIOS LOCALES
 import { comentariosPeliculas } from "../assets/comentariospeli";
 
 export default function Inicio({ searchQuery = "" }) {
@@ -26,29 +25,33 @@ export default function Inicio({ searchQuery = "" }) {
   const { user } = useAuth();
   const [favoritos, setFavoritos] = useState([]);
 
-  // ⭐ FUNCIÓN PARA SACAR PROMEDIO DE ESTRELLAS POR PELÍCULA
+  // ⭐ SLIDER PRINCIPAL
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setSlide((prev) => (prev + 1) % peliculas.length);
+    }, 4000);
+    return () => clearInterval(intervalo);
+  }, []);
+
+  // ⭐ PROMEDIO ESTRELLAS
   const obtenerPromedio = (peliculaId) => {
     const comentarios = comentariosPeliculas.filter(
       (c) => c.peliculaId === peliculaId
     );
-
     if (comentarios.length === 0) return 0;
-
     const suma = comentarios.reduce((acc, c) => acc + c.puntuacion, 0);
-    return suma / comentarios.length; // regresa el promedio real
+    return suma / comentarios.length;
   };
 
-  // ⭐ Cargar favoritos del usuario
+  // ⭐ FAVORITOS
   useEffect(() => {
     if (!user) return;
     const cargarFavoritos = async () => {
       const q = query(collection(db, "favoritos"), where("uid", "==", user.uid));
       const snapshot = await getDocs(q);
-      const favs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setFavoritos(favs);
+      setFavoritos(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
     cargarFavoritos();
   }, [user]);
@@ -80,11 +83,10 @@ export default function Inicio({ searchQuery = "" }) {
       toast("Eliminado de favoritos 💔", { icon: "🗑️" });
     }
 
-    // refrescar estado
-    const newSnapshot = await getDocs(
+    const newSnap = await getDocs(
       query(collection(db, "favoritos"), where("uid", "==", user.uid))
     );
-    setFavoritos(newSnapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+    setFavoritos(newSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
 
   const esFavorito = (titulo) =>
@@ -93,20 +95,21 @@ export default function Inicio({ searchQuery = "" }) {
   const scroll = (categoria, direccion) => {
     const contenedor = carruseles.current[categoria];
     if (contenedor) {
-      const scrollAmount = direccion === "left" ? -300 : 300;
-      contenedor.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      contenedor.scrollBy({
+        left: direccion === "left" ? -300 : 300,
+        behavior: "smooth",
+      });
     }
   };
 
-  // ⭐ Carrusel automático INFINITO ⭐
+  // ⭐ CARRUSEL AUTOMÁTICO
   useEffect(() => {
     const interval = setInterval(() => {
       categorias.forEach((categoria) => {
         const contenedor = carruseles.current[categoria];
         if (!contenedor) return;
 
-        const maxScroll =
-          contenedor.scrollWidth - contenedor.clientWidth;
+        const maxScroll = contenedor.scrollWidth - contenedor.clientWidth;
 
         if (contenedor.scrollLeft >= maxScroll - 10) {
           contenedor.scrollTo({ left: 0, behavior: "smooth" });
@@ -119,12 +122,19 @@ export default function Inicio({ searchQuery = "" }) {
     return () => clearInterval(interval);
   }, []);
 
+  // ⭐ BUSCADOR — YA FUNCIONA
   const peliculasFiltradas = peliculas.filter((peli) => {
     const query = searchQuery.toLowerCase();
+
     return (
       peli.titulo?.toLowerCase().includes(query) ||
       peli.genero?.toLowerCase().includes(query) ||
       peli.categoria?.toLowerCase().includes(query) ||
+      peli.autor?.toLowerCase().includes(query) ||
+      peli.reseña?.toLowerCase().includes(query) ||
+      peli.descripcion?.toLowerCase().includes(query) ||
+      peli.recomendacion?.toLowerCase().includes(query) ||
+      peli.detalles?.toLowerCase().includes(query) ||
       peli.anio?.toString().includes(query)
     );
   });
@@ -137,21 +147,47 @@ export default function Inicio({ searchQuery = "" }) {
           : "bg-[#F9F9F9] text-gray-900"
       }`}
     >
+
+      {/* ⭐⭐⭐ CARRUSEL PRINCIPAL CLICK ⭐⭐⭐ */}
+      <Link to={`/detalle/${peliculas[slide].id}`}>
+        <div className="w-full h-[300px] md:h-[380px] rounded-xl overflow-hidden relative shadow-lg mb-10 cursor-pointer">
+
+          <img
+            src={peliculas[slide].imagen}
+            className="w-full h-full object-cover object-center transition-all duration-700"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+          <div className="absolute bottom-4 left-4">
+            <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+              {peliculas[slide].titulo}
+            </h2>
+            <p className="text-sm text-gray-200 line-clamp-2 max-w-[500px]">
+              {peliculas[slide].descripcion}
+            </p>
+          </div>
+        </div>
+      </Link>
+
+      {/* ⭐ TÍTULO */}
       <h1
-        className={`text-3xl font-bold mb-6 text-center ${
-          theme === "dark" ? "text-[#00C8D7]" : "text-[#008A91]"
+        className={`text-4xl mb-6 text-center font-bold ${
+          theme === "dark" ? "text-[#00C8D7]" : "text-[#007D85]"
         }`}
+        style={{ fontFamily: "'Playfair Display', serif" }}
       >
         🎬 Todas las películas
       </h1>
 
+      {/* Si no hay resultados */}
       {peliculasFiltradas.length === 0 ? (
         <p
           className={`text-center text-lg mt-10 ${
             theme === "dark" ? "text-[#B0B0B0]" : "text-gray-600"
           }`}
         >
-          No se encontraron películas con ese nombre 😢
+          No se encontraron películas 😢
         </p>
       ) : (
         categorias.map((categoria) => {
@@ -172,13 +208,13 @@ export default function Inicio({ searchQuery = "" }) {
                 {categoria}
               </h2>
 
-              {/* Botones de desplazamiento */}
+              {/* Botones */}
               <button
                 onClick={() => scroll(categoria, "left")}
-                className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-10 transition-all ${
+                className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full z-10 ${
                   theme === "dark"
-                    ? "bg-[#0B1014]/70 hover:bg-[#00C8D7] text-white"
-                    : "bg-[#E0E0E0]/70 hover:bg-[#00C8D7] text-gray-900"
+                    ? "bg-[#0B1014]/70 hover:bg-[#00C8D7]"
+                    : "bg-[#E0E0E0]/70 hover:bg-[#00C8D7]"
                 }`}
               >
                 ◀
@@ -186,16 +222,16 @@ export default function Inicio({ searchQuery = "" }) {
 
               <button
                 onClick={() => scroll(categoria, "right")}
-                className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-10 transition-all ${
+                className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full z-10 ${
                   theme === "dark"
-                    ? "bg-[#0B1014]/70 hover:bg-[#ffffff] text-white"
-                    : "bg-[#E0E0E0]/70 hover:bg-[#00C8D7] text-gray-900"
+                    ? "bg-[#0B1014]/70 hover:bg-white"
+                    : "bg-[#E0E0E0]/70 hover:bg-[#00C8D7]"
                 }`}
               >
                 ▶
               </button>
 
-              {/* ⭐ CARRUSEL */}
+              {/* Carrusel */}
               <div
                 ref={(el) => (carruseles.current[categoria] = el)}
                 className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
@@ -209,10 +245,11 @@ export default function Inicio({ searchQuery = "" }) {
                         : "bg-white border border-gray-200"
                     }`}
                   >
-                    {/* ❤️ BOTÓN FAVORITO */}
+
+                    {/* ❤️ FAVORITO */}
                     <button
                       onClick={() => handleToggleFavorite(peli)}
-                      className={`absolute top-2 right-2 p-2 rounded-full transition-all ${
+                      className={`absolute top-2 right-2 p-2 rounded-full ${
                         esFavorito(peli.titulo)
                           ? "bg-red-500 text-white"
                           : "bg-gray-700 text-white hover:bg-red-500"
@@ -227,13 +264,11 @@ export default function Inicio({ searchQuery = "" }) {
                     <Link to={`/detalle/${peli.id}`}>
                       <img
                         src={peli.imagen}
-                        alt={peli.titulo}
                         className="rounded-lg mb-2 w-full h-48 object-cover cursor-pointer"
                       />
 
-                      {/* 🔹 TÍTULO */}
                       <h3
-                        className={`text-lg font-semibold truncate transition-colors cursor-pointer ${
+                        className={`text-lg font-semibold truncate ${
                           theme === "dark"
                             ? "text-white hover:text-[#00C8D7]"
                             : "text-gray-900 hover:text-[#007D85]"
@@ -242,7 +277,7 @@ export default function Inicio({ searchQuery = "" }) {
                         {peli.titulo}
                       </h3>
 
-                      {/* ⭐ PROMEDIO DE ESTRELLAS */}
+                      {/* ⭐ Estrellas */}
                       <div className="flex items-center gap-1 mt-1 text-yellow-400 text-sm">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <span key={i}>
@@ -251,14 +286,12 @@ export default function Inicio({ searchQuery = "" }) {
                               : "☆"}
                           </span>
                         ))}
-
                         <span className="text-xs ml-1 text-gray-400">
                           {obtenerPromedio(peli.id).toFixed(1)}/5
                         </span>
                       </div>
                     </Link>
 
-                    {/* 🔹 Año - Género */}
                     <p
                       className={`text-sm ${
                         theme === "dark"
