@@ -1,5 +1,6 @@
 // src/Componentes/Favoritos.jsx
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; // 👈 Necesitas esta importación
 import { useAuth } from "../Context/AuthContext";
 import { db } from "../lib/firebase";
 import { collection, query, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
@@ -29,6 +30,7 @@ export default function Favoritos() {
   const eliminarFavorito = async (id) => {
     try {
       await deleteDoc(doc(db, "favoritos", id));
+      // NOTA: Puedes añadir una notificación profesional aquí (usando react-hot-toast)
     } catch (error) {
       console.error("Error al eliminar favorito:", error);
     }
@@ -54,28 +56,31 @@ export default function Favoritos() {
               transition={{ duration: 0.3 }}
               className="relative bg-gray-900/80 border border-gray-700 rounded-xl p-3 shadow-lg hover:shadow-cyan-600/20 hover:-translate-y-1 transition-all duration-300"
             >
-              {/* Imagen */}
-              <img
-                src={peli.imagen || "https://via.placeholder.com/200x300/1f2937/67e8f9?text=🎬"}
-                alt={peli.titulo}
-                className="rounded-lg w-full h-64 object-cover mb-3"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src =
-                    "https://via.placeholder.com/200x300/1f2937/67e8f9?text=🎬";
-                }}
-              />
+              {/* 🛑 ENVOLVEMOS EL CONTENIDO EN EL LINK 🛑 */}
+              <Link to={`/detalle/${peli.id}`}>
+                {/* Imagen */}
+                <img
+                  src={peli.imagen || "https://via.placeholder.com/200x300/1f2937/67e8f9?text=🎬"}
+                  alt={peli.titulo}
+                  // Se recomienda h-56 para que el tamaño sea más uniforme con Inicio
+                  className="rounded-lg w-full h-56 object-cover mb-3" 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      "https://via.placeholder.com/200x300/1f2937/67e8f9?text=🎬";
+                  }}
+                />
 
-              {/* Título y género */}
-              <h3 className="text-lg font-bold text-white truncate">{peli.titulo}</h3>
-              {peli.genero && (
-                <p className="text-sm text-cyan-400">{peli.genero}</p>
-              )}
-
-              {/* Botón eliminar */}
+                {/* Título y género */}
+                <h3 className="text-lg font-bold text-white truncate hover:text-cyan-400 transition-colors">{peli.titulo}</h3>
+                {peli.genero && (
+                  <p className="text-sm text-cyan-400">{peli.genero}</p>
+                )}
+              </Link>
+              {/* 🛑 Botón eliminar: Debe quedar FUERA del Link 🛑 */}
               <button
                 onClick={() => eliminarFavorito(peli.id)}
-                className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all shadow-md hover:shadow-red-500/30"
+                className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all shadow-md hover:shadow-red-500/30 z-10"
                 title="Eliminar de favoritos"
               >
                 <Trash2 className="w-4 h-4" />
