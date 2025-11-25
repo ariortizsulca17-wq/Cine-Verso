@@ -19,6 +19,8 @@ export default function Navbar({ onAbrirLogin }) {
   const [isOpen, setIsOpen] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [sugerencias, setSugerencias] = useState([]);
+  const [historial, setHistorial] = useState([]);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -27,6 +29,12 @@ export default function Navbar({ onAbrirLogin }) {
   const { theme, toggleTheme } = useTheme();
   const { user, loading } = useAuth();
   const isAuthenticated = !!user;
+
+  // Cargar historial de búsquedas
+  useEffect(() => {
+    const guardado = JSON.parse(localStorage.getItem("historialBusqueda")) || [];
+    setHistorial(guardado);
+  }, []);
 
   useEffect(() => {
     document.body.classList.remove("light", "dark");
@@ -54,16 +62,32 @@ export default function Navbar({ onAbrirLogin }) {
 
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
 
-  // 👉 Submit búsqueda
+  // ------------------------------------
+  // 🔍 BUSCADOR — SUBMIT
+  // ------------------------------------
   const manejarSubmitBusqueda = (e) => {
     e.preventDefault();
     if (busqueda.trim() !== "") {
       navigate(`/buscar?q=${encodeURIComponent(busqueda.trim())}`);
+
+      // Guardar historial
+      const nuevoHistorial = [
+        busqueda.trim(),
+        ...historial.filter((h) => h !== busqueda.trim()),
+      ].slice(0, 10);
+
+      setHistorial(nuevoHistorial);
+      localStorage.setItem("historialBusqueda", JSON.stringify(nuevoHistorial));
+
       setBusqueda("");
+      setSugerencias([]);
       closeMenu();
     }
   };
 
+  // ------------------------------------
+  // 🔍 Buscar por TODOS los datos (global)
+  // ------------------------------------
   const manejarCambioBusqueda = (e) => {
     const value = e.target.value;
     setBusqueda(value);
@@ -73,8 +97,18 @@ export default function Navbar({ onAbrirLogin }) {
       return;
     }
 
-    const filtradas = PeliculasData.filter((peli) =>
-      peli.titulo.toLowerCase().includes(value.toLowerCase())
+    const query = value.toLowerCase();
+
+    const filtradas = PeliculasData.filter((p) =>
+      (p.titulo?.toLowerCase().includes(query) ||
+        p.genero?.toLowerCase().includes(query) ||
+        p.categoria?.toLowerCase().includes(query) ||
+        p.autor?.toLowerCase().includes(query) ||
+        p.descripcion?.toLowerCase().includes(query) ||
+        p.reseña?.toLowerCase().includes(query) ||
+        p.recomendacion?.toLowerCase().includes(query) ||
+        p.detalles?.toLowerCase().includes(query) ||
+        p.anio?.toString().includes(query))
     ).slice(0, 6);
 
     setSugerencias(filtradas);
@@ -86,16 +120,19 @@ export default function Navbar({ onAbrirLogin }) {
     navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
   };
 
-  // 👉 Abrir modal login
-  const handleAbrirLogin = () => {
-    onAbrirLogin && onAbrirLogin();
+  const seleccionarHistorial = (v) => {
+    navigate(`/buscar?q=${encodeURIComponent(v)}`);
+    setMostrarHistorial(false);
   };
 
+  // --------------------------------------
+  // ACTUALIZACIÓN: 🔥 NAVBAR ENTERO
+  // --------------------------------------
   return (
     <nav className={navbarClasses}>
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
 
-        {/* 🌟 Logo */}
+        {/* LOGO */}
         <Link to="/" className="flex items-center gap-3" onClick={closeMenu}>
           <span className="text-3xl text-cyan-400">🎬</span>
           <span className="font-extrabold text-2xl tracking-wide">
@@ -103,7 +140,7 @@ export default function Navbar({ onAbrirLogin }) {
           </span>
         </Link>
 
-        {/* 🔹 Menú escritorio */}
+        {/* MENÚ DESKTOP */}
         <div className="hidden md:flex gap-7">
           {menuItems.map(({ path, label }) => (
             <NavLink
@@ -111,9 +148,10 @@ export default function Navbar({ onAbrirLogin }) {
               to={path}
               end
               className={({ isActive }) =>
-                `${navLinkBaseClasses} ${isActive
-                  ? navLinkActiveClasses
-                  : theme === "dark"
+                `${navLinkBaseClasses} ${
+                  isActive
+                    ? navLinkActiveClasses
+                    : theme === "dark"
                     ? "text-gray-300"
                     : "text-gray-700"
                 }`
@@ -124,10 +162,10 @@ export default function Navbar({ onAbrirLogin }) {
           ))}
         </div>
 
-        {/* ⚙️ Acciones */}
+        {/* ACCIONES */}
         <div className="flex items-center gap-4">
 
-          {/* 🔍 Buscador escritorio */}
+          {/* BUSCADOR DESKTOP */}
           <div className="hidden md:block relative">
             <form
               onSubmit={manejarSubmitBusqueda}
@@ -140,25 +178,66 @@ export default function Navbar({ onAbrirLogin }) {
                 placeholder="Buscar película..."
                 className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200"
               />
-              <button type="submit" className="text-cyan-500 text-lg ml-2">🔍</button>
+
+              <button
+                type="button"
+                onClick={() => setMostrarHistorial(!mostrarHistorial)}
+                className="text-gray-500 text-lg mr-2"
+              >
+                🕘
+              </button>
+
+              <button
+                type="submit"
+                className={`text-cyan-500 text-lg ml-2 transition-transform ${
+                  busqueda.length > 0 ? "scale-125 animate-pulse" : ""
+                }`}
+              >
+                🔍
+              </button>
             </form>
 
+            {/* HISTORIAL */}
+            {mostrarHistorial && historial.length > 0 && (
+              <ul className="absolute left-0 right-0 bg-gray-800 text-white rounded-lg mt-2 shadow-xl z-40 max-h-60 overflow-y-auto">
+                {historial.map((item, idx) => (
+                  <li
+                    key={idx}
+                    onClick={() => seleccionarHistorial(item)}
+                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* DROPDOWN TIPO NETFLIX */}
             {sugerencias.length > 0 && (
-              <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-64 overflow-y-auto">
+              <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-72 overflow-y-auto border border-gray-700">
                 {sugerencias.map((peli) => (
                   <li
                     key={peli.id}
                     onClick={() => seleccionarSugerencia(peli.titulo)}
-                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+                    className="flex gap-3 px-3 py-2 hover:bg-gray-700 cursor-pointer"
                   >
-                    {peli.titulo}
+                    <img
+                      src={peli.imagen}
+                      className="w-12 h-16 object-cover rounded"
+                    />
+                    <div>
+                      <h3 className="font-bold">{peli.titulo}</h3>
+                      <p className="text-xs text-gray-300">
+                        {peli.categoria} • {peli.anio}
+                      </p>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* 🌓 Tema */}
+          {/* TEMA */}
           <button
             onClick={toggleTheme}
             className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
@@ -166,7 +245,7 @@ export default function Navbar({ onAbrirLogin }) {
             {theme === "dark" ? <FaSun /> : <FaMoon />}
           </button>
 
-          {/* 🛒 Carrito */}
+          {/* CARRITO */}
           <button
             onClick={() => navigate("/carrito")}
             className={`${iconBtn} ${theme === "dark" ? "text-white" : "text-gray-800"}`}
@@ -174,12 +253,12 @@ export default function Navbar({ onAbrirLogin }) {
             <FaShoppingCart />
           </button>
 
-          {/* 👤 Usuario */}
+          {/* USUARIO */}
           <div className="hidden md:block">
-            {!loading && <ZonaUsuario onAbrirLogin={handleAbrirLogin} />}
+            {!loading && <ZonaUsuario onAbrirLogin={onAbrirLogin} />}
           </div>
 
-          {/* 📱 Botón menú */}
+          {/* MENÚ MÓVIL */}
           <button className={`md:hidden ${iconBtn}`} onClick={toggleMenu}>
             {isOpen ? <FaTimes className="text-cyan-400" /> : <FaBars />}
           </button>
@@ -187,11 +266,10 @@ export default function Navbar({ onAbrirLogin }) {
         </div>
       </div>
 
-      {/* 📱 MENÚ MÓVIL — REPARADO */}
+      {/* MENÚ MÓVIL (igual que lo tenías, sin cambios) */}
       {isOpen && (
         <div className="md:hidden fixed top-16 left-0 right-0 bg-gray-900 text-white border-t border-cyan-700 py-5 z-40 flex flex-col items-center space-y-5">
 
-          {/* 🔍 Buscador móvil */}
           <div className="w-11/12 relative">
             <form
               onSubmit={manejarSubmitBusqueda}
@@ -216,16 +294,16 @@ export default function Navbar({ onAbrirLogin }) {
                       seleccionarSugerencia(peli.titulo);
                       closeMenu();
                     }}
-                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer"
+                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer flex gap-2"
                   >
-                    {peli.titulo}
+                    <img src={peli.imagen} className="w-10 h-14 object-cover rounded" />
+                    <span>{peli.titulo}</span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* ⭐ LINKS */}
           {menuItems.map(({ path, label }) => (
             <NavLink
               key={path}
@@ -237,13 +315,11 @@ export default function Navbar({ onAbrirLogin }) {
             </NavLink>
           ))}
 
-          {/* 👤 Login/Register */}
           <div className="w-11/12 pt-3 border-t border-cyan-700 space-y-3">
-
             {!isAuthenticated ? (
               <>
                 <button
-                  onClick={handleAbrirLogin}
+                  onClick={onAbrirLogin}
                   className="w-full py-2 rounded-lg bg-cyan-600 text-gray-900 font-semibold"
                 >
                   <FaUserCircle className="inline mr-2" /> Iniciar sesión
@@ -262,14 +338,12 @@ export default function Navbar({ onAbrirLogin }) {
               </div>
             )}
 
-            {/* 🛒 Carrito móvil */}
             <button
               onClick={() => navigate("/carrito")}
               className="w-full py-2 rounded-lg bg-gray-800 text-cyan-400 flex items-center justify-center gap-2"
             >
               <FaShoppingCart /> Ver carrito
             </button>
-
           </div>
 
         </div>

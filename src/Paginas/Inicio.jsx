@@ -122,7 +122,7 @@ export default function Inicio({ searchQuery = "" }) {
     return () => clearInterval(interval);
   }, []);
 
-  // ⭐ BUSCADOR — YA FUNCIONA
+  // ⭐ FILTRO BUSCADOR
   const peliculasFiltradas = peliculas.filter((peli) => {
     const query = searchQuery.toLowerCase();
 
@@ -139,6 +139,23 @@ export default function Inicio({ searchQuery = "" }) {
     );
   });
 
+  // ⭐ FUNCIÓN PARA IR A LA CATEGORÍA
+  const obtenerRutaCategoria = (categoria) => {
+    if (!categoria) return "/";
+
+    const c = categoria.toLowerCase();
+
+    if (c.includes("top")) return "/peliTops";
+    if (c.includes("libro")) return "/peliLibros";
+    if (c.includes("kids")) return "/peliKids";
+    if (c.includes("documental")) return "/peliDocumentales";
+    if (c.includes("asi")) return "/peliAsiaticas";
+
+    return "/";
+  };
+
+  const rutaCategoriaSlide = obtenerRutaCategoria(peliculas[slide].categoria);
+
   return (
     <div
       className={`p-6 min-h-screen transition-colors duration-500 ${
@@ -148,8 +165,8 @@ export default function Inicio({ searchQuery = "" }) {
       }`}
     >
 
-      {/* ⭐⭐⭐ CARRUSEL PRINCIPAL CLICK ⭐⭐⭐ */}
-      <Link to={`/detalle/${peliculas[slide].id}`}>
+      {/* ⭐⭐⭐ CARRUSEL PRINCIPAL AHORA IRÁ A LA CATEGORÍA ⭐⭐⭐ */}
+      <Link to={rutaCategoriaSlide}>
         <div className="w-full h-[300px] md:h-[380px] rounded-xl overflow-hidden relative shadow-lg mb-10 cursor-pointer">
 
           <img

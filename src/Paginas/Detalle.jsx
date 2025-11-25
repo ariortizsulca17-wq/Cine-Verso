@@ -1,8 +1,9 @@
-// src/components/DetallePelicula.jsx (CON CARRITO + MODO CLARO/OSCURO GLOBAL)
+// src/components/Detalle.jsx
 import { useParams, Link } from "react-router-dom";
 import peliculas from "../Componentes/PeliculasData";
 import ComentariosPelicula from "../Componentes/Comentarios";
 import { useTheme } from "../Context/ThemeContext"; // 🌓 Importar el tema
+import { comentariosPeliculas } from "../assets/comentariospeli"; // ⭐ IMPORTAR COMENTARIOS
 
 function DetallePelicula() {
   const { id } = useParams();
@@ -20,6 +21,18 @@ function DetallePelicula() {
       </div>
     );
   }
+
+  // ⭐ PROMEDIO ESTRELLAS
+  const obtenerPromedio = (peliculaId) => {
+    const comentarios = comentariosPeliculas.filter(
+      (c) => c.peliculaId === peliculaId
+    );
+    if (comentarios.length === 0) return 0;
+    const suma = comentarios.reduce((acc, c) => acc + c.puntuacion, 0);
+    return suma / comentarios.length;
+  };
+
+  const promedioEstrellas = obtenerPromedio(pelicula.id);
 
   // 💡 FUNCIÓN: Añade la película al carrito
   const handleAddToCart = () => {
@@ -96,7 +109,45 @@ function DetallePelicula() {
               {pelicula.titulo}
             </h1>
 
-            {/* Etiquetas */}
+            {/* ⭐ PROMEDIO DE ESTRELLAS */}
+            <div className="flex items-center mb-6">
+              <span className="text-[#00C8D7] font-bold text-xl mr-2">
+                {promedioEstrellas.toFixed(1)}
+              </span>
+
+              <div className="flex">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`text-2xl ${
+                      i < Math.round(promedioEstrellas)
+                        ? "text-yellow-400"
+                        : theme === "dark"
+                        ? "text-gray-600"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              <span
+                className={`ml-3 text-sm ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                (
+                {
+                  comentariosPeliculas.filter(
+                    (c) => c.peliculaId === pelicula.id
+                  ).length
+                }{" "}
+                comentarios)
+              </span>
+            </div>
+
+            {/* Etquetas */}
             <div className="flex flex-wrap items-center space-x-3 mb-6">
               <span className="text-lg text-[#00C8D7] font-medium">
                 {pelicula.anio}

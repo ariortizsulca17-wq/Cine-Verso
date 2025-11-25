@@ -1,3 +1,4 @@
+// src/Componentes/ResultadosBusqueda.jsx
 import { useLocation, Link } from "react-router-dom";
 import PeliculasData from "../Componentes/PeliculasData.jsx";
 
@@ -7,9 +8,22 @@ export default function ResultadosBusqueda() {
   const queryParams = new URLSearchParams(location.search);
   const termino = queryParams.get("q")?.toLowerCase() || "";
 
-  const resultados = PeliculasData.filter((peli) =>
-    peli.titulo.toLowerCase().includes(termino)
-  );
+  // 🔍 FILTRAR POR TODO (título, género, categoría, autor, reseña, año, etc.)
+  const resultados = PeliculasData.filter((peli) => {
+    const q = termino.toLowerCase();
+
+    return (
+      peli.titulo?.toLowerCase().includes(q) ||
+      peli.genero?.toLowerCase().includes(q) ||
+      peli.categoria?.toLowerCase().includes(q) ||
+      peli.autor?.toLowerCase().includes(q) ||
+      peli.reseña?.toLowerCase().includes(q) ||
+      peli.descripcion?.toLowerCase().includes(q) ||
+      peli.recomendacion?.toLowerCase().includes(q) ||
+      peli.detalles?.toLowerCase().includes(q) ||
+      peli.anio?.toString().includes(q)
+    );
+  });
 
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4">
