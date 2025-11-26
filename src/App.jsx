@@ -1,4 +1,4 @@
-// ✅ src/App.jsx
+// ✅ src/App.jsx (CORREGIDO)
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useTheme } from "./Context/ThemeContext";
@@ -23,17 +23,20 @@ import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
 
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
-import ProtectedRoute from "./Componentes/AdminRoute";
+import ProtectedRoute from "./Componentes/AdminRoute"; // Asumo que es el componente para la ruta protegida ADMIN
 
+// Componentes del Dashboard Admin
 import AdminUsuarios from "./Componentes/DashboardAdmi/AdminUsuarios";
 import AdminPeliculas from "./Componentes/DashboardAdmi/AdminPeliculas";
 import AdminAgregarPelicula from "./Componentes/DashboardAdmi/AdminAgregarPelicula";
 import AdminEditarPelicula from "./Componentes/DashboardAdmi/AdminEditarPelicula";
 import DashboardLayout from "./Componentes/DashboardAdmi/DashboardLayaout"
 
+import ImportarPeliculas from "./Componentes/importarPeliculas";
 
 import "./App.css";
 
+// Componente auxiliar para la ruta protegida del usuario estándar (Mantenido)
 function RutaProtegida({ element }) {
   const { user, loading } = useAuth();
 
@@ -53,6 +56,7 @@ function RutaProtegida({ element }) {
 }
 
 export default function App() {
+  // ... (Lógica de estados y handlers sin cambios)
   const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -79,7 +83,6 @@ export default function App() {
   return (
     <div className={theme === 'dark' ? 'min-h-screen bg-gray-900' : 'min-h-screen bg-gray-100'}>
 
-      {/* 🔵 Pasamos abrirLogin al Navbar → ZonaUsuario */}
       <Navbar onSearch={handleSearch} onAbrirLogin={abrirLogin} />
 
       <main className="min-h-[calc(100vh-64px)]">
@@ -95,7 +98,13 @@ export default function App() {
           <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
 
-          {/* ️⃣ Dashboard ADMIN protegido */}
+          {/* 🔐 Dashboard del usuario normal (Mantenido) */}
+          <Route
+            path="/dashboard"
+            element={<RutaProtegida element={<Dashboard />} />}
+          />
+
+          {/* 👑 Dashboard ADMIN (Rutas Anidadas) */}
           <Route
             path="/admin"
             element={
@@ -104,25 +113,22 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            {/* RUTAS INTERNAS DEL DASHBOARD */}
+            {/* /admin */}
             <Route index element={<AdminUsuarios />} />
+            {/* /admin/usuarios */}
             <Route path="usuarios" element={<AdminUsuarios />} />
+            {/* /admin/peliculas */}
             <Route path="peliculas" element={<AdminPeliculas />} />
-            <Route path="agregar" element={<AdminAgregarPelicula />} />
-            <Route path="editar/:id" element={<AdminEditarPelicula />} />
+            {/* /admin/peliculas/agregar */}
+            <Route path="peliculas/agregar" element={<AdminAgregarPelicula />} />
+            {/* /admin/peliculas/editar/:id */}
+            <Route path="peliculas/editar/:id" element={<AdminEditarPelicula />} />
           </Route>
 
-          {/* 🔐 Dashboard del usuario normal */}
-          <Route
-            path="/dashboard"
-            element={<RutaProtegida element={<Dashboard />} />}
-          />
         </Routes>
       </main>
-
       <Footer />
-
-      {/* === 🟧 MODAL GLOBAL === */}
+      {/* ... (Modal y Toaster) */}
       <Modal isOpen={modalAbierto} onClose={cerrarModal}>
         {modalContenido === "login" && (
           <Login

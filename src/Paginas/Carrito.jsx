@@ -165,7 +165,7 @@ export default function Carrito() {
                     <CheckCircle className="text-green-500 w-6 h-6 mr-3" />
                     <span className="font-bold text-lg text-white">¡Gracias por tu compra!</span>
                 </div>
-                <p className="text-sm text-gray-300 mb-2">El comprobante y el acceso a tus películas han sido enviados a tu correo: **{user.email}**</p>
+                <p className="text-sm text-gray-300 mb-2">El comprobante y el acceso a tus películas han sido enviados a tu correo: {user.email}</p>
                 <button
                     className="mt-2 px-4 py-2 bg-[#00C8D7] text-gray-900 font-bold rounded-lg hover:bg-[#00E0FF] transition text-sm"
                     onClick={() => {

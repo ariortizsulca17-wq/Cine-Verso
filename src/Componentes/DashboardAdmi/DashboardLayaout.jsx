@@ -1,5 +1,7 @@
+// src/Componentes/DashboardAdmi/DashboardLayout.jsx
+import { Outlet } from "react-router-dom"; // 👈 Nueva importación
 import DashboardNav from "./DashboardNav";
-import DashboardContent from "./DashboardContent";
+// import DashboardContent from "./DashboardContent"; // 🚫 Ya no es necesario importar esto
 
 export default function DashboardLayout() {
   return (
@@ -10,7 +12,8 @@ export default function DashboardLayout() {
 
       {/* 📌 CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-6 overflow-y-auto">
-        <DashboardContent />
+        {/* 💡 SOLUCIÓN: Outlet renderiza el contenido de la ruta anidada */}
+        <Outlet /> 
       </main>
     </div>
   );

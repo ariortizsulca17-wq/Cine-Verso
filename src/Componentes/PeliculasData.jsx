@@ -1,5 +1,5 @@
-const peliculas = [
-  // ===============================
+export const peliculas = [
+// ===============================
 // 📚 BASADAS EN LIBROS (VERSIÓN EXTENDIDA)
 // ===============================
 

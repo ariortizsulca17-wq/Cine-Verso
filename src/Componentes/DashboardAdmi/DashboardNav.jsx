@@ -1,68 +1,100 @@
 import { NavLink } from "react-router-dom";
-import { FaUsers, FaFilm, FaPlusCircle, FaEdit, FaHome } from "react-icons/fa";
+import { Users, Film, PlusCircle, Edit, Home, Monitor, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react"; // Importar useState para el menú desplegable
+
+// Componente para manejar el estado desplegable del grupo "Películas"
+const NavDropdown = ({ children, title, icon: Icon }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="flex flex-col">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center justify-between px-4 py-3 rounded-lg font-medium transition-colors 
+                           text-gray-300 hover:bg-gray-800 hover:text-cyan-400 focus:outline-none"
+            >
+                <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5" />
+                    {title}
+                </div>
+                {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                <div className="pl-4 border-l border-gray-700 ml-5 flex flex-col gap-1">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function DashboardNav() {
-  const linkBase =
-    "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors";
+    // Definición de estilos mejorados
+    const linkBase =
+        "flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-all text-sm";
 
-  const linkInactive = "text-gray-300 hover:bg-gray-800 hover:text-cyan-400";
-  const linkActive = "bg-cyan-600 text-black shadow-md";
+    // Estilos inactivo: Más énfasis en el hover
+    const linkInactive = "text-gray-400 hover:bg-gray-800 hover:text-cyan-400";
+    
+    // Estilos activo: Usa un color cian semitransparente como fondo y un borde izquierdo
+    const linkActive = "bg-cyan-900/40 text-cyan-300 border-l-4 border-cyan-500 shadow-lg shadow-cyan-900/50";
 
-  return (
-    <aside className="w-64 bg-gray-950 border-r border-cyan-800/40 p-6 hidden md:block">
-      {/* TÍTULO */}
-      <h2 className="text-2xl font-bold text-cyan-400 mb-8 text-center">
-        Admin Panel
-      </h2>
+    const getLinkClass = ({ isActive }) =>
+        `${linkBase} ${isActive ? linkActive : linkInactive}`;
 
-      {/* NAV */}
-      <nav className="flex flex-col gap-3">
+    return (
+        <aside className="w-64 bg-gray-950/95 border-r border-gray-800 p-6 hidden md:block shadow-2xl shadow-black/50 font-sans">
+            
+            {/* 🖥️ LOGO / TÍTULO */}
+            <div className="mb-10 pt-2 border-b border-cyan-500/30 pb-4">
+                <div className="flex items-center justify-center gap-2">
+                    <Monitor className="w-8 h-8 text-cyan-400 animate-pulse" />
+                    <h2 className="text-2xl font-extrabold text-white tracking-widest">
+                        ADMIN
+                    </h2>
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-1">Control Total</p>
+            </div>
 
-        <NavLink
-          to="/admin"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? linkActive : linkInactive}`
-          }
-        >
-          <FaHome /> Inicio Admin
-        </NavLink>
+            {/* 🧭 NAV PRINCIPAL */}
+            <nav className="flex flex-col gap-2">
 
-        <NavLink
-          to="/admin/usuarios"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? linkActive : linkInactive}`
-          }
-        >
-          <FaUsers /> Usuarios
-        </NavLink>
+                {/* Inicio Admin */}
+                <NavLink to="/admin" end className={getLinkClass}>
+                    <Home className="w-5 h-5" /> Inicio
+                </NavLink>
 
-        <NavLink
-          to="/admin/peliculas"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? linkActive : linkInactive}`
-          }
-        >
-          <FaFilm /> Películas
-        </NavLink>
+                {/* Usuarios */}
+                <NavLink to="/admin/usuarios" className={getLinkClass}>
+                    <Users className="w-5 h-5" /> Gestión de Usuarios
+                </NavLink>
 
-        <NavLink
-          to="/admin/peliculas/agregar"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? linkActive : linkInactive}`
-          }
-        >
-          <FaPlusCircle /> Agregar película
-        </NavLink>
+                {/* --- SEPARADOR (Mejora la jerarquía) --- */}
+                <hr className="my-3 border-gray-800" />
+                <span className="text-xs uppercase text-gray-500 font-bold ml-4 mb-1 tracking-wider">
+                    Contenido
+                </span>
 
-        <NavLink
-          to="/admin/peliculas/editar"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? linkActive : linkInactive}`
-          }
-        >
-          <FaEdit /> Editar / Eliminar
-        </NavLink>
-      </nav>
-    </aside>
-  );
+                {/* Grupo de Películas (Desplegable) */}
+                <NavDropdown title="Películas" icon={Film}>
+                    
+                    {/* Listar Películas (Base) */}
+                    <NavLink to="/admin/peliculas" end className={getLinkClass}>
+                        <Film className="w-4 h-4" /> Listar/Buscar
+                    </NavLink>
+                    
+                    {/* Agregar Película */}
+                    <NavLink to="/admin/peliculas/agregar" className={getLinkClass}>
+                        <PlusCircle className="w-4 h-4" /> Agregar Nueva
+                    </NavLink>
+
+                    {/* Editar / Eliminar (General) */}
+                    {/* Se usa "peliculas/editar" ya que redirige a la lista para seleccionar */}
+                    <NavLink to="/admin/peliculas/editar" className={getLinkClass}>
+                        <Edit className="w-4 h-4" /> Editar / Eliminar
+                    </NavLink>
+                </NavDropdown>
+
+            </nav>
+        </aside>
+    );
 }
