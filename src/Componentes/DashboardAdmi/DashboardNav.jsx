@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Users, Film, PlusCircle, Edit, Home, Monitor, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Film, PlusCircle, Edit, Home, Monitor, ChevronDown, ChevronUp, Ticket } from "lucide-react"; // ✨ AGREGADO: Ticket
 import { useState } from "react"; // Importar useState para el menú desplegable
 
 // Componente para manejar el estado desplegable del grupo "Películas"
@@ -10,7 +10,7 @@ const NavDropdown = ({ children, title, icon: Icon }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center justify-between px-4 py-3 rounded-lg font-medium transition-colors 
-                           text-gray-300 hover:bg-gray-800 hover:text-cyan-400 focus:outline-none"
+text-gray-300 hover:bg-gray-800 hover:text-cyan-400 focus:outline-none"
             >
                 <div className="flex items-center gap-3">
                     <Icon className="w-5 h-5" />
@@ -34,7 +34,7 @@ export default function DashboardNav() {
 
     // Estilos inactivo: Más énfasis en el hover
     const linkInactive = "text-gray-400 hover:bg-gray-800 hover:text-cyan-400";
-    
+
     // Estilos activo: Usa un color cian semitransparente como fondo y un borde izquierdo
     const linkActive = "bg-cyan-900/40 text-cyan-300 border-l-4 border-cyan-500 shadow-lg shadow-cyan-900/50";
 
@@ -43,7 +43,7 @@ export default function DashboardNav() {
 
     return (
         <aside className="w-64 bg-gray-950/95 border-r border-gray-800 p-6 hidden md:block shadow-2xl shadow-black/50 font-sans">
-            
+
             {/* 🖥️ LOGO / TÍTULO */}
             <div className="mb-10 pt-2 border-b border-cyan-500/30 pb-4">
                 <div className="flex items-center justify-center gap-2">
@@ -76,22 +76,36 @@ export default function DashboardNav() {
 
                 {/* Grupo de Películas (Desplegable) */}
                 <NavDropdown title="Películas" icon={Film}>
-                    
+
                     {/* Listar Películas (Base) */}
                     <NavLink to="/admin/peliculas" end className={getLinkClass}>
                         <Film className="w-4 h-4" /> Listar/Buscar
                     </NavLink>
-                    
+
                     {/* Agregar Película */}
                     <NavLink to="/admin/peliculas/agregar" className={getLinkClass}>
                         <PlusCircle className="w-4 h-4" /> Agregar Nueva
                     </NavLink>
 
                     {/* Editar / Eliminar (General) */}
-                    {/* Se usa "peliculas/editar" ya que redirige a la lista para seleccionar */}
-                    <NavLink to="/admin/peliculas/editar" className={getLinkClass}>
+                    <NavLink to="/admin/peliculas" className={getLinkClass}>
                         <Edit className="w-4 h-4" /> Editar / Eliminar
                     </NavLink>
+                </NavDropdown>
+
+                {/* 🎁 NUEVO: Grupo de Cupones (Desplegable) */}
+                <NavDropdown title="Cupones" icon={Ticket}>
+
+                    {/* Generar Nuevo Cupón (Usando la ruta /admin/cupones/generar para tu componente) */}
+                    <NavLink to="/admin/cupones/generar" className={getLinkClass}>
+                        <PlusCircle className="w-4 h-4" /> Generar Nuevo
+                    </NavLink>
+
+                    {/* Gestión de Cupones (Ruta base para listado/gestión) */}
+                    <NavLink to="/admin/cupones" className={getLinkClass}>
+                        <Edit className="w-4 h-4" /> Activar / Desactivar
+                    </NavLink>
+
                 </NavDropdown>
 
             </nav>

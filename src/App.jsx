@@ -31,7 +31,8 @@ import AdminPeliculas from "./Componentes/DashboardAdmi/AdminPeliculas";
 import AdminAgregarPelicula from "./Componentes/DashboardAdmi/AdminAgregarPelicula";
 import AdminEditarPelicula from "./Componentes/DashboardAdmi/AdminEditarPelicula";
 import DashboardLayout from "./Componentes/DashboardAdmi/DashboardLayaout"
-
+import AdminInicio from "./Componentes/DashboardAdmi/AdminInicio";
+import GenerarCupon from "./Componentes/DashboardAdmi/GenerarCupon";
 import ImportarPeliculas from "./Componentes/importarPeliculas";
 
 import "./App.css";
@@ -113,8 +114,8 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            {/* /admin */}
-            <Route index element={<AdminUsuarios />} />
+            {/* ✅ SOLUCIÓN: /admin ahora carga el Dashboard de Inicio */}
+            <Route index element={<AdminInicio />} />
             {/* /admin/usuarios */}
             <Route path="usuarios" element={<AdminUsuarios />} />
             {/* /admin/peliculas */}
@@ -123,6 +124,10 @@ export default function App() {
             <Route path="peliculas/agregar" element={<AdminAgregarPelicula />} />
             {/* /admin/peliculas/editar/:id */}
             <Route path="peliculas/editar/:id" element={<AdminEditarPelicula />} />
+
+            {/* Rutas de Cupones */}
+            <Route path="cupones/generar" element={<GenerarCupon />} /> {/* ✨ RUTA NUEVA */}
+            <Route path="cupones" element={/* Componente ListarCupones */ null} />
           </Route>
 
         </Routes>

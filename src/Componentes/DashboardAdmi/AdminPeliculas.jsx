@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { Dialog } from "@headlessui/react";
-import { Pencil, Trash2, Plus, Film, Search, Loader2, X, AlertTriangle, Image } from "lucide-react"; // Nuevos iconos
+import { Pencil, Trash2, Plus, Film, Search, Loader2, X, AlertTriangle, Image } from "lucide-react"; 
 import { useNavigate } from "react-router-dom";
 
 export default function AdminPeliculas() {
@@ -10,7 +10,7 @@ export default function AdminPeliculas() {
   const [filtradas, setFiltradas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [buscar, setBuscar] = useState("");
-  const [error, setError] = useState(null); // Nuevo estado para errores
+  const [error, setError] = useState(null); 
 
   const [modal, setModal] = useState({
     abierto: false,
@@ -28,7 +28,6 @@ export default function AdminPeliculas() {
       setError(null);
       try {
         const snap = await getDocs(collection(db, "peliculas"));
-        // Asumiendo que 'imagen' y 'anio' son campos válidos
         const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
         setPeliculas(lista);
@@ -53,7 +52,7 @@ export default function AdminPeliculas() {
           p.titulo?.toLowerCase().includes(text) ||
           p.genero?.toLowerCase().includes(text) ||
           p.categoria?.toLowerCase().includes(text) ||
-          p.anio?.toString().includes(text) // Permite buscar por año
+          p.anio?.toString().includes(text) 
       )
     );
   }, [buscar, peliculas]);
@@ -89,14 +88,12 @@ export default function AdminPeliculas() {
   
   // Función de navegación a Agregar
   const handleNavigateAdd = () => {
-      // Usamos la ruta anidada correcta: /admin/peliculas/agregar
-      navigate("/admin/peliculas/agregar"); 
+    navigate("/admin/peliculas/agregar"); 
   };
   
   // Función de navegación a Editar
   const handleNavigateEdit = (id) => {
-      // Usamos la ruta anidada correcta: /admin/peliculas/editar/:id
-      navigate(`/admin/peliculas/editar/${id}`);
+    navigate(`/admin/peliculas/editar/${id}`);
   };
 
 
@@ -140,7 +137,7 @@ export default function AdminPeliculas() {
         <button
           onClick={handleNavigateAdd}
           className="flex items-center gap-2 bg-cyan-600 px-5 py-2 mt-4 sm:mt-0 rounded-full font-bold 
-                     hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-900/50"
+                      hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-900/50"
         >
           <Plus size={20} />
           Agregar Película
@@ -155,7 +152,7 @@ export default function AdminPeliculas() {
         </div>
       )}
 
-      {/* BUSCADOR */}
+      {/* BUSCADOR - MODIFICADO CON BOTÓN DE LIMPIEZA */}
       <div className="relative w-full mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cyan-400" />
           <input
@@ -163,9 +160,21 @@ export default function AdminPeliculas() {
             placeholder="Buscar por título, género, categoría o año..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
-            className="w-full bg-gray-800/80 pl-10 pr-4 py-2 rounded-full border border-gray-600 
-                       focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-sm shadow-inner"
+            // AUMENTAMOS PR (right padding) a pr-10 para hacer espacio al botón X
+            className="w-full bg-gray-800/80 pl-10 pr-10 py-2 rounded-full border border-gray-600 
+                        focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-sm shadow-inner"
           />
+          
+          {/* Botón de limpieza (solo se muestra si hay texto) */}
+          {buscar.length > 0 && (
+            <button
+              onClick={() => setBuscar("")}
+              title="Limpiar búsqueda"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-white transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
       </div>
 
       {/* TABLA OPTIMIZADA */}
@@ -173,7 +182,7 @@ export default function AdminPeliculas() {
         <table className="min-w-full divide-y divide-cyan-700/50">
           <thead className="bg-cyan-900/20 uppercase text-xs tracking-wider">
             <tr>
-              <th className="p-4 text-left font-semibold text-cyan-400">Póster</th>
+              <th className="p-4 text-left font-semibold text-cyan-400">Portada</th>
               <th className="p-4 text-left font-semibold text-cyan-400">Título</th>
               <th className="p-4 text-left font-semibold text-cyan-400 hidden sm:table-cell">Categoría</th>
               <th className="p-4 text-left font-semibold text-cyan-400 hidden md:table-cell">Género / Año</th>
@@ -272,7 +281,7 @@ export default function AdminPeliculas() {
             </h2>
 
             <p className="text-gray-400 text-center text-sm mb-6 leading-relaxed">
-              ¿Estás **completamente seguro** de eliminar la película: 
+              ¿Estás completamente seguro de eliminar la película: 
               <span className="font-extrabold text-red-300 block mt-1">
                 "{modal.pelicula?.titulo}"
               </span>
