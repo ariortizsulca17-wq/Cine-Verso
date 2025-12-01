@@ -25,27 +25,27 @@ export default function Inicio({ searchQuery = "" }) {
   const { user } = useAuth();
   const [favoritos, setFavoritos] = useState([]);
 
-  // ⭐ SLIDER PRINCIPAL
-  const [slide, setSlide] = useState(0);
+  const [peliDestacada, setPeliDestacada] = useState(null);
 
   useEffect(() => {
-    const intervalo = setInterval(() => {
-      setSlide((prev) => (prev + 1) % peliculas.length);
-    }, 4000);
-    return () => clearInterval(intervalo);
+    const random = Math.floor(Math.random() * peliculas.length);
+    setPeliDestacada(peliculas[random]);
+
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * peliculas.length);
+      setPeliDestacada(peliculas[randomIndex]);
+    }, 6000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  // ⭐ PROMEDIO ESTRELLAS
   const obtenerPromedio = (peliculaId) => {
-    const comentarios = comentariosPeliculas.filter(
-      (c) => c.peliculaId === peliculaId
-    );
+    const comentarios = comentariosPeliculas.filter((c) => c.peliculaId === peliculaId);
     if (comentarios.length === 0) return 0;
     const suma = comentarios.reduce((acc, c) => acc + c.puntuacion, 0);
     return suma / comentarios.length;
   };
 
-  // ⭐ FAVORITOS
   useEffect(() => {
     if (!user) return;
     const cargarFavoritos = async () => {
@@ -67,6 +67,7 @@ export default function Inicio({ searchQuery = "" }) {
       where("uid", "==", user.uid),
       where("titulo", "==", peli.titulo)
     );
+
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
@@ -83,14 +84,11 @@ export default function Inicio({ searchQuery = "" }) {
       toast("Eliminado de favoritos 💔", { icon: "🗑️" });
     }
 
-    const newSnap = await getDocs(
-      query(collection(db, "favoritos"), where("uid", "==", user.uid))
-    );
+    const newSnap = await getDocs(query(collection(db, "favoritos"), where("uid", "==", user.uid)));
     setFavoritos(newSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
 
-  const esFavorito = (titulo) =>
-    favoritos.some((fav) => fav.titulo === titulo);
+  const esFavorito = (titulo) => favoritos.some((fav) => fav.titulo === titulo);
 
   const scroll = (categoria, direccion) => {
     const contenedor = carruseles.current[categoria];
@@ -102,7 +100,6 @@ export default function Inicio({ searchQuery = "" }) {
     }
   };
 
-  // ⭐ CARRUSEL AUTOMÁTICO
   useEffect(() => {
     const interval = setInterval(() => {
       categorias.forEach((categoria) => {
@@ -122,10 +119,8 @@ export default function Inicio({ searchQuery = "" }) {
     return () => clearInterval(interval);
   }, []);
 
-  // ⭐ FILTRO BUSCADOR
   const peliculasFiltradas = peliculas.filter((peli) => {
     const query = searchQuery.toLowerCase();
-
     return (
       peli.titulo?.toLowerCase().includes(query) ||
       peli.genero?.toLowerCase().includes(query) ||
@@ -139,22 +134,28 @@ export default function Inicio({ searchQuery = "" }) {
     );
   });
 
-  // ⭐ FUNCIÓN PARA IR A LA CATEGORÍA
+  const normalizar = (texto) =>
+    texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
   const obtenerRutaCategoria = (categoria) => {
     if (!categoria) return "/";
+    const c = normalizar(categoria);
 
-    const c = categoria.toLowerCase();
-
-    if (c.includes("top")) return "/peliTops";
-    if (c.includes("libro")) return "/peliLibros";
-    if (c.includes("kids")) return "/peliKids";
-    if (c.includes("documental")) return "/peliDocumentales";
-    if (c.includes("asi")) return "/peliAsiaticas";
+    if (c.includes("top")) return "/PeliTops";
+    if (c.includes("libro")) return "/PeliLibros";
+    if (c.includes("kids")) return "/PeliKids";
+    if (c.includes("documental")) return "/PeliDocumentales";
+    if (c.includes("asiatic")) return "/PeliAsiaticas";
 
     return "/";
   };
 
-  const rutaCategoriaSlide = obtenerRutaCategoria(peliculas[slide].categoria);
+  const rutaCategoriaSlide =
+    peliDestacada ? obtenerRutaCategoria(peliDestacada.categoria) : "/";
 
   return (
     <div
@@ -164,30 +165,28 @@ export default function Inicio({ searchQuery = "" }) {
           : "bg-[#F9F9F9] text-gray-900"
       }`}
     >
+      {peliDestacada && (
+        <Link to={rutaCategoriaSlide}>
+          <div className="w-full h-[300px] md:h-[380px] rounded-xl overflow-hidden relative shadow-lg mb-10 cursor-pointer">
+            <img
+              src={peliDestacada.imagen}
+              className="w-full h-full object-cover object-center transition-all duration-700"
+            />
 
-      {/* ⭐⭐⭐ CARRUSEL PRINCIPAL AHORA IRÁ A LA CATEGORÍA ⭐⭐⭐ */}
-      <Link to={rutaCategoriaSlide}>
-        <div className="w-full h-[300px] md:h-[380px] rounded-xl overflow-hidden relative shadow-lg mb-10 cursor-pointer">
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
 
-          <img
-            src={peliculas[slide].imagen}
-            className="w-full h-full object-cover object-center transition-all duration-700"
-          />
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-
-          <div className="absolute bottom-4 left-4">
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg">
-              {peliculas[slide].titulo}
-            </h2>
-            <p className="text-sm text-gray-200 line-clamp-2 max-w-[500px]">
-              {peliculas[slide].descripcion}
-            </p>
+            <div className="absolute bottom-4 left-4">
+              <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                {peliDestacada.titulo}
+              </h2>
+              <p className="text-sm text-gray-200 line-clamp-2 max-w-[500px]">
+                {peliDestacada.descripcion}
+              </p>
+            </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      )}
 
-      {/* ⭐ TÍTULO */}
       <h1
         className={`text-4xl mb-6 text-center font-bold ${
           theme === "dark" ? "text-[#00C8D7]" : "text-[#007D85]"
@@ -197,7 +196,6 @@ export default function Inicio({ searchQuery = "" }) {
         🎬 Todas las películas
       </h1>
 
-      {/* Si no hay resultados */}
       {peliculasFiltradas.length === 0 ? (
         <p
           className={`text-center text-lg mt-10 ${
@@ -208,10 +206,12 @@ export default function Inicio({ searchQuery = "" }) {
         </p>
       ) : (
         categorias.map((categoria) => {
-          const peliculasCategoria = peliculasFiltradas.filter(
-            (peli) =>
-              peli.categoria.toLowerCase() === categoria.toLowerCase()
+          let peliculasCategoria = peliculasFiltradas.filter(
+            (peli) => normalizar(peli.categoria) === normalizar(categoria)
           );
+
+          // ❌ SE QUITÓ EL ORDEN ALEATORIO — AHORA SE MUESTRAN NORMAL
+          // peliculasCategoria = [...peliculasCategoria].sort(() => Math.random() - 0.5);
 
           if (peliculasCategoria.length === 0) return null;
 
@@ -225,7 +225,6 @@ export default function Inicio({ searchQuery = "" }) {
                 {categoria}
               </h2>
 
-              {/* Botones */}
               <button
                 onClick={() => scroll(categoria, "left")}
                 className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full z-10 ${
@@ -248,7 +247,6 @@ export default function Inicio({ searchQuery = "" }) {
                 ▶
               </button>
 
-              {/* Carrusel */}
               <div
                 ref={(el) => (carruseles.current[categoria] = el)}
                 className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide"
@@ -262,8 +260,6 @@ export default function Inicio({ searchQuery = "" }) {
                         : "bg-white border border-gray-200"
                     }`}
                   >
-
-                    {/* ❤️ FAVORITO */}
                     <button
                       onClick={() => handleToggleFavorite(peli)}
                       className={`absolute top-2 right-2 p-2 rounded-full ${
@@ -272,10 +268,7 @@ export default function Inicio({ searchQuery = "" }) {
                           : "bg-gray-700 text-white hover:bg-red-500"
                       }`}
                     >
-                      <Heart
-                        size={18}
-                        fill={esFavorito(peli.titulo) ? "white" : "none"}
-                      />
+                      <Heart size={18} fill={esFavorito(peli.titulo) ? "white" : "none"} />
                     </button>
 
                     <Link to={`/detalle/${peli.id}`}>
@@ -294,13 +287,10 @@ export default function Inicio({ searchQuery = "" }) {
                         {peli.titulo}
                       </h3>
 
-                      {/* ⭐ Estrellas */}
                       <div className="flex items-center gap-1 mt-1 text-yellow-400 text-sm">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <span key={i}>
-                            {i < Math.round(obtenerPromedio(peli.id))
-                              ? "★"
-                              : "☆"}
+                            {i < Math.round(obtenerPromedio(peli.id)) ? "★" : "☆"}
                           </span>
                         ))}
                         <span className="text-xs ml-1 text-gray-400">
@@ -311,9 +301,7 @@ export default function Inicio({ searchQuery = "" }) {
 
                     <p
                       className={`text-sm ${
-                        theme === "dark"
-                          ? "text-[#B0B0B0]"
-                          : "text-gray-600"
+                        theme === "dark" ? "text-[#B0B0B0]" : "text-gray-600"
                       }`}
                     >
                       {peli.anio} • {peli.genero}

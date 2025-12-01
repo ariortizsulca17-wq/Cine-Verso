@@ -1,4 +1,4 @@
-// src/context/authContext.jsx
+// src/context/AuthContext.jsx
 // 👇 Contexto de autenticación unificado: Auth + Firestore + Storage
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -11,7 +11,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signInWithPopup,
-  updateProfile, // 💡 IMPORTANTE: Necesario para cambiar displayName y photoURL
+  updateProfile,
 } from "firebase/auth";
 
 import {
@@ -19,7 +19,7 @@ import {
   setDoc,
   getDoc,
   serverTimestamp,
-  updateDoc, // 💡 IMPORTANTE: Necesario para actualizar el documento de perfil
+  updateDoc,
 } from "firebase/firestore";
 
 import {
@@ -31,7 +31,7 @@ import {
 // 1. Creamos el contexto
 const AuthContext = createContext();
 
-// 2. Hook personalizado para usar el contexto
+// 2. Hook personalizado
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -45,7 +45,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Función que mezcla datos de Auth + Firestore en un solo objeto user
+  // ⭐ BANDERA: mostrar pantalla de bienvenida
+  const [esNuevo, setEsNuevo] = useState(false);
+
+  // Mezcla datos de Auth + Firestore
   const cargarUsuarioCompleto = async (firebaseUser) => {
     if (!firebaseUser) {
       setUser(null);
@@ -53,15 +56,15 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      // Asegúrate de que tu colección se llama 'usuarios'
       const userRef = doc(db, "usuarios", firebaseUser.uid);
       const snap = await getDoc(userRef);
 
       if (snap.exists()) {
         const profile = snap.data();
+
         setUser({
           ...firebaseUser,
-          ...profile,
+          ...profile, // ⭐ incluye gender también
         });
       } else {
         setUser(firebaseUser);
@@ -72,7 +75,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Escuchamos cambios de sesión
+  // Escuchar cambios de sesión
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -86,76 +89,63 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-
   // =========================================================================
-  // 🚀 NUEVAS FUNCIONES PARA EL DASHBOARD/MI PERFIL
+  // 🚀 ACTUALIZAR PERFIL
   // =========================================================================
 
-  // 🟢 FUNCIÓN 1: Actualizar datos personales (Nombre, Apellido, etc.)
   const updateProfileData = async (data) => {
     if (!user) throw new Error("No hay usuario autenticado para actualizar.");
 
-    const userRef = doc(db, 'usuarios', user.uid);
-    const { nombre, apellido, ...firestoreData } = data;
+    const userRef = doc(db, "usuarios", user.uid);
 
-    // 1. Crear el nombre completo para Firebase Auth
+    const { nombre, apellido, gender, ...firestoreData } = data;
+
     const newDisplayName = `${nombre} ${apellido}`.trim();
 
-    // 2. Actualizar Firebase Auth (displayName)
     await updateProfile(auth.currentUser, {
       displayName: newDisplayName,
     });
 
-    // 3. Actualizar Firestore
     await updateDoc(userRef, {
-      username: nombre, // Guardamos el nombre de pila como 'username'
-      lastName: apellido, // Guardamos el apellido
-      ...firestoreData, // Campos adicionales (celular, genero, etc.)
-      updatedAt: serverTimestamp()
+      username: nombre,
+      lastName: apellido,
+      gender, // ⭐ permitir actualizar género
+      ...firestoreData,
+      updatedAt: serverTimestamp(),
     });
 
-    // 4. Recargar el usuario completo para reflejar los cambios en el contexto
     await cargarUsuarioCompleto(auth.currentUser);
   };
 
-
-  // 🟢 FUNCIÓN 2: Actualizar la foto de perfil (Avatar)
   const updateAvatar = async (file) => {
     if (!user) throw new Error("No hay usuario autenticado para actualizar el avatar.");
 
-    // 1. Subir el archivo a Storage (usamos el UID del usuario para la carpeta)
     const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
     const snapshot = await uploadBytes(storageRef, file);
 
-    // 2. Obtener la URL de descarga
     const photoURL = await getDownloadURL(snapshot.ref);
 
-    // 3. Actualizar la URL en Firebase Auth
     await updateProfile(auth.currentUser, { photoURL });
 
-    // 4. Actualizar la URL en Firestore
-    const userRef = doc(db, 'usuarios', user.uid);
+    const userRef = doc(db, "usuarios", user.uid);
     await updateDoc(userRef, { avatar: photoURL });
 
-    // 5. Recargar el usuario completo para reflejar los cambios
     await cargarUsuarioCompleto(auth.currentUser);
   };
 
   // =========================================================================
-  // 🛑 FIN DE LAS NUEVAS FUNCIONES
+  // 🟢 REGISTRO
   // =========================================================================
 
-
-  // 🟢 REGISTRO con email/password + avatar en Storage + perfil en Firestore
   const register = async (
     email,
     password,
     {
       username,
       avatarFile,
+      gender, // ⭐ NUEVO CAMPO
     }
   ) => {
-    // ... (Tu lógica existente para registro) ...
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = cred.user;
     const uid = firebaseUser.uid;
@@ -163,16 +153,15 @@ export function AuthProvider({ children }) {
     let avatarUrl = "";
     if (avatarFile) {
       const uniqueName = `${uid}-${Date.now()}-${avatarFile.name}`;
-      const avatarRef = ref(storage, `avatars/${uid}/${uniqueName}`); // 💡 CAMBIO: Usar carpeta 'avatars/UID' para consistencia
+      const avatarRef = ref(storage, `avatars/${uid}/${uniqueName}`);
       await uploadBytes(avatarRef, avatarFile);
       avatarUrl = await getDownloadURL(avatarRef);
     }
 
-    // Actualizar Auth con el displayName inicial si es posible
-    await updateProfile(firebaseUser, { displayName: username || email.split('@')[0] });
+    await updateProfile(firebaseUser, {
+      displayName: username || email.split("@")[0],
+    });
 
-
-    // 3. Crear documento de perfil en Firestore
     const userRef = doc(db, "usuarios", uid);
     await setDoc(userRef, {
       uid,
@@ -180,23 +169,36 @@ export function AuthProvider({ children }) {
       username,
       avatar: avatarUrl,
       provider: "password",
-      createdAt: serverTimestamp()
+      gender,        // ⭐ GUARDADO EN FIRESTORE
+      createdAt: serverTimestamp(),
     });
 
     await cargarUsuarioCompleto(firebaseUser);
+
+    setEsNuevo(true);
+
     return firebaseUser;
   };
 
-  // 🟢 LOGIN con email/password
+  // =========================================================================
+  // 🟢 LOGIN EMAIL
+  // =========================================================================
+
   const login = async (email, password) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = cred.user;
 
     await cargarUsuarioCompleto(firebaseUser);
+
+    setEsNuevo(true);
+
     return firebaseUser;
   };
 
-  // 🟢 LOGIN con Google (y creación de perfil si no existe)
+  // =========================================================================
+  // 🟢 LOGIN GOOGLE
+  // =========================================================================
+
   const loginWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const gUser = result.user;
@@ -211,8 +213,13 @@ export function AuthProvider({ children }) {
         username: gUser.displayName || "",
         avatar: gUser.photoURL || "",
         provider: "google",
+        gender: "no-especificado", // ⭐ Google no da género
         createdAt: serverTimestamp(),
       });
+
+      setEsNuevo(true);
+    } else {
+      setEsNuevo(true);
     }
 
     await cargarUsuarioCompleto(gUser);
@@ -220,16 +227,26 @@ export function AuthProvider({ children }) {
     return gUser;
   };
 
+  // =========================================================================
   // 🟢 LOGOUT
+  // =========================================================================
+
   const logout = async () => {
     await signOut(auth);
     setUser(null);
   };
 
+  // =========================================================================
   // 🟢 RESET PASSWORD
+  // =========================================================================
+
   const resetPassword = async (email) => {
     await sendPasswordResetEmail(auth, email);
   };
+
+  // =========================================================================
+  // 🟢 VALORES ENVIADOS AL CONTEXTO
+  // =========================================================================
 
   const value = {
     user,
@@ -239,9 +256,12 @@ export function AuthProvider({ children }) {
     logout,
     resetPassword,
     loginWithGoogle,
-    // 💡 EXPORTAR las nuevas funciones de actualización
     updateProfileData,
     updateAvatar,
+
+    // ⭐ bandera para mostrar bienvenida
+    esNuevo,
+    setEsNuevo,
   };
 
   return (

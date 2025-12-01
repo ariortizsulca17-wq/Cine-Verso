@@ -23,6 +23,7 @@ import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
 
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
+import Bienvenido from "./Componentes/Bienvenido";
 
 import "./App.css";
 
@@ -49,15 +50,14 @@ export default function App() {
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // 🔍 Función para manejar búsqueda
+  // 🔍 Manejar búsqueda
   const handleSearch = (query) => {
     setSearchQuery(query.toLowerCase());
   };
 
-  // === 🟦 ESTADOS DEL MODAL ===
+  // === 🟦 MODAL ===
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [modalContenido, setModalContenido] = useState("login"); 
-  // "login" o "registro"
+  const [modalContenido, setModalContenido] = useState("login");
 
   const abrirLogin = () => {
     setModalContenido("login");
@@ -69,11 +69,20 @@ export default function App() {
   };
 
   return (
-    <div className={theme === 'dark' ? 'min-h-screen bg-gray-900' : 'min-h-screen bg-gray-100'}>
+    <div
+      className={
+        theme === "dark"
+          ? "min-h-screen bg-gray-900"
+          : "min-h-screen bg-gray-100"
+      }
+    >
+      {/* 🎉 TARJETA DE BIENVENIDA GLOBAL (componente maneja su propia visibilidad) */}
+      <Bienvenido />
 
-      {/* 🔵 Pasamos abrirLogin al Navbar → ZonaUsuario */}
+      {/* 🔵 Navbar */}
       <Navbar onSearch={handleSearch} onAbrirLogin={abrirLogin} />
 
+      {/* 🔵 CONTENIDO PRINCIPAL */}
       <main className="min-h-[calc(100vh-64px)]">
         <Routes>
           <Route path="/" element={<Inicio searchQuery={searchQuery} />} />
@@ -88,27 +97,33 @@ export default function App() {
           <Route path="/carrito" element={<Carrito />} />
 
           {/* 🔐 Dashboard protegido */}
-          <Route 
-            path="/dashboard" 
-            element={<RutaProtegida element={<Dashboard />} />} 
+          <Route
+            path="/dashboard"
+            element={<RutaProtegida element={<Dashboard />} />}
           />
         </Routes>
       </main>
 
       <Footer />
 
-      {/* === 🟧 MODAL GLOBAL === */}
+      {/* 🟧 MODAL GLOBAL */}
       <Modal isOpen={modalAbierto} onClose={cerrarModal}>
         {modalContenido === "login" && (
-          <Login 
-            onLoginExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
+          <Login
+            onLoginExitoso={() => {
+              cerrarModal();
+              navigate("/dashboard");
+            }}
             irARegistro={() => setModalContenido("registro")}
           />
         )}
 
         {modalContenido === "registro" && (
-          <Registro 
-            onRegistroExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
+          <Registro
+            onRegistroExitoso={() => {
+              cerrarModal();
+              navigate("/dashboard");
+            }}
             irALogin={() => setModalContenido("login")}
           />
         )}

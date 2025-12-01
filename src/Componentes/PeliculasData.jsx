@@ -1,3 +1,4 @@
+// PeliculasData.jsx//
 const peliculas = [
   // ===============================
 // 📚 BASADAS EN LIBROS (VERSIÓN EXTENDIDA)
@@ -17,6 +18,7 @@ const peliculas = [
   recomendacion: "Imprescindible para quienes aman los universos de fantasía llenos de imaginación y amistad.",
   detalles: "Basada en el libro 'Harry Potter y la Piedra Filosofal'. Dirigida por Chris Columbus.",
   duracion: "2h 32min",
+  trailer: "https://www.youtube.com/watch?v=1dYv5u6v55Y"
 },
 
 {
@@ -33,6 +35,7 @@ const peliculas = [
   recomendacion: "Ideal para los amantes del drama de época, el romance contenido y las historias de crecimiento emocional.",
   detalles: "Protagonizada por Keira Knightley y Matthew Macfadyen. Dirigida por Joe Wright.",
   duracion: "2h 9min",
+  trailer: "https://www.youtube.com/watch?v=1dYv5u6v55Y"
 },
 
 {
@@ -49,6 +52,7 @@ const peliculas = [
   recomendacion: "La adaptación definitiva del género épico. Obligatoria para los fans del cine fantástico.",
   detalles: "Dirigida por Peter Jackson. Ganadora de 4 Premios Óscar.",
   duracion: "2h 58min",
+  trailer: "https://www.youtube.com/watch?v=V75dMMIW2B4"
 },
 
 {
@@ -65,6 +69,7 @@ const peliculas = [
   recomendacion: "Perfecta para quienes buscan pasión, misterio y un toque de peligro en el romance.",
   detalles: "Basada en la novela homónima de Stephenie Meyer. Protagonizada por Kristen Stewart y Robert Pattinson.",
   duracion: "2h 2min",
+  trailer: "https://www.youtube.com/watch?v=6VBx3WgQ1aY"
 },
 
 {
@@ -81,6 +86,7 @@ const peliculas = [
   recomendacion: "Ideal para los amantes de los romances emotivos que dejan una huella en el corazón.",
   detalles: "Protagonizada por Emilia Clarke y Sam Claflin. Dirigida por Thea Sharrock.",
   duracion: "1h 50min",
+  trailer: "https://www.youtube.com/watch?v=Eh993__rOxA"
 },
 
 {
@@ -97,6 +103,7 @@ const peliculas = [
   recomendacion: "Obligatoria para todo amante del cine. Una lección de dirección y narrativa impecable.",
   detalles: "Dirigida por Francis Ford Coppola. Ganadora de 3 Premios Óscar, incluido Mejor Película.",
   duracion: "2h 55min",
+  trailer: "https://www.youtube.com/watch?v=sY1S34973zA"
 },
 {
   id: 7,
@@ -112,6 +119,7 @@ const peliculas = [
   recomendacion: "Perfecta para quienes disfrutan de la acción con trasfondo político y emocional.",
   detalles: "Protagonizada por Jennifer Lawrence, Josh Hutcherson y Woody Harrelson. Dirigida por Gary Ross.",
   duracion: "2h 22min",
+  trailer: "https://www.youtube.com/watch?v=4S9a5V9ODuY"
 },
 
 {
@@ -128,6 +136,7 @@ const peliculas = [
   recomendacion: "Una película que te hará llorar, reflexionar y valorar los pequeños momentos de la vida.",
   detalles: "Protagonizada por Shailene Woodley y Ansel Elgort. Dirigida por Josh Boone.",
   duracion: "2h 6min",
+  trailer: "https://www.youtube.com/watch?v=9ItBvH5J6ss"
 },
 
 {
@@ -144,6 +153,7 @@ const peliculas = [
   recomendacion: "Recomendada para quienes disfrutan del terror psicológico con un toque nostálgico al estilo ochentero.",
   detalles: "Dirigida por Andy Muschietti. Basada en la novela homónima de Stephen King.",
   duracion: "2h 15min",
+  trailer: "https://www.youtube.com/watch?v=xKJmEC5ieOk"
 },
 
 {
@@ -160,6 +170,8 @@ const peliculas = [
   recomendacion: "Ideal para amantes de los misterios, acertijos y teorías ocultas.",
   detalles: "Protagonizada por Tom Hanks y Audrey Tautou. Dirigida por Ron Howard.",
   duracion: "2h 29min",
+  trailer: "https://www.youtube.com/watch?v=1dYv5u6v55Y"
+
 },
 
 {
@@ -176,6 +188,7 @@ const peliculas = [
   recomendacion: "Recomendada para quienes buscan una película íntima, emocional y profundamente humana.",
   detalles: "Protagonizada por Logan Lerman, Emma Watson y Ezra Miller. Dirigida por Stephen Chbosky.",
   duracion: "1h 43min",
+  trailer: "https://www.youtube.com/watch?v=n5rh7O4IDc0"
 },
 
 {
@@ -192,6 +205,7 @@ const peliculas = [
   recomendacion: "Perfecta para los fans de la fantasía urbana con un toque romántico y juvenil.",
   detalles: "Protagonizada por Lily Collins y Jamie Campbell Bower. Dirigida por Harald Zwart.",
   duracion: "2h 10min",
+  trailer: "https://www.youtube.com/watch?v=Z3eL4QYV1kI"
 },
 
   // ===============================
@@ -212,6 +226,7 @@ const peliculas = [
   recomendacion: "Ideal para toda la familia y los fans de la trilogía original. Emotiva, visualmente majestuosa y llena de corazón.",
   detalles: "Adaptación *live-action* de DreamWorks. Dirigida por Dean DeBlois. Estreno mundial en junio de 2025.",
   duracion: "2h 10min",
+  trailer: "https://www.youtube.com/embed/liGB1ssYn38?si=T1lOX35pSnltaPxM"
 },
 {
   id: 22,
@@ -228,6 +243,7 @@ const peliculas = [
   recomendacion: "Perfecta para quienes buscan un regreso emocional a los valores clásicos del héroe más icónico del cine.",
   detalles: "Dirigida por James Gunn. Primera entrega del nuevo DC Universe (DCU). Protagonizada por David Corenswet y Rachel Brosnahan.",
   duracion: "2h 30min",
+  trailer: "https://www.youtube.com/embed/lBu2CwVSAEw?si=-tscJdgKrAORRxA5"
 },
 {
   id: 23,
@@ -244,6 +260,7 @@ const peliculas = [
   recomendacion: "Para los amantes de los thrillers con atmósferas densas y giros inesperados.",
   detalles: "Producción británica dirigida por Sam Hargrave, con música de Ben Salisbury y Geoff Barrow.",
   duracion: "1h 55min",
+  trailer: "https://www.youtube.com/embed/J3R3DyQZ1e8?si=VhbaIzOOzbEVOzWE" 
 },
 {
   id: 24,
@@ -260,6 +277,7 @@ const peliculas = [
   recomendacion: "Ideal para quienes disfrutan de thrillers intensos con un toque filosófico y un ritmo implacable.",
   detalles: "Dirigida por Darren Aronofsky. Protagonizada por Patrick Wilson y Jennifer Jason Leigh. Basada en la novela de Charlie Huston.",
   duracion: "2h 05min",
+  trailer: "https://www.youtube.com/embed/3Xr2HSVl3po?si=0DXfG0i7yqUcYKTH"
 },
 {
   id: 25,
@@ -276,6 +294,7 @@ const peliculas = [
   recomendacion: "Perfecta para quienes buscan una visión más madura y ambigua del Universo Marvel.",
   detalles: "Dirigida por Jake Schreier. Parte oficial del nuevo UCM. Producción de Kevin Feige.",
   duracion: "2h 15min",
+  trailer: "https://www.youtube.com/embed/TseBlCmwFLc?si=17b3GPWjZ64U-xWr"
 },
 {
   id: 26,
@@ -292,6 +311,7 @@ const peliculas = [
   recomendacion: "Ideal para quienes aman las historias de ciencia ficción con corazón y épica visual.",
   detalles: "Dirigida por Matt Shakman. Parte del nuevo UCM. Se rodó parcialmente en Vancouver y Londres.",
   duracion: "2h 18min",
+  trailer: "https://www.youtube.com/embed/big1YWw_TgM?si=-wJ8MthaK_4TJZfM"
 },
 {
   id: 27,
@@ -308,6 +328,7 @@ const peliculas = [
   recomendacion: "Una experiencia cinematográfica imprescindible para los amantes de la acción real.",
   detalles: "Dirigida por Christopher McQuarrie. Protagonizada por Tom Cruise, Rebecca Ferguson y Hayley Atwell.",
   duracion: "2h 40min",
+  trailer: "https://www.youtube.com/embed/A6VZHeeZGgk?si=aLNxt6keYwQBE1dj"
 },
 {
   id: 28,
@@ -324,6 +345,7 @@ const peliculas = [
   recomendacion: "Perfecta para los fans del terror sobrenatural con un toque de superhéroes.",
   detalles: "Protagonizada por Mahershala Ali. Dirigida por Yann Demange. Parte del UCM Fase 6.",
   duracion: "1h 58min",
+  trailer: "https://www.youtube.com/embed/taK7x1pUGqw?si=7reDrAiFp0Y1vQs9"
 },
 {
   id: 30,
@@ -340,6 +362,7 @@ const peliculas = [
   recomendacion: "Imprescindible para los amantes de la velocidad, el realismo y las historias de redención.",
   detalles: "Dirigida por Joseph Kosinski ('Top Gun: Maverick'). Producida por Apple Studios y coproducida por Lewis Hamilton.",
   duracion: "2h 12min",
+  trailer: "https://www.youtube.com/embed/aw8YyC4B1EA?si=4AgSFbOAo5428BGS"
 },
 
 
@@ -361,6 +384,7 @@ const peliculas = [
   recomendacion: "Una película obligatoria para todas las edades. Divertida, emotiva e innovadora.",
   detalles: "La primera película de Pixar realizada completamente por ordenador. Un hito en la animación.",
   duracion: "1h 21min",
+  trailer: "https://www.youtube.com/embed/m9CvO0s6Tzw?si=pOT4OMpg2uNw48Ce",
 },
 {
   id: 32,
@@ -377,6 +401,7 @@ const peliculas = [
   recomendacion: "Un clásico moderno de Pixar. Visualmente hermoso y con mucho humor.",
   detalles: "Ganadora del Oscar a Mejor Película de Animación.",
   duracion: "1h 40min",
+  trailer: "https://www.youtube.com/embed/wZdpNglLbt8?si=6v6v6v6v6v6v6v6v",
 },
 {
   id: 33,
@@ -393,6 +418,7 @@ const peliculas = [
   recomendacion: "Humor para adultos y niños. Muy recomendable.",
   detalles: "Primera película en ganar el Oscar a Mejor Película de Animación (categoría recién creada).",
   duracion: "1h 30min",
+  trailer: "https://www.youtube.com/embed/CwXOrWvPBPk?si=9twCYotIZfiA894S",
 },
 {
   id: 34,
@@ -409,6 +435,7 @@ const peliculas = [
   recomendacion: "Sus canciones son un éxito mundial. Imprescindible en Disney.",
   detalles: "Basada vagamente en el cuento de 'La Reina de las Nieves'. Ganó 2 Oscars.",
   duracion: "1h 42min",
+  trailer: "https://www.youtube.com/embed/FLzfXQSPBOg?si=qwPrZd5WihaNsbvr",
 },
 {
   id: 35,
@@ -425,6 +452,7 @@ const peliculas = [
   recomendacion: "Excelente animación y peleas de artes marciales aptas para niños.",
   detalles: "Producida por Dreamworks Animation.",
   duracion: "1h 30min",
+  trailer: "https://www.youtube.com/embed/vRhMIpFu-Zw?si=aGyIUQCG6JVKvT61",
 },
 {
   id: 36,
@@ -441,6 +469,7 @@ const peliculas = [
   recomendacion: "Considerada una de las mejores películas de superhéroes de la historia, animada o no.",
   detalles: "Dirigida por Brad Bird, conocido por su trabajo en 'El gigante de hierro'.",
   duracion: "1h 55min",
+  trailer: "https://www.youtube.com/embed/gvtI0TLmHLY?si=AF4Ig9zwp9IhRV1-",
 },
 {
   id: 37,
@@ -457,6 +486,7 @@ const peliculas = [
   recomendacion: "Una de las películas más emotivas de Pixar. Hermosa y culturalmente rica.",
   detalles: "Ganadora del Oscar a Mejor Película de Animación y Mejor Canción Original.",
   duracion: "1h 45min",
+  trailer: "https://www.youtube.com/embed/awzWdtCezDo?si=FPGkPz2rAkPrQfR0",
 },
 {
   id: 38,
@@ -489,6 +519,7 @@ const peliculas = [
   recomendacion: "Visualmente exquisita y un deleite para los amantes de la gastronomía.",
   detalles: "Ganadora del Oscar a Mejor Película de Animación.",
   duracion: "1h 51min",
+  trailer: "https://www.youtube.com/embed/NgsQ8mVkN8w?si=X-LSEc1tK3LClV1k",
 },
 {
   id: 40,
@@ -521,6 +552,7 @@ const peliculas = [
   recomendacion: "Inteligente, divertida y con una gran animación. Ganadora del Oscar.",
   detalles: "Ganadora del Oscar a Mejor Película de Animación.",
   duracion: "1h 48min",
+  trailer: "https://www.youtube.com/embed/r9Wp6Njj31w?si=QqRP005_dUkMW3uS" 
 },
 {
   id: 42,
@@ -537,6 +569,7 @@ const peliculas = [
   recomendacion: "Perfecta para los fans de las historias de heroínas y la aventura en el mar.",
   detalles: "Canciones de Lin-Manuel Miranda. Un éxito de crítica y público.",
   duracion: "1h 47min",
+  trailer: "https://www.youtube.com/embed/HKwvFVAqtoE?si=wzpmgzRtlD6l6ad2" 
 },
 {
   id: 43,
@@ -586,6 +619,7 @@ const peliculas = [
   recomendacion: "No te dejes engañar por los globos, es una película profundamente adulta y conmovedora.",
   detalles: "Ganadora de 2 Oscars. Nombrada a Mejor Película, un honor raro para la animación.",
   duracion: "1h 36min",
+  trailer: "https://www.youtube.com/embed/ORFWdXl_zJ4?si=HXJqUC71ynr1O7Ln",
 },
 {
   id: 46,
@@ -593,7 +627,7 @@ const peliculas = [
   anio: 2023,
   genero: "Musical / Fantasía",
   categoria: "Kids",
-  imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyrAAhriSRmnPNElfM4_OLBos6XwgYucYcHQ&s",
+  imagen: "https://lumiere-a.akamaihd.net/v1/images/image_73399495.jpeg?region=0,0,540,810",
   rangoEdad: "+7",
   autor: "Rob Marshall (Director)",
   reseña: "La versión *live-action* del clásico de Disney, con nuevas canciones y efectos visuales impresionantes.",
@@ -618,6 +652,7 @@ const peliculas = [
   recomendacion: "Comedia animada ligera y muy divertida, especialmente por los Minions.",
   detalles: "La película que inició la exitosa franquicia de los Minions.",
   duracion: "1h 35min",
+  trailer: "https://www.youtube.com/embed/zzCZ1W_CUoI?si=BZxFJ2vB4pQqH3i3" 
 },
 {
   id: 48,
@@ -634,6 +669,7 @@ const peliculas = [
   recomendacion: "Mucha música y diversión. Ideal para una tarde familiar y animada.",
   detalles: "Producida por Illumination Entertainment.",
   duracion: "1h 48min",
+  trailer: "https://www.youtube.com/embed/9qPgK_u4vX8?si=icfz1v726enB34j5"
 },
 {
   id: 49,
@@ -641,7 +677,7 @@ const peliculas = [
   anio: 2022,
   genero: "Animación / Fantasía",
   categoria: "Kids",
-  imagen: "https://i.pinimg.com/564x/5e/b4/e4/5eb4e4e89a1f7d0a556a5e266d868621.jpg",
+  imagen: "https://m.media-amazon.com/images/M/MV5BYjEyMDJmYTAtOTliMC00MjYzLTljNDEtMjliM2Y0MThjYzBiXkEyXkFqcGc@._V1_.jpg",
   rangoEdad: "+13",
   autor: "Guillermo del Toro (Director)",
   reseña: "Una reinterpretación oscura, visualmente deslumbrante y profundamente emotiva del cuento clásico.",
@@ -650,6 +686,7 @@ const peliculas = [
   recomendacion: "Si buscas una animación artística, adulta y con un mensaje político y emocional profundo.",
   detalles: "Ganadora del Oscar a Mejor Película de Animación. Obra maestra de *stop-motion*.",
   duracion: "1h 56min",
+  trailer: "https://www.youtube.com/embed/dZrmy91eZa4?si=XwbwD3mp0mOWoOup"
 },
 
   // ===============================

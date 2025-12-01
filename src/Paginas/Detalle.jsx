@@ -207,6 +207,29 @@ function DetallePelicula() {
               </div>
             </div>
 
+            {/* 🎬 TRAILER AGREGADO AQUÍ SIN BORRAR NADA */}
+            {pelicula.trailer && (
+              <div
+                className={`mb-12 mt-10 rounded-xl overflow-hidden shadow-xl border transition-colors ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-300"
+                }`}
+              >
+                <h2 className="text-2xl font-bold mb-4 text-[#00C8D7]">
+                  🎬 Trailer Oficial
+                </h2>
+
+                <div className="w-full aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    className="w-full h-full"
+                    src={pelicula.trailer}
+                    title={`Trailer de ${pelicula.titulo}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
+
             {/* 💬 SECCIÓN DE COMENTARIOS */}
             <div
               className={`mt-12 pt-8 border-t transition-colors ${

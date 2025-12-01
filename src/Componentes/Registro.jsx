@@ -9,6 +9,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [gender, setGender] = useState(""); // ⭐ Nuevo
     const [error, setError] = useState("");
 
     const emailRef = useRef(null);
@@ -22,7 +23,12 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
         setError("");
 
         try {
-            await register(email, password, { username, avatarFile });
+            await register(email, password, { 
+                username, 
+                avatarFile,
+                gender   // ⭐ Enviar género a Firebase
+            });
+
             if (onRegistroExitoso) onRegistroExitoso();
         } catch (err) {
             setError(traducirError(err.code));
@@ -76,6 +82,8 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
+                
+                {/* AVATAR */}
                 <div className="flex flex-col items-center">
                     <div className="w-24 h-24 rounded-full bg-gray-800 overflow-hidden border-2 border-gray-600">
                         {avatarPreview ? (
@@ -86,6 +94,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                             </div>
                         )}
                     </div>
+
                     <label className="mt-2 text-sm text-gray-300">Avatar</label>
                     <input
                         type="file"
@@ -95,6 +104,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
+                {/* USERNAME */}
                 <div>
                     <label className="block text-sm mb-1 text-gray-300">
                         Nombre de usuario
@@ -110,6 +120,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
+                {/* EMAIL */}
                 <div>
                     <label className="block text-sm mb-1 text-gray-300">
                         Correo electrónico
@@ -126,6 +137,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
+                {/* PASSWORD */}
                 <div>
                     <label className="block text-sm mb-1 text-gray-300">
                         Contraseña
@@ -141,6 +153,38 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
+                {/* ⭐ GÉNERO – estilo Roblox */}
+                <div>
+                    <label className="block text-sm mb-2 text-gray-300">
+                        Género (opcional)
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setGender("girl")}
+                            className={`py-3 rounded-lg border transition
+                                ${gender === "girl"
+                                    ? "border-pink-500 bg-pink-600/40"
+                                    : "border-gray-600 bg-gray-800"}`}
+                        >
+                            👧 Niña
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setGender("boy")}
+                            className={`py-3 rounded-lg border transition
+                                ${gender === "boy"
+                                    ? "border-blue-500 bg-blue-600/40"
+                                    : "border-gray-600 bg-gray-800"}`}
+                        >
+                            👦 Niño
+                        </button>
+                    </div>
+                </div>
+
+                {/* BOTONES */}
                 <div className="flex gap-3 pt-3">
                     <button
                         type="submit"
@@ -158,6 +202,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                 </div>
             </form>
 
+            {/* GOOGLE */}
             <button
                 type="button"
                 onClick={handleGoogle}

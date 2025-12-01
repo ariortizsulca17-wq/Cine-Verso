@@ -1,4 +1,4 @@
-// ✅ src/Componentes/ZonaUsuario.jsx (VERSIÓN FINAL FUSIONADA)
+// ✅ src/Componentes/ZonaUsuario.jsx 
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
@@ -28,6 +28,9 @@ export function ZonaUsuario({ onAbrirLogin }) {
     if (user) {
         const displayUsername =
             user.username || user.displayName || user.email?.split("@")[0];
+
+        // Aquí obtenemos el género guardado
+        const gender = user?.gender || "No especificado";
 
         const menuClasses =
             "absolute right-0 mt-3 w-64 bg-gray-800 text-white rounded-lg shadow-2xl z-50 transition-all duration-300";
@@ -89,6 +92,11 @@ export function ZonaUsuario({ onAbrirLogin }) {
                                     </svg>
                                 </div>
                             </div>
+
+                            {/* ⭐ Nuevo: mostrar género del usuario */}
+                            <p className="text-sm text-gray-300 mt-1">
+                                <span className="font-bold text-cyan-300">Género:</span> {gender}
+                            </p>
                         </div>
 
                         {/* Opciones del menú */}

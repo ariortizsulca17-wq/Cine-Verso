@@ -30,12 +30,17 @@ export default function Navbar({ onAbrirLogin }) {
   const { user, loading } = useAuth();
   const isAuthenticated = !!user;
 
-  // Cargar historial de búsquedas
+  //------------------------------------------------
+  // 🔄 CARGAR HISTORIAL AL INICIAR
+  //------------------------------------------------
   useEffect(() => {
     const guardado = JSON.parse(localStorage.getItem("historialBusqueda")) || [];
     setHistorial(guardado);
   }, []);
 
+  //------------------------------------------------
+  // 🎨 TEMA
+  //------------------------------------------------
   useEffect(() => {
     document.body.classList.remove("light", "dark");
     document.body.classList.add(theme);
@@ -62,19 +67,18 @@ export default function Navbar({ onAbrirLogin }) {
 
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
 
-  // ------------------------------------
-  // 🔍 BUSCADOR — SUBMIT
-  // ------------------------------------
+  //------------------------------------------------
+  // 🔍 SUBMIT BUSQUEDA
+  //------------------------------------------------
   const manejarSubmitBusqueda = (e) => {
     e.preventDefault();
     if (busqueda.trim() !== "") {
       navigate(`/buscar?q=${encodeURIComponent(busqueda.trim())}`);
 
-      // Guardar historial
       const nuevoHistorial = [
         busqueda.trim(),
         ...historial.filter((h) => h !== busqueda.trim()),
-      ].slice(0, 10);
+      ];
 
       setHistorial(nuevoHistorial);
       localStorage.setItem("historialBusqueda", JSON.stringify(nuevoHistorial));
@@ -85,9 +89,9 @@ export default function Navbar({ onAbrirLogin }) {
     }
   };
 
-  // ------------------------------------
-  // 🔍 Buscar por TODOS los datos (global)
-  // ------------------------------------
+  //------------------------------------------------
+  // 🔍 BUSCADOR GLOBAL
+  //------------------------------------------------
   const manejarCambioBusqueda = (e) => {
     const value = e.target.value;
     setBusqueda(value);
@@ -125,9 +129,18 @@ export default function Navbar({ onAbrirLogin }) {
     setMostrarHistorial(false);
   };
 
-  // --------------------------------------
-  // ACTUALIZACIÓN: 🔥 NAVBAR ENTERO
-  // --------------------------------------
+  //------------------------------------------------
+  // 🗑️ BORRAR HISTORIAL
+  //------------------------------------------------
+  const borrarHistorial = () => {
+    localStorage.removeItem("historialBusqueda");
+    setHistorial([]);
+    setMostrarHistorial(false);
+  };
+
+  //------------------------------------------------
+  // RENDER PRINCIPAL
+  //------------------------------------------------
   return (
     <nav className={navbarClasses}>
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -179,6 +192,7 @@ export default function Navbar({ onAbrirLogin }) {
                 className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200"
               />
 
+              {/* BOTÓN RELOJ */}
               <button
                 type="button"
                 onClick={() => setMostrarHistorial(!mostrarHistorial)}
@@ -199,20 +213,35 @@ export default function Navbar({ onAbrirLogin }) {
 
             {/* HISTORIAL */}
             {mostrarHistorial && historial.length > 0 && (
-              <ul className="absolute left-0 right-0 bg-gray-800 text-white rounded-lg mt-2 shadow-xl z-40 max-h-60 overflow-y-auto">
-                {historial.map((item, idx) => (
-                  <li
-                    key={idx}
-                    onClick={() => seleccionarHistorial(item)}
-                    className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+              <div className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 border border-gray-700">
+
+                {/* BOTÓN BORRAR */}
+                <div className="flex justify-between px-3 py-2 text-sm border-b border-gray-700">
+                  <span className="text-gray-300">Historial</span>
+                  <button
+                    onClick={borrarHistorial}
+                    className="text-red-400 hover:text-red-300 text-sm"
                   >
-                    {item}
-                  </li>
-                ))}
-              </ul>
+                    🗑️ Borrar
+                  </button>
+                </div>
+
+                {/* LISTA (SOLO 5 A LA VISTA) */}
+                <ul className="max-h-56 overflow-y-auto">
+                  {historial.map((item, idx) => (
+                    <li
+                      key={idx}
+                      onClick={() => seleccionarHistorial(item)}
+                      className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
-            {/* DROPDOWN TIPO NETFLIX */}
+            {/* DROPDOWN SUGERENCIAS */}
             {sugerencias.length > 0 && (
               <ul className="absolute left-0 right-0 bg-gray-900 text-white rounded-lg mt-2 shadow-xl z-40 max-h-72 overflow-y-auto border border-gray-700">
                 {sugerencias.map((peli) => (
@@ -266,7 +295,7 @@ export default function Navbar({ onAbrirLogin }) {
         </div>
       </div>
 
-      {/* MENÚ MÓVIL (igual que lo tenías, sin cambios) */}
+      {/* MENÚ MÓVIL (SIN CAMBIOS) */}
       {isOpen && (
         <div className="md:hidden fixed top-16 left-0 right-0 bg-gray-900 text-white border-t border-cyan-700 py-5 z-40 flex flex-col items-center space-y-5">
 

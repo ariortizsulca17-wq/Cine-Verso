@@ -1,3 +1,4 @@
+// src/Paginas/PeliKids.jsx//
 import React, { useState, useMemo } from "react"; // 👈 Importamos useMemo
 import { Link } from "react-router-dom"; // 👈 Importamos Link para la navegación
 import { useTheme } from "../Context/ThemeContext";
