@@ -1,4 +1,4 @@
-// ✅ src/Componentes/ZonaUsuario.jsx (VERSIÓN FINAL FUSIONADA)
+// ✅ src/Componentes/ZonaUsuario.jsx (FUSIÓN FINAL)
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
@@ -11,10 +11,10 @@ export function ZonaUsuario({ onAbrirLogin }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
-    // Foto del usuario: Firestore o Google Auth
+    // Avatar desde Firestore o Google
     const getAvatarUrl = () => user?.photoURL || user?.avatar;
 
-    // Cerrar menú al hacer clic fuera
+    // Cerrar menú cuando hacen clic fuera
     useEffect(() => {
         const handler = (e) => {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -29,6 +29,9 @@ export function ZonaUsuario({ onAbrirLogin }) {
         const displayUsername =
             user.username || user.displayName || user.email?.split("@")[0];
 
+        // ⭐ Nuevo: género del usuario
+        const gender = user?.gender || "No especificado";
+
         const menuClasses =
             "absolute right-0 mt-3 w-64 bg-gray-800 text-white rounded-lg shadow-2xl z-50 transition-all duration-300";
         const itemClasses =
@@ -37,7 +40,7 @@ export function ZonaUsuario({ onAbrirLogin }) {
 
         return (
             <div className="relative" ref={menuRef}>
-                {/* Avatar pequeño (para abrir menú) */}
+                {/* Avatar pequeño para abrir menú */}
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     className="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-cyan-400 transition-all"
@@ -89,9 +92,14 @@ export function ZonaUsuario({ onAbrirLogin }) {
                                     </svg>
                                 </div>
                             </div>
+
+                            {/* ⭐ NUEVO: mostrar género del usuario */}
+                            <p className="text-sm text-gray-300 mt-1">
+                                <span className="font-bold text-cyan-300">Género:</span> {gender}
+                            </p>
                         </div>
 
-                        {/* Opciones del menú */}
+                        {/* Opciones */}
                         <div className="py-1">
                             <div
                                 className={itemClasses}
@@ -136,7 +144,7 @@ export function ZonaUsuario({ onAbrirLogin }) {
         );
     }
 
-    // Invitado → abre modal de login
+    // Invitado
     return (
         <button
             onClick={onAbrirLogin}

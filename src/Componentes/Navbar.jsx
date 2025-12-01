@@ -13,18 +13,22 @@ import {
   FaMoon,
   FaUserCircle,
 } from "react-icons/fa";
-import { ChevronDown, Search } from "lucide-react"; 
+import { ChevronDown, Search } from "lucide-react";
 
 export default function Navbar({ onAbrirLogin }) {
   // 👉 Estados
   const [isOpen, setIsOpen] = useState(false);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false); 
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [sugerencias, setSugerencias] = useState([]);
-  const [carritoCount, setCarritoCount] = useState(0); 
-  
+  // ⭐ Nuevos estados del historial
+  const [historial, setHistorial] = useState([]);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+
+  const [carritoCount, setCarritoCount] = useState(0);
+
   // 💡 Ref para manejar el timer del dropdown
-  const categoryTimerRef = useRef(null); 
+  const categoryTimerRef = useRef(null);
 
   // 👉 Hooks
   const navigate = useNavigate();
@@ -34,8 +38,8 @@ export default function Navbar({ onAbrirLogin }) {
 
   // 👉 Funciones del Menú
   const toggleMenu = () => {
-      setIsOpen(!isOpen);
-      setIsCategoryOpen(false); 
+    setIsOpen(!isOpen);
+    setIsCategoryOpen(false);
   };
   const closeMenu = () => {
     setIsOpen(false);
@@ -84,6 +88,12 @@ export default function Navbar({ onAbrirLogin }) {
     };
   }, []);
 
+  useEffect(() => {
+    const guardado = JSON.parse(localStorage.getItem("historialBusqueda")) || [];
+    setHistorial(guardado);
+  }, []);
+
+
   // 📋 Links del Dropdown de Categorías
   const categoryItems = [
     { path: "/PeliculasTops", label: "Top 10" },
@@ -97,20 +107,33 @@ export default function Navbar({ onAbrirLogin }) {
   const iconBtn = "text-2xl hover:text-cyan-400 transition focus:outline-none";
   const navbarClasses =
     theme === "dark"
-      ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700" 
+      ? "bg-gray-900 text-white shadow-lg sticky top-0 z-50 border-b border-cyan-700"
       : "bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-cyan-200";
-  const navLinkBaseClasses = "font-medium hover:text-cyan-400 transition-colors py-4"; 
-  const navLinkActiveClasses = "text-cyan-400 border-b-2 border-cyan-400"; 
+  const navLinkBaseClasses = "font-medium hover:text-cyan-400 transition-colors py-4";
+  const navLinkActiveClasses = "text-cyan-400 border-b-2 border-cyan-400";
 
-  // 👉 Funciones de Búsqueda (Mantenidas)
   const manejarSubmitBusqueda = (e) => {
     e.preventDefault();
+
     if (busqueda.trim() !== "") {
       navigate(`/buscar?q=${encodeURIComponent(busqueda.trim())}`);
+
+      // Guardar historial sin duplicados
+      const nuevo = [
+        busqueda.trim(),
+        ...historial.filter((h) => h !== busqueda.trim()),
+      ];
+
+      setHistorial(nuevo);
+      localStorage.setItem("historialBusqueda", JSON.stringify(nuevo));
+
       setBusqueda("");
+      setSugerencias([]);
+      setMostrarHistorial(false);
       closeMenu();
     }
   };
+
 
   const manejarCambioBusqueda = (e) => {
     const value = e.target.value;
@@ -118,21 +141,48 @@ export default function Navbar({ onAbrirLogin }) {
 
     if (value.trim() === "") {
       setSugerencias([]);
+      setMostrarHistorial(true);
       return;
     }
 
-    const filtradas = PeliculasData.filter((peli) =>
-      peli.titulo.toLowerCase().includes(value.toLowerCase())
+    setMostrarHistorial(false);
+
+    const query = value.toLowerCase();
+
+    const filtradas = PeliculasData.filter((p) =>
+    (p.titulo?.toLowerCase().includes(query) ||
+      p.genero?.toLowerCase().includes(query) ||
+      p.categoria?.toLowerCase().includes(query) ||
+      p.autor?.toLowerCase().includes(query) ||
+      p.descripcion?.toLowerCase().includes(query) ||
+      p.reseña?.toLowerCase().includes(query) ||
+      p.recomendacion?.toLowerCase().includes(query) ||
+      p.detalles?.toLowerCase().includes(query) ||
+      p.anio?.toString().includes(query))
     ).slice(0, 6);
 
     setSugerencias(filtradas);
   };
 
+
   const seleccionarSugerencia = (titulo) => {
     setBusqueda("");
     setSugerencias([]);
-    navigate(`/buscar?q=${encodeURIComponent(titulo)}`); 
+    navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
   };
+
+  const seleccionarHistorial = (value) => {
+    navigate(`/buscar?q=${encodeURIComponent(value)}`);
+    setMostrarHistorial(false);
+    closeMenu();
+  };
+
+  const borrarHistorial = () => {
+    localStorage.removeItem("historialBusqueda");
+    setHistorial([]);
+    setMostrarHistorial(false);
+  };
+
 
 
   return (
@@ -147,20 +197,19 @@ export default function Navbar({ onAbrirLogin }) {
         </Link>
 
         {/* 🖥️ MENÚ ESCRITORIO */}
-        <div className="hidden md:flex gap-10 items-center h-full"> 
-          
+        <div className="hidden md:flex gap-10 items-center h-full">
+
           {/* 1. Inicio */}
           <NavLink
             to="/"
             end
             className={({ isActive }) =>
-                `${navLinkBaseClasses} ${
-                  isActive
-                    ? navLinkActiveClasses
-                    : theme === "dark"
-                    ? "text-gray-300"
-                    : "text-gray-700"
-                }`
+              `${navLinkBaseClasses} ${isActive
+                ? navLinkActiveClasses
+                : theme === "dark"
+                  ? "text-gray-300"
+                  : "text-gray-700"
+              }`
             }
           >
             Inicio
@@ -168,30 +217,27 @@ export default function Navbar({ onAbrirLogin }) {
 
 
           {/* 2. ⭐ CATEGORÍAS DROPDOWN (ESCRITORIO) */}
-          <div 
-            className="relative h-full flex items-center" 
+          <div
+            className="relative h-full flex items-center"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave} // Usamos la nueva función con retraso
           >
-            <span 
-              className={`${navLinkBaseClasses} flex items-center cursor-pointer ${
-                isCategoryOpen ? navLinkActiveClasses : 
-                theme === "dark" ? "text-gray-300" : "text-gray-700"
-              }`}
+            <span
+              className={`${navLinkBaseClasses} flex items-center cursor-pointer ${isCategoryOpen ? navLinkActiveClasses :
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
             >
               Categorías
-              <ChevronDown 
-                className={`w-4 h-4 ml-1 transition-transform duration-200 ${
-                  isCategoryOpen ? 'transform rotate-180 text-cyan-400' : ''
-                }`} 
+              <ChevronDown
+                className={`w-4 h-4 ml-1 transition-transform duration-200 ${isCategoryOpen ? 'transform rotate-180 text-cyan-400' : ''
+                  }`}
               />
             </span>
 
             {isCategoryOpen && (
-              <div 
-                className={`absolute top-full mt-2 w-56 p-2 rounded-lg shadow-xl z-[60] ${ 
-                  theme === "dark" ? "bg-gray-800 border border-cyan-700" : "bg-white border border-gray-300"
-                }`}
+              <div
+                className={`absolute top-full mt-2 w-56 p-2 rounded-lg shadow-xl z-[60] ${theme === "dark" ? "bg-gray-800 border border-cyan-700" : "bg-white border border-gray-300"
+                  }`}
               >
                 {categoryItems.map(({ path, label }) => (
                   <NavLink
@@ -199,10 +245,9 @@ export default function Navbar({ onAbrirLogin }) {
                     to={path}
                     onClick={closeMenu}
                     className={({ isActive }) =>
-                      `block px-4 py-2 text-sm rounded-lg transition-colors ${
-                        isActive
-                          ? "bg-cyan-600 text-black font-bold"
-                          : theme === "dark"
+                      `block px-4 py-2 text-sm rounded-lg transition-colors ${isActive
+                        ? "bg-cyan-600 text-black font-bold"
+                        : theme === "dark"
                           ? "text-gray-200 hover:bg-gray-700"
                           : "text-gray-800 hover:bg-gray-100"
                       }`
@@ -215,36 +260,34 @@ export default function Navbar({ onAbrirLogin }) {
             )}
           </div>
           {/* FIN CATEGORÍAS DROPDOWN */}
-          
+
           {/* 3. Estrenos */}
           <NavLink
             to="/Estrenos"
             end
             className={({ isActive }) =>
-                `${navLinkBaseClasses} ${
-                  isActive
-                    ? navLinkActiveClasses
-                    : theme === "dark"
-                    ? "text-gray-300"
-                    : "text-gray-700"
-                }`
+              `${navLinkBaseClasses} ${isActive
+                ? navLinkActiveClasses
+                : theme === "dark"
+                  ? "text-gray-300"
+                  : "text-gray-700"
+              }`
             }
           >
             Estrenos
           </NavLink>
-          
+
           {/* 4. Contacto */}
           <NavLink
             to="/Contacto"
             end
             className={({ isActive }) =>
-                `${navLinkBaseClasses} ${
-                  isActive
-                    ? navLinkActiveClasses
-                    : theme === "dark"
-                    ? "text-gray-300"
-                    : "text-gray-700"
-                }`
+              `${navLinkBaseClasses} ${isActive
+                ? navLinkActiveClasses
+                : theme === "dark"
+                  ? "text-gray-300"
+                  : "text-gray-700"
+              }`
             }
           >
             Contacto
@@ -268,9 +311,8 @@ export default function Navbar({ onAbrirLogin }) {
           <div className="hidden md:block relative">
             <form
               onSubmit={manejarSubmitBusqueda}
-              className={`flex items-center rounded-lg px-3 py-1 ${
-                theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-              }`}
+              className={`flex items-center rounded-lg px-3 py-1 ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                }`}
             >
               <input
                 type="text"
@@ -285,22 +327,45 @@ export default function Navbar({ onAbrirLogin }) {
             </form>
 
             {sugerencias.length > 0 && (
-              <ul className={`absolute left-0 right-0 rounded-lg mt-2 shadow-xl z-[60] max-h-64 overflow-y-auto ${
-                theme === "dark" ? "bg-gray-800 border border-cyan-700" : "bg-white border border-gray-300"
-              }`}>
+              <ul className={`absolute left-0 right-0 rounded-lg mt-2 shadow-xl z-[60] max-h-64 overflow-y-auto ${theme === "dark" ? "bg-gray-800 border border-cyan-700" : "bg-white border border-gray-300"
+                }`}>
                 {sugerencias.map((peli) => (
                   <li
                     key={peli.id}
                     onClick={() => seleccionarSugerencia(peli.titulo)}
-                    className={`px-3 py-2 cursor-pointer text-sm ${
-                        theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-100"
-                    }`}
+                    className={`px-3 py-2 cursor-pointer text-sm ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-100"
+                      }`}
                   >
                     {peli.titulo}
                   </li>
                 ))}
               </ul>
             )}
+            {mostrarHistorial && historial.length > 0 && (
+              <div className={`absolute left-0 right-0 mt-2 rounded-lg shadow-xl p-3 z-[60] ${theme === "dark" ? "bg-gray-800 border border-cyan-700" : "bg-white border border-gray-300"
+                }`}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold">Historial</span>
+                  <button onClick={borrarHistorial} className="text-xs text-red-400 hover:text-red-300">
+                    Borrar
+                  </button>
+                </div>
+
+                {historial.map((h, i) => (
+                  <div
+                    key={i}
+                    onClick={() => seleccionarHistorial(h)}
+                    className={`px-2 py-1 text-sm cursor-pointer rounded ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"
+                      }`}
+                  >
+                    {h}
+                  </div>
+                ))}
+              </div>
+            )}
+
+
+
           </div>
 
           {/* 🌓 TEMA */}
@@ -341,7 +406,7 @@ export default function Navbar({ onAbrirLogin }) {
       {/* 📱 MENÚ MÓVIL DESPLEGABLE */}
       {isOpen && (
         <div className="md:hidden bg-gray-800/95 backdrop-blur-sm flex flex-col items-center space-y-4 py-5 text-lg font-medium border-t border-cyan-800">
-          
+
           {/* 🔍 BUSCADOR MÓVIL */}
           <div className="w-11/12 relative">
             <form
@@ -376,6 +441,31 @@ export default function Navbar({ onAbrirLogin }) {
                 ))}
               </ul>
             )}
+
+            {mostrarHistorial && historial.length > 0 && (
+              <div className="absolute left-0 right-0 bg-gray-800 rounded-lg mt-2 shadow-xl z-40 p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-gray-200">Historial</span>
+                  <button onClick={borrarHistorial} className="text-xs text-red-400">
+                    Borrar
+                  </button>
+                </div>
+
+                {historial.map((h, i) => (
+                  <div
+                    key={i}
+                    onClick={() => {
+                      seleccionarHistorial(h);
+                      closeMenu();
+                    }}
+                    className="px-3 py-1 text-gray-300 text-sm cursor-pointer hover:bg-gray-700 rounded"
+                  >
+                    {h}
+                  </div>
+                ))}
+              </div>
+            )}
+
           </div>
 
           {/* 1. Inicio */}
@@ -383,49 +473,45 @@ export default function Navbar({ onAbrirLogin }) {
             to="/"
             onClick={handleNavClick}
             className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${
-                isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
-                }`
+              `w-full text-center py-2 transition-colors ${isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
+              }`
             }
           >
             Inicio
           </NavLink>
-          
+
           {/* 2. ⭐ CATEGORÍAS ACORDEÓN (MÓVIL) */}
           <div className="w-full">
             <button
-                onClick={toggleCategory}
-                className={`w-full flex justify-between items-center px-5 py-2 transition-colors font-medium text-white hover:bg-gray-700 border-b border-t border-gray-700 ${
-                    isCategoryOpen ? "bg-gray-700" : ""
+              onClick={toggleCategory}
+              className={`w-full flex justify-between items-center px-5 py-2 transition-colors font-medium text-white hover:bg-gray-700 border-b border-t border-gray-700 ${isCategoryOpen ? "bg-gray-700" : ""
                 }`}
             >
-                Categorías
-                <ChevronDown 
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                    isCategoryOpen ? 'transform rotate-180 text-cyan-400' : ''
-                    }`} 
-                />
+              Categorías
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'transform rotate-180 text-cyan-400' : ''
+                  }`}
+              />
             </button>
-            
+
             {isCategoryOpen && (
-                <div className="flex flex-col border-b border-gray-700">
-                    {categoryItems.map(({ path, label }) => (
-                        <NavLink
-                            key={path}
-                            to={path}
-                            onClick={handleNavClick}
-                            className={({ isActive }) =>
-                                `block w-full text-left pl-10 py-2 text-sm transition-colors ${
-                                    isActive
-                                        ? "bg-cyan-800 text-cyan-300 font-semibold"
-                                        : "text-gray-300 hover:bg-gray-700"
-                                }`
-                            }
-                        >
-                            {label}
-                        </NavLink>
-                    ))}
-                </div>
+              <div className="flex flex-col border-b border-gray-700">
+                {categoryItems.map(({ path, label }) => (
+                  <NavLink
+                    key={path}
+                    to={path}
+                    onClick={handleNavClick}
+                    className={({ isActive }) =>
+                      `block w-full text-left pl-10 py-2 text-sm transition-colors ${isActive
+                        ? "bg-cyan-800 text-cyan-300 font-semibold"
+                        : "text-gray-300 hover:bg-gray-700"
+                      }`
+                    }
+                  >
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
             )}
           </div>
           {/* FIN CATEGORÍAS MÓVIL */}
@@ -435,9 +521,8 @@ export default function Navbar({ onAbrirLogin }) {
             to="/Estrenos"
             onClick={handleNavClick}
             className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${
-                isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
-                }`
+              `w-full text-center py-2 transition-colors ${isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
+              }`
             }
           >
             Estrenos
@@ -448,9 +533,8 @@ export default function Navbar({ onAbrirLogin }) {
             to="/Contacto"
             onClick={handleNavClick}
             className={({ isActive }) =>
-                `w-full text-center py-2 transition-colors ${
-                isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
-                }`
+              `w-full text-center py-2 transition-colors ${isActive ? "bg-cyan-900 text-cyan-400" : "text-white hover:bg-gray-700"
+              }`
             }
           >
             Contacto
@@ -475,7 +559,7 @@ export default function Navbar({ onAbrirLogin }) {
                 <button
                   onClick={() => {
                     navigate("/login");
-                    closeMenu(); 
+                    closeMenu();
                   }}
                   className="w-full text-center py-2 px-4 rounded-lg font-semibold bg-cyan-600 text-gray-900 hover:bg-cyan-500 shadow-lg"
                 >
@@ -484,7 +568,7 @@ export default function Navbar({ onAbrirLogin }) {
                 <button
                   onClick={() => {
                     navigate("/registro");
-                    closeMenu(); 
+                    closeMenu();
                   }}
                   className="w-full text-center py-2 px-4 rounded-lg font-semibold bg-gray-800 text-cyan-400 hover:bg-gray-700"
                 >
@@ -501,7 +585,7 @@ export default function Navbar({ onAbrirLogin }) {
             <button
               onClick={() => {
                 navigate("/carrito");
-                closeMenu(); 
+                closeMenu();
               }}
               className="w-full text-center py-2 px-4 rounded-lg font-semibold bg-gray-800 text-cyan-400 hover:bg-gray-700 flex items-center justify-center gap-2"
             >
@@ -512,4 +596,7 @@ export default function Navbar({ onAbrirLogin }) {
       )}
     </nav>
   );
+
+
+
 }

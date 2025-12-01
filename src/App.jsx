@@ -1,10 +1,11 @@
-// ✅ src/App.jsx (CORREGIDO)
+// ✅ src/App.jsx (VERSIÓN FINAL FUSIONADA)
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useTheme } from "./Context/ThemeContext";
 import { useAuth } from "./Context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
+// ⭐ PÁGINAS PRINCIPALES
 import Inicio from "./Paginas/Inicio";
 import PeliTops from "./Paginas/PeliTops";
 import PeliKids from "./Paginas/PeliKids";
@@ -15,29 +16,30 @@ import Contacto from "./Paginas/Contacto";
 import Carrito from "./Paginas/Carrito";
 import DetallePelicula from "./Paginas/Detalle";
 
+// ⭐ COMPONENTES GENERALES
 import Navbar from "./Componentes/Navbar";
 import Footer from "./Componentes/Footer";
+import Bienvenido from "./Componentes/Bienvenido";   // ⭐ AÑADIDO DESDE TU COMPAÑERA
 import Modal from "./Componentes/Modal";
 import Dashboard from "./Componentes/Dashboard";
 import ResultadosBusqueda from "./Componentes/ResultadosBusqueda";
-
 import Login from "./Componentes/Login";
 import Registro from "./Componentes/Registro";
-import ProtectedRoute from "./Componentes/AdminRoute"; // Asumo que es el componente para la ruta protegida ADMIN
 
-// Componentes del Dashboard Admin
+// ⭐ ADMIN
+import ProtectedRoute from "./Componentes/AdminRoute";
+import DashboardLayout from "./Componentes/DashboardAdmi/DashboardLayaout";
+import AdminInicio from "./Componentes/DashboardAdmi/AdminInicio";
 import AdminUsuarios from "./Componentes/DashboardAdmi/AdminUsuarios";
 import AdminPeliculas from "./Componentes/DashboardAdmi/AdminPeliculas";
 import AdminAgregarPelicula from "./Componentes/DashboardAdmi/AdminAgregarPelicula";
 import AdminEditarPelicula from "./Componentes/DashboardAdmi/AdminEditarPelicula";
-import DashboardLayout from "./Componentes/DashboardAdmi/DashboardLayaout"
-import AdminInicio from "./Componentes/DashboardAdmi/AdminInicio";
 import GenerarCupon from "./Componentes/DashboardAdmi/GenerarCupon";
 import ImportarPeliculas from "./Componentes/importarPeliculas";
 
 import "./App.css";
 
-// Componente auxiliar para la ruta protegida del usuario estándar (Mantenido)
+// ⭐ RUTA PROTEGIDA PARA USUARIOS NORMALES
 function RutaProtegida({ element }) {
   const { user, loading } = useAuth();
 
@@ -57,20 +59,18 @@ function RutaProtegida({ element }) {
 }
 
 export default function App() {
-  // ... (Lógica de estados y handlers sin cambios)
   const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // 🔍 Función para manejar búsqueda
+  // 🔍 BUSCADOR
   const handleSearch = (query) => {
     setSearchQuery(query.toLowerCase());
   };
 
-  // === 🟦 ESTADOS DEL MODAL ===
+  // 🟦 ESTADOS DEL MODAL
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalContenido, setModalContenido] = useState("login");
-  // "login" o "registro"
 
   const abrirLogin = () => {
     setModalContenido("login");
@@ -82,12 +82,16 @@ export default function App() {
   };
 
   return (
-    <div className={theme === 'dark' ? 'min-h-screen bg-gray-900' : 'min-h-screen bg-gray-100'}>
+    <div className={theme === "dark" ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-100"}>
+
+      {/* ⭐ TARJETA DE BIENVENIDA (DE TU COMPAÑERA) */}
+      <Bienvenido />  
 
       <Navbar onSearch={handleSearch} onAbrirLogin={abrirLogin} />
 
       <main className="min-h-[calc(100vh-64px)]">
         <Routes>
+          {/* 📌 RUTAS PÚBLICAS */}
           <Route path="/" element={<Inicio searchQuery={searchQuery} />} />
           <Route path="/PeliculasTops" element={<PeliTops />} />
           <Route path="/PeliculasKids" element={<PeliKids />} />
@@ -99,13 +103,13 @@ export default function App() {
           <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
 
-          {/* 🔐 Dashboard del usuario normal (Mantenido) */}
+          {/* ⭐ DASHBOARD USUARIO NORMAL */}
           <Route
             path="/dashboard"
             element={<RutaProtegida element={<Dashboard />} />}
           />
 
-          {/* 👑 Dashboard ADMIN (Rutas Anidadas) */}
+          {/* 👑 RUTAS ADMINISTRADOR */}
           <Route
             path="/admin"
             element={
@@ -114,37 +118,47 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            {/* ✅ SOLUCIÓN: /admin ahora carga el Dashboard de Inicio */}
+            {/* INDEX */}
             <Route index element={<AdminInicio />} />
-            {/* /admin/usuarios */}
-            <Route path="usuarios" element={<AdminUsuarios />} />
-            {/* /admin/peliculas */}
+
+            {/* ADMIN PELÍCULAS */}
             <Route path="peliculas" element={<AdminPeliculas />} />
-            {/* /admin/peliculas/agregar */}
             <Route path="peliculas/agregar" element={<AdminAgregarPelicula />} />
-            {/* /admin/peliculas/editar/:id */}
             <Route path="peliculas/editar/:id" element={<AdminEditarPelicula />} />
 
-            {/* Rutas de Cupones */}
-            <Route path="cupones/generar" element={<GenerarCupon />} /> {/* ✨ RUTA NUEVA */}
-            <Route path="cupones" element={/* Componente ListarCupones */ null} />
-          </Route>
+            {/* ADMIN USUARIOS */}
+            <Route path="usuarios" element={<AdminUsuarios />} />
 
+            {/* CUPONES */}
+            <Route path="cupones/generar" element={<GenerarCupon />} />
+            <Route path="cupones" element={null} />
+
+            {/* IMPORTAR */}
+            <Route path="importar" element={<ImportarPeliculas />} />
+          </Route>
         </Routes>
       </main>
+
       <Footer />
-      {/* ... (Modal y Toaster) */}
+
+      {/* 🟧 MODAL GLOBAL */}
       <Modal isOpen={modalAbierto} onClose={cerrarModal}>
         {modalContenido === "login" && (
           <Login
-            onLoginExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
+            onLoginExitoso={() => {
+              cerrarModal();
+              navigate("/dashboard");
+            }}
             irARegistro={() => setModalContenido("registro")}
           />
         )}
 
         {modalContenido === "registro" && (
           <Registro
-            onRegistroExitoso={() => { cerrarModal(); navigate("/dashboard"); }}
+            onRegistroExitoso={() => {
+              cerrarModal();
+              navigate("/dashboard");
+            }}
             irALogin={() => setModalContenido("login")}
           />
         )}

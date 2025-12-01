@@ -1,13 +1,14 @@
-// src/components/DetallePelicula.jsx (CON CARRITO + MODO CLARO/OSCURO GLOBAL)
+// src/components/DetallePelicula.jsx (VERSIÓN FUSIONADA COMPLETA)
 import { useParams, Link } from "react-router-dom";
 import peliculas from "../Componentes/PeliculasData";
 import ComentariosPelicula from "../Componentes/Comentarios";
-import { useTheme } from "../Context/ThemeContext"; // 🌓 Importar el tema
+import { useTheme } from "../Context/ThemeContext";
+import { comentariosPeliculas } from "../assets/comentariospeli"; // ⭐ Comentarios externos
 
 function DetallePelicula() {
   const { id } = useParams();
   const pelicula = peliculas.find((p) => p.id === parseInt(id));
-  const { theme } = useTheme(); // 🌓 Obtener el tema actual
+  const { theme } = useTheme();
 
   if (!pelicula) {
     return (
@@ -21,28 +22,43 @@ function DetallePelicula() {
     );
   }
 
-  // 💡 FUNCIÓN: Añade la película al carrito
+  // ⭐ PROMEDIO DE ESTRELLAS (de la versión de tu compañera)
+  const obtenerPromedio = (peliculaId) => {
+    const comentarios = comentariosPeliculas.filter(
+      (c) => c.peliculaId === peliculaId
+    );
+    if (comentarios.length === 0) return 0;
+
+    const suma = comentarios.reduce((acc, c) => acc + c.puntuacion, 0);
+    return suma / comentarios.length;
+  };
+
+  const promedioEstrellas = obtenerPromedio(pelicula.id);
+
+  // 🛒 AÑADIR AL CARRITO (tu versión — mejorada con el evento global)
   const handleAddToCart = () => {
-  const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
-  const existe = carritoActual.some((p) => p.id === pelicula.id);
+    const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+    const existe = carritoActual.some((p) => p.id === pelicula.id);
 
-  if (!existe) {
-    const itemNuevo = {
-      id: pelicula.id,
-      titulo: pelicula.titulo,
-      imagen: pelicula.imagen,
-    };
-    const nuevoCarrito = [...carritoActual, itemNuevo];
-    localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+    if (!existe) {
+      const itemNuevo = {
+        id: pelicula.id,
+        titulo: pelicula.titulo,
+        imagen: pelicula.imagen,
+      };
 
-    // 🔔 Avisamos al navbar
-    window.dispatchEvent(new Event("carritoActualizado"));
+      const nuevoCarrito = [...carritoActual, itemNuevo];
+      localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
 
-    alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
-  } else {
-    alert(`¡"${pelicula.titulo}" ya está en tu carrito!`);
-  }
-};
+      // 🔔 Avisamos al navbar
+      window.dispatchEvent(new Event("carritoActualizado"));
+
+      alert(`¡"${pelicula.titulo}" ha sido añadido al carrito! 🛒`);
+    } else {
+      alert(`¡"${pelicula.titulo}" ya está en tu carrito!`);
+    }
+  };
+
   return (
     <div
       className={`min-h-screen p-4 sm:p-8 transition-colors duration-500 ${
@@ -66,7 +82,7 @@ function DetallePelicula() {
         </Link>
 
         <div className="flex flex-col md:flex-row gap-10">
-          {/* 🎬 Imagen y botón */}
+          {/* 🎬 Imagen + Botón */}
           <div className="flex-shrink-0 w-full md:w-1/3 space-y-6">
             <img
               src={pelicula.imagen}
@@ -98,6 +114,39 @@ function DetallePelicula() {
             >
               {pelicula.titulo}
             </h1>
+
+            {/* ⭐ Estrellas promedio */}
+            <div className="flex items-center mb-6">
+              <span className="text-[#00C8D7] font-bold text-xl mr-2">
+                {promedioEstrellas.toFixed(1)}
+              </span>
+
+              <div className="flex">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`text-2xl ${
+                      i < Math.round(promedioEstrellas)
+                        ? "text-yellow-400"
+                        : theme === "dark"
+                        ? "text-gray-600"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              <span
+                className={`ml-3 text-sm ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                ({comentariosPeliculas.filter((c) => c.peliculaId === pelicula.id).length}{" "}
+                comentarios)
+              </span>
+            </div>
 
             {/* Etiquetas */}
             <div className="flex flex-wrap items-center space-x-3 mb-6">
@@ -159,7 +208,30 @@ function DetallePelicula() {
               </div>
             </div>
 
-            {/* 💬 SECCIÓN DE COMENTARIOS */}
+            {/* 🎬 TRAILER (agregado de tu compañera, conservado) */}
+            {pelicula.trailer && (
+              <div
+                className={`mb-12 mt-10 rounded-xl overflow-hidden shadow-xl border transition-colors ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-300"
+                }`}
+              >
+                <h2 className="text-2xl font-bold mb-4 text-[#00C8D7]">
+                  🎬 Trailer Oficial
+                </h2>
+
+                <div className="w-full aspect-video rounded-xl overflow-hidden">
+                  <iframe
+                    className="w-full h-full"
+                    src={pelicula.trailer}
+                    title={`Trailer de ${pelicula.titulo}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
+
+            {/* 💬 Comentarios */}
             <div
               className={`mt-12 pt-8 border-t transition-colors ${
                 theme === "dark" ? "border-gray-700" : "border-gray-300"
