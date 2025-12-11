@@ -1,6 +1,4 @@
-// src/context/AuthContext.jsx
-
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, googleProvider, db, storage } from "../lib/firebase";
 
 import {
@@ -13,40 +11,24 @@ import {
   updateProfile,
 } from "firebase/auth";
 
-import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
-
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const AuthContext = createContext();
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth debe usarse dentro de AuthProvider");
+  if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
   return context;
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);              // Mezcla Auth + Firestore
-  const [datosUsuario, setDatosUsuario] = useState(null); // Solo Firestore
+  const [user, setUser] = useState(null); // combinación Auth + Firestore
+  const [datosUsuario, setDatosUsuario] = useState(null); // datos puros de Firestore
   const [loading, setLoading] = useState(true);
-
-  // ⭐ bandera para bienvenida de usuarios nuevos
   const [esNuevo, setEsNuevo] = useState(false);
 
-  // ============================================================
-  // 🔥 CARGAR USUARIO COMPLETO
-  // ============================================================
-
+  // Cargar datos combinados (Auth + Firestore)
   const cargarUsuarioCompleto = async (firebaseUser) => {
     if (!firebaseUser) {
       setUser(null);
@@ -60,12 +42,8 @@ export function AuthProvider({ children }) {
 
       if (snap.exists()) {
         const profile = snap.data();
-
         setDatosUsuario(profile);
-        setUser({
-          ...firebaseUser,
-          ...profile, // Incluye username, avatar, rol, gender, etc.
-        });
+        setUser({ ...firebaseUser, ...profile });
       } else {
         setDatosUsuario(null);
         setUser(firebaseUser);
@@ -76,7 +54,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Escucha cambios de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       await cargarUsuarioCompleto(firebaseUser);
@@ -86,113 +63,120 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // ============================================================
-  // 🔷 ACTUALIZAR PERFIL
-  // ============================================================
-
+  // Actualizar perfil (Firestore + Firebase Auth displayName)
   const updateProfileData = async (data) => {
     if (!user) throw new Error("No hay usuario autenticado.");
 
     const userRef = doc(db, "usuarios", user.uid);
+    const { nombre, apellido, ...rest } = data;
 
-    const { nombre, apellido, gender, ...rest } = data;
+    const newDisplayName = `${nombre || ""} ${apellido || ""}`.trim();
 
-    const newDisplayName = `${nombre} ${apellido}`.trim();
-
-    await updateProfile(auth.currentUser, { displayName: newDisplayName });
+    try {
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: newDisplayName });
+      }
+    } catch (err) {
+      console.warn("updateProfile fallo:", err);
+    }
 
     await updateDoc(userRef, {
-      username: nombre,
-      lastName: apellido,
-      gender,
+      username: nombre || "",
+      lastName: apellido || "",
       ...rest,
       updatedAt: serverTimestamp(),
     });
 
-    await cargarUsuarioCompleto(auth.currentUser);
+    await cargarUsuarioCompleto(auth.currentUser || user);
   };
 
-  // ============================================================
-  // 🔷 ACTUALIZAR AVATAR
-  // ============================================================
-
+  // Actualizar avatar
   const updateAvatar = async (file) => {
     if (!user) throw new Error("No hay usuario autenticado.");
 
     const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
     const snapshot = await uploadBytes(storageRef, file);
-
     const photoURL = await getDownloadURL(snapshot.ref);
 
-    await updateProfile(auth.currentUser, { photoURL });
+    try {
+      if (auth.currentUser) await updateProfile(auth.currentUser, { photoURL });
+    } catch (err) {
+      console.warn("updateProfile (photoURL) fallo:", err);
+    }
 
     const userRef = doc(db, "usuarios", user.uid);
     await updateDoc(userRef, { avatar: photoURL });
 
-    await cargarUsuarioCompleto(auth.currentUser);
+    await cargarUsuarioCompleto(auth.currentUser || user);
   };
 
-  // ============================================================
-  // 🟢 REGISTRO
-  // ============================================================
+  // Registro
+  const register = async (email, password, { username, avatarFile, gender } = {}) => {
+    console.log("[Auth] register - inicio", { email, username, gender, hasAvatar: !!avatarFile });
 
-  const register = async (
-    email,
-    password,
-    { username, avatarFile, gender }
-  ) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = cred.user;
     const uid = firebaseUser.uid;
 
-    let avatarUrl = "";
-
-    if (avatarFile) {
-      const fileRef = ref(storage, `avatars/${uid}/${Date.now()}-${avatarFile.name}`);
-      await uploadBytes(fileRef, avatarFile);
-      avatarUrl = await getDownloadURL(fileRef);
-    }
-
-    await updateProfile(firebaseUser, {
-      displayName: username || email.split("@")[0],
-    });
-
-    const userRef = doc(db, "usuarios", firebaseUser.uid);
-    await setDoc(userRef, {
+    // Creamos documento inicial para garantizar persistencia
+    const userRef = doc(db, "usuarios", uid);
+    const initialUserData = {
       uid,
       email,
-      username,
-      avatar: avatarUrl,
+      username: username || "",
+      avatar: "",
       provider: "password",
       rol: "usuario",
-      gender,
+      gender: gender || null,
       createdAt: serverTimestamp(),
-    });
+    };
+
+    try {
+      await setDoc(userRef, initialUserData, { merge: true });
+      console.log("[Auth] register - documento inicial creado", initialUserData);
+    } catch (err) {
+      console.error("[Auth] register - fallo al crear documento inicial:", err);
+    }
+
+    // Intentar subir avatar (no bloquearn el registro si falla)
+    if (avatarFile) {
+      try {
+        const fileRef = ref(storage, `avatars/${uid}/${Date.now()}-${avatarFile.name}`);
+        await uploadBytes(fileRef, avatarFile);
+        const avatarUrl = await getDownloadURL(fileRef);
+        try {
+          await updateDoc(userRef, { avatar: avatarUrl });
+        } catch (updErr) {
+          console.warn("No se pudo actualizar avatar en Firestore:", updErr);
+        }
+      } catch (storageErr) {
+        console.error("Fallo subida avatar (se continúa):", storageErr);
+      }
+    }
+
+    try {
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: username || email.split("@")[0] });
+      }
+    } catch (updErr) {
+      console.warn("updateProfile fallo:", updErr);
+    }
 
     await cargarUsuarioCompleto(firebaseUser);
-
     setEsNuevo(true);
 
     return firebaseUser;
   };
 
-  // ============================================================
-  // 🟢 LOGIN EMAIL
-  // ============================================================
-
+  // Login email
   const login = async (email, password) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     await cargarUsuarioCompleto(cred.user);
-
     setEsNuevo(true);
-
     return cred.user;
   };
 
-  // ============================================================
-  // 🟢 LOGIN GOOGLE
-  // ============================================================
-
+  // Login Google
   const loginWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const gUser = result.user;
@@ -201,28 +185,28 @@ export function AuthProvider({ children }) {
     const snap = await getDoc(userRef);
 
     if (!snap.exists()) {
-      await setDoc(userRef, {
+      const userData = {
         uid: gUser.uid,
         email: gUser.email,
-        username: gUser.displayName,
-        avatar: gUser.photoURL,
+        username: gUser.displayName || "",
+        avatar: gUser.photoURL || "",
         provider: "google",
         rol: "usuario",
         gender: "no-especificado",
         createdAt: serverTimestamp(),
-      });
+      };
+      try {
+        await setDoc(userRef, userData, { merge: true });
+        console.log("[Auth] loginWithGoogle - creado documento usuario", userData);
+      } catch (err) {
+        console.error("[Auth] loginWithGoogle - fallo al crear documento:", err);
+      }
     }
 
     await cargarUsuarioCompleto(gUser);
-
     setEsNuevo(true);
-
     return gUser;
   };
-
-  // ============================================================
-  // 🟢 LOGOUT
-  // ============================================================
 
   const logout = async () => {
     await signOut(auth);
@@ -230,39 +214,27 @@ export function AuthProvider({ children }) {
     setDatosUsuario(null);
   };
 
-  // ============================================================
-  // 🟢 RESET PASSWORD
-  // ============================================================
-
   const resetPassword = async (email) => {
     await sendPasswordResetEmail(auth, email);
   };
-
-  // ============================================================
-  // PROVIDER VALUE
-  // ============================================================
 
   const value = {
     user,
     datosUsuario,
     loading,
-
     register,
     login,
     logout,
     resetPassword,
     loginWithGoogle,
-
     updateProfileData,
     updateAvatar,
-
     esNuevo,
     setEsNuevo,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }
+
+export default AuthContext;
+

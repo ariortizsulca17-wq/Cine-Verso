@@ -6,33 +6,47 @@ import DashboardContent from './DashboardContent';
 export default function Dashboard() {
     const { user, loading, updateProfileData, updateAvatar } = useAuth();
 
-    // --- Estado principal ---
+    // --- 1. Estado principal (Solo los campos usados en el formulario) ---
     const [activeTab, setActiveTab] = useState('profile');
     const [formData, setFormData] = useState({
-        nombre: '', apellido: '', email: '', fechaNacimiento: '', 
-        celular: '', cineFavorito: '', genero: '',
+        nombre: '', 
+        email: '', 
+        fechaNacimiento: '', 
+        telefono: '', // Usaremos 'telefono' en todo el componente para simplificar.
     });
     const [newAvatarFile, setNewAvatarFile] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
+    // --- 2. useEffect para Cargar Datos (Mapeo corregido) ---
     useEffect(() => {
         if (user && !loading) {
-            const [firstName = '', lastName = ''] = user.displayName?.split(' ') || ['', ''];
+            // Extraer nombre/apellido (si se usa displayName)
+            const [firstName = ''] = user.displayName?.split(' ') || [''];
+            
             setFormData({
-                nombre: user.username || firstName,
-                apellido: user.lastName || lastName,
+                // Prioriza user.username, luego firstName, si no existe usa cadena vacía.
+                nombre: user.username || firstName || '', 
+                
                 email: user.email || '',
+                
+                // Mapeo unificado de teléfono: 
+                // Prioriza user.telefono, luego user.celular. Si no existe, usa cadena vacía.
+                telefono: user.telefono || user.celular || '', 
+                
                 fechaNacimiento: user.fechaNacimiento || '', 
-                celular: user.celular || '', 
-                cineFavorito: user.cineFavorito || '', 
-                genero: user.genero || '', 
+                
+                // NOTA: 'gender' no se incluye en formData ya que es de solo lectura 
+                // y se puede acceder directamente desde la prop 'user' en el hijo.
             });
         }
     }, [user, loading]);
 
+    // --- 3. Handlers ---
     const handleChange = (e) => {
+        // [e.target.name] será 'nombre', 'email', 'telefono', etc., 
+        // y coincidirá con las claves del estado formData.
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setSuccessMsg('');
     };
@@ -49,7 +63,9 @@ export default function Dashboard() {
         setSuccessMsg('');
 
         try {
-            await updateProfileData(formData);
+            // Se envía solo los campos definidos en formData
+            await updateProfileData(formData); 
+            
             if (newAvatarFile) {
                 await updateAvatar(newAvatarFile);
                 setNewAvatarFile(null);
@@ -77,7 +93,7 @@ export default function Dashboard() {
                     <DashboardContent 
                         activeTab={activeTab}
                         formData={formData}
-                        setFormData={setFormData}
+                        // setFormData ya no es necesario pasarlo
                         newAvatarFile={newAvatarFile}
                         handleFileChange={handleFileChange}
                         handleChange={handleChange}
@@ -85,7 +101,7 @@ export default function Dashboard() {
                         isSaving={isSaving}
                         error={error}
                         successMsg={successMsg}
-                        user={user}
+                        user={user} // Pasamos 'user' para acceder a gender y otras props
                     />
                 </div>
             </div>

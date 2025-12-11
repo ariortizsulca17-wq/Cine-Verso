@@ -102,7 +102,7 @@ export default function DashboardNav() {
                     </NavLink>
 
                     {/* Gestión de Cupones (Ruta base para listado/gestión) */}
-                    <NavLink to="/admin/cupones" className={getLinkClass}>
+                    <NavLink to="/admin/cupones/estados" className={getLinkClass}>
                         <Edit className="w-4 h-4" /> Activar / Desactivar
                     </NavLink>
 

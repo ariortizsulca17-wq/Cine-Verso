@@ -38,6 +38,7 @@ import GenerarCupon from "./Componentes/DashboardAdmi/GenerarCupon";
 import ImportarPeliculas from "./Componentes/importarPeliculas";
 
 import "./App.css";
+import EstadosCupones from "./Componentes/DashboardAdmi/EstadoCupones";
 
 // ⭐ RUTA PROTEGIDA PARA USUARIOS NORMALES
 function RutaProtegida({ element }) {
@@ -131,7 +132,7 @@ export default function App() {
 
             {/* CUPONES */}
             <Route path="cupones/generar" element={<GenerarCupon />} />
-            <Route path="cupones" element={null} />
+            <Route path="cupones/estados" element={<EstadosCupones />} />
 
             {/* IMPORTAR */}
             <Route path="importar" element={<ImportarPeliculas />} />

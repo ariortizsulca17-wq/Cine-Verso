@@ -29,8 +29,7 @@ export function ZonaUsuario({ onAbrirLogin }) {
         const displayUsername =
             user.username || user.displayName || user.email?.split("@")[0];
 
-        // ⭐ Nuevo: género del usuario
-        const gender = user?.gender || "No especificado";
+        
 
         const menuClasses =
             "absolute right-0 mt-3 w-64 bg-gray-800 text-white rounded-lg shadow-2xl z-50 transition-all duration-300";
@@ -82,21 +81,12 @@ export function ZonaUsuario({ onAbrirLogin }) {
                                 </div>
 
                                 {/* iconito editar visual */}
-                                <div className="absolute bottom-0 right-0 p-1 bg-gray-600 rounded-full border-2 border-gray-800">
-                                    <svg
-                                        className="w-3 h-3 text-white"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.794.793-2.828-2.828.794-.793zm-4 4L10.586 6l4-4 1.414 1.414-4 4z"></path>
-                                    </svg>
-                                </div>
+                                <div className="absolute bottom-0 right-0 p-1.5 bg-cyan-600 rounded-full border-2 border-gray-900 shadow-md">
+    <User className="w-4 h-4 text-white" />
+</div>
                             </div>
 
-                            {/* ⭐ NUEVO: mostrar género del usuario */}
-                            <p className="text-sm text-gray-300 mt-1">
-                                <span className="font-bold text-cyan-300">Género:</span> {gender}
-                            </p>
+                            
                         </div>
 
                         {/* Opciones */}

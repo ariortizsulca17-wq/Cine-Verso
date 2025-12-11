@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { Camera, UserCircle } from "lucide-react";
+import { User, UserCircle2 } from "lucide-react";
+
 
 export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }) {
     const { register, loginWithGoogle } = useAuth();
@@ -10,7 +12,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    
+
     const [gender, setGender] = useState(""); // ⭐ Agregado del componente de tu compañera
 
     const [error, setError] = useState("");
@@ -92,7 +94,13 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     //          JSX
     // ============================
     return (
-        <div className="text-white">
+        <div 
+    className="text-white max-h-[88vh] overflow-y-auto pr-2"
+    style={{
+        scrollbarWidth: "thin",
+        scrollbarColor: "#4b5563 #1f2937"
+    }}
+>
             <h1 className="text-3xl font-bold text-center mb-5 text-cyan-300 tracking-wide">
                 Crear cuenta
             </h1>
@@ -104,28 +112,28 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-                
+
                 {/* === SECCIÓN AVATAR COMPACTA === */}
                 <div className="flex items-center gap-4 p-3 border border-gray-700/50 rounded-lg bg-gray-900/50">
-                    
+
                     {/* Previsualización + botón cámara */}
-                    <div className="relative w-16 h-16 rounded-full bg-gray-800 overflow-hidden border-2 border-cyan-500/50 flex-shrink-0"> 
+                    <div className="relative w-16 h-16 rounded-full bg-gray-800 overflow-hidden border-2 border-cyan-500/50 flex-shrink-0">
                         {avatarPreview ? (
                             <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                <UserCircle className="w-10 h-10 text-gray-600" /> 
+                                <UserCircle className="w-10 h-10 text-gray-600" />
                             </div>
                         )}
-                        <div 
+                        <div
                             className="absolute bottom-0 right-0 p-1 bg-cyan-600 rounded-full border-2 border-gray-900 cursor-pointer hover:bg-cyan-500 transition"
                             onClick={handleButtonClick}
                             title={avatarPreview ? "Cambiar foto" : "Subir foto"}
                         >
-                            <Camera className="w-3 h-3 text-white" /> 
+                            <Camera className="w-3 h-3 text-white" />
                         </div>
                     </div>
-                    
+
                     {/* Botón para seleccionar archivo */}
                     <div className="flex-1">
                         <label className="block text-sm mb-1 text-gray-300">
@@ -191,34 +199,43 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
-                {/* === GÉNERO (ROBLOX STYLE) === */}
+                {/* === GÉNERO PROFESIONAL === */}
                 <div>
                     <label className="block text-sm mb-2 text-gray-300">Género (opcional)</label>
 
                     <div className="grid grid-cols-2 gap-3">
+
+                        {/* Mujer */}
                         <button
                             type="button"
-                            onClick={() => setGender("girl")}
-                            className={`py-3 rounded-lg border transition
-                                ${gender === "girl"
-                                    ? "border-pink-500 bg-pink-600/40"
-                                    : "border-gray-600 bg-gray-800"}`}
+                            onClick={() => setGender("Femenino")}
+                            className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition
+                ${gender === "Femenino"
+                                    ? "border-pink-500 bg-pink-600/30 text-pink-300"
+                                    : "border-gray-600 bg-gray-800 text-gray-300"
+                                }`}
                         >
-                            👧 Niña
+                            <UserCircle2 className="w-5 h-5" />
+                            Mujer
                         </button>
 
+                        {/* Hombre */}
                         <button
                             type="button"
-                            onClick={() => setGender("boy")}
-                            className={`py-3 rounded-lg border transition
-                                ${gender === "boy"
-                                    ? "border-blue-500 bg-blue-600/40"
-                                    : "border-gray-600 bg-gray-800"}`}
+                            onClick={() => setGender("Masculino")}
+                            className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition
+                ${gender === "Masculino"
+                                    ? "border-blue-500 bg-blue-600/30 text-blue-300"
+                                    : "border-gray-600 bg-gray-800 text-gray-300"
+                                }`}
                         >
-                            👦 Niño
+                            <User className="w-5 h-5" />
+                            Hombre
                         </button>
+
                     </div>
                 </div>
+
 
                 {/* === BOTONES === */}
                 <div className="flex gap-3 pt-3">
@@ -238,19 +255,25 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                 </div>
             </form>
 
+  
             {/* === GOOGLE LOGIN === */}
-            <button
-                type="button"
-                onClick={handleGoogle}
-                className="mt-4 w-full bg-gray-800 border border-gray-700 rounded-lg py-2 hover:bg-gray-700 transition flex items-center justify-center gap-2"
-            >
-                <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"
-                    alt="Google Logo"
-                    className="w-5 h-5"
-                />
-                Continuar con Google
-            </button>
+<div className="mt-4"> 
+    <button
+        type="button"
+        onClick={handleGoogle}
+        className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 text-sm 
+        hover:bg-gray-700 transition flex items-center justify-center gap-2"
+        style={{ maxWidth: "260px", margin: "0 auto" }}
+    >
+        <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"
+            alt="Google Logo"
+            className="w-4 h-4"
+        />
+        Continuar con Google
+    </button>
+</div>
+
         </div>
     );
 }

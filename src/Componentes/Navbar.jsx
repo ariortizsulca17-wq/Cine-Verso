@@ -150,16 +150,15 @@ export default function Navbar({ onAbrirLogin }) {
     const query = value.toLowerCase();
 
     const filtradas = PeliculasData.filter((p) =>
-    (p.titulo?.toLowerCase().includes(query) ||
-      p.genero?.toLowerCase().includes(query) ||
-      p.categoria?.toLowerCase().includes(query) ||
-      p.autor?.toLowerCase().includes(query) ||
-      p.descripcion?.toLowerCase().includes(query) ||
-      p.reseña?.toLowerCase().includes(query) ||
-      p.recomendacion?.toLowerCase().includes(query) ||
-      p.detalles?.toLowerCase().includes(query) ||
-      p.anio?.toString().includes(query))
-    ).slice(0, 6);
+  (
+    p.titulo?.toLowerCase().includes(query) ||
+    p.genero?.toLowerCase().includes(query) ||
+    p.categoria?.toLowerCase().includes(query) ||
+    p.autor?.toLowerCase().includes(query) ||
+    p.duracion?.toLowerCase().includes(query) ||
+    p.anio?.toString().includes(query)
+  )
+).slice(0, 6);
 
     setSugerencias(filtradas);
   };

@@ -39,7 +39,7 @@ export default function DashboardContent({
               newAvatarFile
                 ? URL.createObjectURL(newAvatarFile)
                 : getAvatarUrl() ||
-                  "https://via.placeholder.com/150/4B5563/FFFFFF?text=U"
+                  "https://placehold.co/150x150/4B5563/FFFFFF?text=U"
             }
             alt="Foto de perfil"
             className="w-full h-full rounded-full object-cover border-4 border-cyan-500 shadow-lg"
@@ -108,6 +108,21 @@ export default function DashboardContent({
             className={inputClasses}
           />
         </div>
+
+          {/* === GÉNERO (SOLO LECTURA) === */}
+<div>
+  <label htmlFor="gender" className={labelClasses}>
+    Género
+  </label>
+  <input
+    type="text"
+    id="gender"
+    name="gender"
+    value={formData.gender || user?.gender || "No especificado"}
+    disabled
+    className="w-full p-3 rounded-lg bg-gray-600 border border-transparent text-gray-400 cursor-not-allowed"
+  />
+</div>
 
         <div>
           <label htmlFor="fechaNacimiento" className={labelClasses}>
