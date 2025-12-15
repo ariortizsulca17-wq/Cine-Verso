@@ -15,6 +15,7 @@ import PeliAsiaticas from "./Paginas/PeliAsiaticas";
 import Contacto from "./Paginas/Contacto";
 import Carrito from "./Paginas/Carrito";
 import DetallePelicula from "./Paginas/Detalle";
+import Estreno from "./Paginas/Estrenos";
 
 // ⭐ COMPONENTES GENERALES
 import Navbar from "./Componentes/Navbar";
@@ -103,6 +104,7 @@ export default function App() {
           <Route path="/Contacto" element={<Contacto />} />
           <Route path="/buscar" element={<ResultadosBusqueda />} />
           <Route path="/carrito" element={<Carrito />} />
+          <Route path="/Estrenos" element={<Estreno />} />
 
           {/* ⭐ DASHBOARD USUARIO NORMAL */}
           <Route

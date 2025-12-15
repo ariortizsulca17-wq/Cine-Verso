@@ -95,7 +95,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     // ============================
     return (
         <div 
-    className="text-white max-h-[88vh] overflow-y-auto pr-2"
+    className="text-white max-h-[88vh] overflow-y-auto pr-2 max-w-lg mx-auto"
     style={{
         scrollbarWidth: "thin",
         scrollbarColor: "#4b5563 #1f2937"

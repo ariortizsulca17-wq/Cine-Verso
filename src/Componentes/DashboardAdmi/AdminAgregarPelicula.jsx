@@ -4,6 +4,100 @@ import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, Film, Loader2, Image, AlertTriangle } from "lucide-react";
 
+const CATEGORIAS = [
+  "Top 10",
+  "Kids/Familiar",
+  "Asiáticas/Anime",
+  "Documentales",
+  "Basadas en Libros",
+];
+
+const GENEROS_POR_CATEGORIA = {
+  "Kids/Familiar": [
+    "Animación / Aventura",
+    "Animación / Familiar",
+    "Animación / Comedia",
+    "Musical",
+    "Animación / Superhéroes",
+    "Animación / Fantasía",
+    "Animación / Emocional",
+    "Animación / Amistad",
+    "Musical / Fantasía",
+  ],
+
+  "Top 10": [
+    "Animación / Aventura / Fantasía",
+    "Acción / Superhéroes / Ciencia Ficción",
+    "Suspenso / Misterio / Drama",
+    "Acción / Crimen / Thriller",
+    "Acción / Superhéroes / Marvel",
+    "Superhéroes / Ciencia Ficción / Aventura",
+    "Acción / Espionaje / Aventura",
+    "Acción / Terror / Fantasía Oscura",
+    "Acción / Deporte / Drama",
+  ],
+
+  "Asiáticas/Anime": [
+    "Thriller / Drama",
+    "Terror / Acción",
+    "Acción / Drama",
+    "Drama / Venganza",
+    "Romance / Fantasía",
+    "Drama / Romance",
+    "Fantasía / Aventura",
+    "Acción / Suspenso",
+    "Terror / Escolar",
+    "Anime / Romance",
+    "Anime / Drama",
+    "Anime / Fantasía",
+    "Anime / Acción",
+    "Anime / Épico",
+    "Anime / Fantasía / Drama",
+    "Anime / Fantasía / Aventura / Drama",
+    "Anime / Sobrenatural",
+    "Anime / Musical",
+    "Anime / Acción / Fantasía",
+  ],
+
+  "Documentales": [
+    "Naturaleza / Ciencia",
+    "Animales / Denuncia",
+    "Océanos / Ecología",
+    "Naturaleza / Reflexión",
+    "Naturaleza / Vida Marina",
+    "Aventura / Océano",
+    "Ciencia / Espacio",
+    "Naturaleza / Mundo",
+    "Tecnología / Sociedad",
+    "Crimen / Real",
+    "Sociedad / Política",
+    "Trabajo / Sociedad",
+    "Derechos Humanos / Historia",
+    "Economía / Política",
+    "Tecnología / Privacidad",
+    "Religión / Misterio",
+    "Deporte / Biografía",
+    "Biografía / Superación",
+    "Música / Juventud",
+    "Música / Inspiración",
+    "Desastre / Testimonio",
+  ],
+
+  "Basadas en Libros": [
+    "Fantasía / Aventura",
+    "Romance / Drama",
+    "Fantasía / Épico",
+    "Romance / Fantasía",
+    "Crimen / Drama",
+    "Ciencia Ficción / Acción",
+    "Drama / Romance",
+    "Terror / Suspenso",
+    "Misterio / Thriller",
+    "Drama / Adolescente",
+  ],
+};
+
+
 export default function AdminAgregarPelicula() {
   const navigate = useNavigate();
   const [errorLocal, setErrorLocal] = useState(null); // Para errores de validación/guardado
@@ -20,14 +114,26 @@ export default function AdminAgregarPelicula() {
     recomendacion: "",
     reseña: "",
     imagen: "", // URL del póster
-    autor: ""
+    autor: "",
+    trailer: "",
   });
 
   const [guardando, setGuardando] = useState(false);
 
   const cambiar = (e) => {
-    setData({ ...data, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "categoria") {
+      setData({
+        ...data,
+        categoria: value,
+        genero: "", // 👈 resetear género al cambiar categoría
+      });
+    } else {
+      setData({ ...data, [name]: value });
+    }
   };
+
 
   // == VALIDACIÓN =======================
   const camposObligatorios = ["titulo", "descripcion", "genero", "categoria", "anio", "imagen"];
@@ -64,7 +170,7 @@ export default function AdminAgregarPelicula() {
     try {
       // Limpiar campos que pueden ser vacíos antes de guardar
       const dataToSave = Object.fromEntries(
-        Object.entries(data).filter(([_, v]) => v !== "")
+        Object.entries(data).filter(([, v]) => v !== "")
       );
 
       await addDoc(collection(db, "peliculas"), dataToSave);
@@ -77,6 +183,30 @@ export default function AdminAgregarPelicula() {
 
     setGuardando(false);
   };
+
+  const getTrailerEmbedUrl = (url) => {
+    if (!url) return null;
+
+    // YouTube normal: https://www.youtube.com/watch?v=XXXX
+    if (url.includes("youtube.com/watch")) {
+      const videoId = url.split("v=")[1]?.split("&")[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // YouTube corto: https://youtu.be/XXXX
+    if (url.includes("youtu.be/")) {
+      const videoId = url.split("youtu.be/")[1];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // Si ya es embed
+    if (url.includes("youtube.com/embed")) {
+      return url;
+    }
+
+    return null;
+  };
+
 
   // =====================================
 
@@ -183,28 +313,51 @@ export default function AdminAgregarPelicula() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 
-          {/* Género */}
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-300">Género <span className="text-red-500">*</span></label>
-            <input
-              name="genero"
-              value={data.genero}
-              onChange={cambiar}
-              className="w-full p-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500"
-              placeholder="Ej: Fantasía"
-            />
-          </div>
-
           {/* Categoría */}
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-300">Categoría <span className="text-red-500">*</span></label>
-            <input
+            <label className="block text-sm font-semibold mb-2 text-gray-300">
+              Categoría <span className="text-red-500">*</span>
+            </label>
+            <select
               name="categoria"
               value={data.categoria}
               onChange={cambiar}
               className="w-full p-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500"
-              placeholder="Ej: Basada en Libros"
-            />
+            >
+              <option value="">Selecciona una categoría</option>
+              {CATEGORIAS.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Género */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-gray-300">
+              Género <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="genero"
+              value={data.genero}
+              onChange={cambiar}
+              disabled={!data.categoria}
+              className="w-full p-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
+            >
+              <option value="">
+                {data.categoria
+                  ? "Selecciona un género"
+                  : "Primero elige una categoría"}
+              </option>
+
+              {data.categoria &&
+                GENEROS_POR_CATEGORIA[data.categoria]?.map((gen) => (
+                  <option key={gen} value={gen}>
+                    {gen}
+                  </option>
+                ))}
+            </select>
           </div>
 
           {/* Año */}
@@ -306,6 +459,52 @@ export default function AdminAgregarPelicula() {
           </div>
 
         </div>
+        {/* === SECCIÓN 4: TRAILER === */}
+        <h2 className="text-xl font-bold text-cyan-400 border-b border-gray-700 pb-2 pt-4">
+          Trailer
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+
+          {/* Input URL */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-gray-300">
+              URL del Trailer (YouTube)
+            </label>
+            <input
+              name="trailer"
+              value={data.trailer}
+              onChange={cambiar}
+              className="w-full p-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              placeholder="https://www.youtube.com/watch?v=XXXX"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Pega un enlace de YouTube para previsualizar el trailer.
+            </p>
+          </div>
+
+          {/* Previsualización */}
+          <div className="w-full">
+            {getTrailerEmbedUrl(data.trailer) ? (
+              <iframe
+                src={getTrailerEmbedUrl(data.trailer)}
+                title="Trailer preview"
+                className="w-full aspect-video rounded-xl border border-cyan-700 shadow-xl"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full aspect-video flex items-center justify-center bg-gray-800/70 rounded-xl border border-gray-700 text-gray-500">
+                <span className="text-sm">Previsualización del trailer</span>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+
+
+
 
         {/* BOTÓN GUARDAR */}
         <button

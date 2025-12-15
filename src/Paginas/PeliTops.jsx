@@ -1,44 +1,59 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
-import peliculas from "../Componentes/PeliculasData";
-// 💡 Importamos íconos de Lucide React para un look moderno
-import { Film, ListOrdered, Filter } from "lucide-react";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { ListOrdered, Filter } from "lucide-react";
 
 export default function PeliTops() {
   const { theme } = useTheme();
+
+  const [peliculas, setPeliculas] = useState([]);
   const [generoSeleccionado, setGeneroSeleccionado] = useState("Todos");
+  const [loading, setLoading] = useState(true);
 
-  // 1. Filtramos la lista base de películas (useMemo)
-  const topPeliculas = useMemo(
-    () => peliculas.filter((p) => p.categoria === "Top 10"),
-    []
-  );
+  // 🔥 FIRESTORE: traer solo Top 10
+  useEffect(() => {
+    const q = query(
+      collection(db, "peliculas"),
+      where("categoria", "==", "Top 10")
+    );
 
-  // 2. Obtenemos géneros únicos para el filtro (useMemo)
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setPeliculas(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 🎭 Géneros dinámicos
   const generos = useMemo(
-    () => ["Todos", ...new Set(topPeliculas.map((p) => p.genero))],
-    [topPeliculas]
+    () => ["Todos", ...new Set(peliculas.map((p) => p.genero))],
+    [peliculas]
   );
 
-  // 3. Filtramos según el género seleccionado (useMemo)
+  // 🎬 Filtro por género
   const peliculasFiltradas = useMemo(() => {
-    const filtered =
-      generoSeleccionado === "Todos"
-        ? topPeliculas
-        : topPeliculas.filter((p) => p.genero === generoSeleccionado);
-    return filtered;
-  }, [generoSeleccionado, topPeliculas]);
+    return generoSeleccionado === "Todos"
+      ? peliculas
+      : peliculas.filter((p) => p.genero === generoSeleccionado);
+  }, [generoSeleccionado, peliculas]);
 
-  // --- RENDERING ---
-
-  // Colores para el fondo de los botones (píldoras de género)
-  // Añadimos 'w-full text-left' para que los botones abarquen todo el ancho en el filtro vertical.
-  const btnBase = "w-full text-left px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all duration-300";
-  const btnDefault = theme === "dark" 
-    ? "bg-[#1A1F25] text-gray-300 hover:bg-[#00C8D7]/20 hover:text-[#00C8D7] border border-transparent" 
-    : "bg-gray-200 text-gray-700 hover:bg-gray-300 border border-gray-300";
-  const btnSelected = "bg-[#00C8D7] text-black shadow-md shadow-[#00C8D7]/50 font-bold";
+  // 🎨 Estilos originales
+  const btnBase =
+    "w-full text-left px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all duration-300";
+  const btnDefault =
+    theme === "dark"
+      ? "bg-[#1A1F25] text-gray-300 hover:bg-[#00C8D7]/20 hover:text-[#00C8D7]"
+      : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+  const btnSelected =
+    "bg-[#00C8D7] text-black shadow-md shadow-[#00C8D7]/50 font-bold";
 
   return (
     <div
@@ -48,41 +63,41 @@ export default function PeliTops() {
           : "bg-[#f2f5f7] text-black"
       }`}
     >
-      <header className="mb-8 text-center sm:text-left">
+      {/* HEADER */}
+      <header className="mb-8">
         <h1
-          className={`flex items-center justify-center sm:justify-start text-4xl font-extrabold mb-2 ${
+          className={`flex items-center text-4xl font-extrabold mb-2 ${
             theme === "dark" ? "text-[#00C8D7]" : "text-[#007D85]"
           }`}
         >
           <ListOrdered className="w-8 h-8 mr-3" />
           El Top 10
         </h1>
-        <p className={`text-lg ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+        <p
+          className={`text-lg ${
+            theme === "dark" ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           Explora las películas más aclamadas y populares del momento.
         </p>
       </header>
 
-      {/* ⭐⭐⭐ CONTENEDOR PRINCIPAL: SIDEBAR + PELÍCULAS ⭐⭐⭐ */}
       <div className="md:grid md:grid-cols-4 md:gap-8">
-        
-        {/* === COLUMNA DE FILTRO (SIDEBAR) === */}
+        {/* SIDEBAR */}
         <aside
           className={`col-span-1 mb-8 md:mb-0 p-4 rounded-xl shadow-xl sticky top-4 self-start ${
             theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
           }`}
         >
-          <h2 className={`text-xl font-semibold mb-4 flex items-center ${
-              theme === "dark" ? "text-white" : "text-gray-800"
-            }`}>
+          <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Filter className="w-5 h-5 mr-2" />
             Filtrar por Género
           </h2>
-          
-          {/* Contenedor de Píldoras Verticales */}
+
           <div className="flex flex-col gap-3">
-            {generos.map((g, i) => (
+            {generos.map((g) => (
               <button
-                key={i}
+                key={g}
                 onClick={() => setGeneroSeleccionado(g)}
                 className={`${btnBase} ${
                   generoSeleccionado === g ? btnSelected : btnDefault
@@ -94,31 +109,27 @@ export default function PeliTops() {
           </div>
         </aside>
 
-        {/* === CONTENIDO PRINCIPAL (3/4 de la pantalla) === */}
+        {/* CONTENIDO */}
         <main className="md:col-span-3">
-          {peliculasFiltradas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-500/50 rounded-xl">
-              <p
-                className={`text-xl font-semibold ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                No hay películas de "{generoSeleccionado}" en el Top 10.
+          {loading ? (
+            <p className="text-gray-400">Cargando películas...</p>
+          ) : peliculasFiltradas.length === 0 ? (
+            <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-500/50 rounded-xl">
+              <p className="text-xl font-semibold text-gray-400">
+                No hay películas de "{generoSeleccionado}".
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {peliculasFiltradas.map((p, i) => (
                 <div
-                  key={p.id || i}
+                  key={p.id}
                   className={`rounded-xl overflow-hidden shadow-2xl hover:scale-[1.03] transition-transform duration-300 relative ${
                     theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
-                  } transform hover:shadow-cyan-500/50`}
+                  }`}
                 >
-                  {/* ⭐ BADGE DE RANKING */}
-                  <div 
-                    className="absolute top-0 left-0 bg-[#00C8D7] text-black font-extrabold text-2xl px-3 py-1 rounded-br-lg shadow-md z-10"
-                  >
+                  {/* BADGE */}
+                  <div className="absolute top-0 left-0 bg-[#00C8D7] text-black font-extrabold text-2xl px-3 py-1 rounded-br-lg z-10">
                     #{i + 1}
                   </div>
 
@@ -126,20 +137,13 @@ export default function PeliTops() {
                     <img
                       src={p.imagen}
                       alt={p.titulo}
-                      className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-48 object-cover"
                     />
                     <div className="p-3">
-                      <h2 
-                        className="text-lg font-bold mb-1 truncate hover:text-[#00C8D7] transition-colors"
-                        title={p.titulo}
-                      >
+                      <h2 className="text-lg font-bold truncate">
                         {p.titulo}
                       </h2>
-                      <p
-                        className={`text-sm mb-3 ${
-                          theme === "dark" ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
+                      <p className="text-sm text-gray-400">
                         {p.genero} • {p.anio}
                       </p>
                     </div>
@@ -147,7 +151,7 @@ export default function PeliTops() {
 
                   <Link
                     to={`/detalle/${p.id}`}
-                    className="block w-full text-center bg-[#00C8D7] text-black py-2 hover:bg-[#00E0FF] font-bold transition-colors text-sm uppercase tracking-wider"
+                    className="block w-full text-center bg-[#00C8D7] text-black py-2 hover:bg-[#00E0FF] font-bold text-sm uppercase tracking-wider"
                   >
                     Ver Detalle
                   </Link>
@@ -157,7 +161,6 @@ export default function PeliTops() {
           )}
         </main>
       </div>
-      {/* ⭐⭐⭐ FIN DEL CONTENEDOR PRINCIPAL ⭐⭐⭐ */}
     </div>
   );
 }

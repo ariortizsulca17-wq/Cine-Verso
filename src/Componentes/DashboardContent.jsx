@@ -1,7 +1,9 @@
-import React from "react";
-import { Calendar, Camera, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar, Camera, Loader2, CheckCircle } from "lucide-react";
 import Favoritos from "./Favoritos";
 import Compras from "./Compras";
+
+
 
 export default function DashboardContent({
   activeTab,
@@ -16,7 +18,7 @@ export default function DashboardContent({
   user,
 }) {
   const getAvatarUrl = () => user?.photoURL || user?.avatar;
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const inputClasses =
     "w-full p-3 rounded-lg bg-gray-700 border border-transparent text-white focus:border-cyan-500 transition-colors placeholder-gray-400";
   const labelClasses =
@@ -39,7 +41,7 @@ export default function DashboardContent({
               newAvatarFile
                 ? URL.createObjectURL(newAvatarFile)
                 : getAvatarUrl() ||
-                  "https://placehold.co/150x150/4B5563/FFFFFF?text=U"
+                "https://placehold.co/150x150/4B5563/FFFFFF?text=U"
             }
             alt="Foto de perfil"
             className="w-full h-full rounded-full object-cover border-4 border-cyan-500 shadow-lg"
@@ -109,20 +111,20 @@ export default function DashboardContent({
           />
         </div>
 
-          {/* === GÉNERO (SOLO LECTURA) === */}
-<div>
-  <label htmlFor="gender" className={labelClasses}>
-    Género
-  </label>
-  <input
-    type="text"
-    id="gender"
-    name="gender"
-    value={formData.gender || user?.gender || "No especificado"}
-    disabled
-    className="w-full p-3 rounded-lg bg-gray-600 border border-transparent text-gray-400 cursor-not-allowed"
-  />
-</div>
+        {/* === GÉNERO (SOLO LECTURA) === */}
+        <div>
+          <label htmlFor="gender" className={labelClasses}>
+            Género
+          </label>
+          <input
+            type="text"
+            id="gender"
+            name="gender"
+            value={formData.gender || user?.gender || "No especificado"}
+            disabled
+            className="w-full p-3 rounded-lg bg-gray-600 border border-transparent text-gray-400 cursor-not-allowed"
+          />
+        </div>
 
         <div>
           <label htmlFor="fechaNacimiento" className={labelClasses}>
@@ -143,15 +145,14 @@ export default function DashboardContent({
 
         {/* Mensajes de error o éxito */}
         {error && (
-          <p className="text-red-400 text-center font-semibold text-sm">
-            ⚠️ {error}
-          </p>
+          <div className="flex items-start gap-3 p-4 bg-red-900/30 border border-red-700/50 rounded-xl">
+            <div className="w-2 h-2 mt-2 rounded-full bg-red-400" />
+            <p className="text-red-300 text-sm leading-relaxed">
+              {error}
+            </p>
+          </div>
         )}
-        {successMsg && (
-          <p className="text-green-400 text-center font-semibold text-sm">
-            ✅ {successMsg}
-          </p>
-        )}
+
 
         {/* Botón guardar */}
         <div className="flex justify-center pt-4">
@@ -173,11 +174,50 @@ export default function DashboardContent({
     </div>
   );
 
+  useEffect(() => {
+    if (successMsg) {
+      setShowSuccessModal(true);
+
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000); // se cierra solo en 3s
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
+
+
   return (
-    <div className="md:col-span-3 lg:col-span-4 bg-gray-800 rounded-xl shadow-2xl shadow-gray-950/70 p-8 md:p-12 border border-gray-700 min-h-[70vh]">
-      {activeTab === "profile" && renderProfileForm()}
-      {activeTab === "favorites" && <Favoritos user={user} />}
-      {activeTab === "purchases" && <Compras user={user} />}
-    </div>
+    <>
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-cyan-500/30 rounded-2xl p-8 w-full max-w-sm text-center shadow-2xl animate-fade-in">
+            <CheckCircle className="mx-auto text-cyan-400 w-16 h-16 mb-4" />
+
+            <h2 className="text-xl font-bold text-white mb-2">
+              ¡Datos actualizados!
+            </h2>
+
+            <p className="text-gray-400 text-sm mb-6">
+              Tu información se guardó correctamente.
+            </p>
+
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-semibold transition"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="md:col-span-3 lg:col-span-4 bg-gray-800 rounded-xl shadow-2xl shadow-gray-950/70 p-8 md:p-12 border border-gray-700 min-h-[70vh]">
+        {activeTab === "profile" && renderProfileForm()}
+        {activeTab === "favorites" && <Favoritos user={user} />}
+        {activeTab === "purchases" && <Compras user={user} />}
+      </div>
+    </>
   );
 }
+
