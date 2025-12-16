@@ -8,11 +8,29 @@ export default function ResultadosBusqueda() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const termino = queryParams.get("q")?.toLowerCase() || "";
+  const normalize = (str) => str?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 
   // 🔎 Lógica de Filtrado
-  const resultados = PeliculasData.filter((peli) =>
-    peli.titulo.toLowerCase().includes(termino)
+ const resultados = PeliculasData.filter((peli) => {
+  const t = normalize(peli.titulo);
+  const g = normalize(peli.genero);
+  const c = normalize(peli.categoria);
+  const a = normalize(peli.autor);
+  const y = normalize(peli.anio?.toString());
+
+  const terminoNorm = normalize(termino);
+
+  return (
+    t.includes(terminoNorm) ||
+    g.includes(terminoNorm) ||
+    c.includes(terminoNorm) ||
+    a.includes(terminoNorm) ||
+    y.includes(terminoNorm)
   );
+});
+
+
 
   // 🎨 Clases base
   const containerClasses = `min-h-screen p-6 transition-colors duration-500 ${

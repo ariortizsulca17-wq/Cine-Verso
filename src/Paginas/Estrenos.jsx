@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { HiCalendar, HiFilm, HiBell, HiCheckCircle } from "react-icons/hi";
+
 
 // =============================
 // 💾 DATA
@@ -77,7 +81,7 @@ const estrenos = [
     {
         id: 7,
         titulo: "Un Buen Ladrón",
-        portada:"https://cdn.apis.cineplanet.com.pe/CDN/media/entity/get/FilmPosterGraphic/HO00002661?referenceScheme=HeadOffice&allowPlaceHolder=true",
+        portada: "https://cdn.apis.cineplanet.com.pe/CDN/media/entity/get/FilmPosterGraphic/HO00002661?referenceScheme=HeadOffice&allowPlaceHolder=true",
         trailer: "https://www.youtube.com/embed/ipKgT9bH83U?si=NPSXw7S44GpVMbXd",
         descripcion:
             "Inspirada en una historia real, Roofman presenta a Jeffrey Manchester (Channing Tatum), un carismático veterano del ejército que lleva una vida tan arriesgada como fascinante. Todo cambia cuando conoce a Leigh Wainscott (Kirsten Dunst), quien despierta en él sentimientos que pondrán a prueba su ingenio y su secreto mejor guardado. Una historia de amor, redención y segundas oportunidades, contada con suspenso y un toque de humor.",
@@ -85,277 +89,253 @@ const estrenos = [
         disponible: "REGULAR, 2D",
     },
 ];
-// ======================================
-// 🍿 EFECTO PALOMITAS — 2 SEGUNDOS
-// ======================================
-const lanzarPalomitas = () => {
-    const end = Date.now() + 2000;
 
-    (function frame() {
-        confetti({
-            particleCount: 4,
-            startVelocity: 12,
-            spread: 360,
-            ticks: 220,
-            shapes: ["circle"],
-            scalar: 1.3,
-            origin: { x: Math.random(), y: -0.1 },
-            colors: ["#d7ecff", "#a7d8ff", "#cfeaff"],
-        });
 
-        if (Date.now() < end) requestAnimationFrame(frame);
-    })();
-};
 
-// ======================================
+// =============================
+// ⭐ COMPONENTE POPCORN
+// =============================
+function PopcornBackground() {
+    return (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[...Array(14)].map((_, i) => (
+                <span
+                    key={i}
+                    className="absolute bottom-[-20px] animate-popcorn opacity-40"
+                    style={{
+                        left: `${Math.random() * 100}%`,
+                        fontSize: `${Math.random() * 14 + 14}px`,
+                        animationDelay: `${Math.random() * 8}s`,
+                        animationDuration: `${Math.random() * 14 + 14}s`,
+                    }}
+                >
+                    🍿
+                </span>
+            ))}
+        </div>
+    );
+}
+
+// =============================
 // ⭐ COMPONENTE PRINCIPAL
-// ======================================
-export default function Estreno() {
-    const [peliculaActiva, setPeliculaActiva] = useState(null);
+// =============================
+export default function Estrenos() {
+    const [activa, setActiva] = useState(null);
+    const [notificada, setNotificada] = useState(false);
+    const estrenoDestacado = estrenos[0];
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const star = document.createElement("div");
-            star.className = "estrella";
-            star.style.left = Math.random() * 100 + "vw";
-            document.body.appendChild(star);
-            setTimeout(() => star.remove(), 4000);
-        }, 300);
+        document.body.style.overflow = activa ? "hidden" : "auto";
+        return () => (document.body.style.overflow = "auto");
+    }, [activa]);
 
-        return () => clearInterval(interval);
-    }, []);
-
-    const abrirModal = (peli) => {
-        setPeliculaActiva(peli);
-        lanzarPalomitas();
+    // Guardar notificación en Firestore
+    const handleNotificar = async (peli) => {
+        await addDoc(collection(db, "estrenos"), {
+            peliculaId: peli.id,
+            titulo: peli.titulo,
+            createdAt: serverTimestamp(),
+        });
+        setNotificada(true);
     };
 
     return (
-        <>
-            <div className={`estrenos-container ${peliculaActiva ? "modal-abierto" : ""}`}>
-                <h1 className="titulo">Estrenos del Momento</h1>
+        <section className="relative min-h-screen bg-slate-950 text-slate-100 px-6 py-20 overflow-hidden">
+            <PopcornBackground />
 
-                <div className="carrusel">
-                    {estrenos.map((peli) => (
-                        <div
-                            key={peli.id}
-                            className="card"
-                            onClick={() => abrirModal(peli)}
-                        >
-                            <span className="etiqueta-estreno">Estreno</span>
+            {/* HERO */}
+            <header className="relative text-center mb-20">
+                <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-purple-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.9)]">
+                    Estrenos en Cartelera
+                </h1>
+                <p className="mt-6 text-slate-400 max-w-2xl mx-auto">
+                    Vive primero las historias que están por llegar a la pantalla grande
+                </p>
+            </header>
 
-                            <img src={peli.portada} alt={peli.titulo} />
-                            <div className="card-info">
-                                <h3>{peli.titulo}</h3>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {peliculaActiva && (
-                    <div
-                        className="modal-overlay"
-                        onClick={() => setPeliculaActiva(null)}
+            {/* DESTACADO */}
+            <div className="max-w-6xl mx-auto mb-24 relative rounded-3xl overflow-hidden shadow-2xl border-4 border-pink-500 animate-pulseGlow">
+                <img
+                    src={estrenoDestacado.portada}
+                    alt={estrenoDestacado.titulo}
+                    className="w-full h-[520px] md:h-[600px] object-cover rounded-3xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex flex-col justify-end p-10">
+                    <motion.span
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="text-pink-500 font-bold tracking-widest mb-2"
                     >
-                        <div className="modal" onClick={(e) => e.stopPropagation()}>
-                            <iframe
-                                src={peliculaActiva.trailer}
-                                allowFullScreen
-                                title="Trailer"
-                            ></iframe>
+                        ⭐ ESTRENO DESTACADO
+                    </motion.span>
 
-                            <h2>{peliculaActiva.titulo}</h2>
-                            <p>{peliculaActiva.descripcion}</p>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-4xl md:text-5xl font-extrabold mb-4"
+                    >
+                        {estrenoDestacado.titulo}
+                    </motion.h2>
 
-                            {peliculaActiva.fecha && (
-                                <p>
-                                    <strong>📅 Fecha:</strong> {peliculaActiva.fecha}
-                                </p>
-                            )}
-
-                            {peliculaActiva.lugar && (
-                                <p>
-                                    <strong>📍 Lugar:</strong> {peliculaActiva.lugar}
-                                </p>
-                            )}
-
-                            {peliculaActiva.disponible && (
-                                <p>
-                                    <strong>🎬 Disponible en:</strong> {peliculaActiva.disponible}
-                                </p>
-                            )}
-
-                            {peliculaActiva.formato && (
-                                <p>
-                                    <strong>🎥 Formato:</strong> {peliculaActiva.formato}
-                                </p>
-                            )}
-
-                            <button
-                                className="cerrar"
-                                onClick={() => setPeliculaActiva(null)}
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                )}
+                    <motion.button
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                        onClick={() => setActiva(estrenoDestacado)}
+                        className="w-fit rounded-xl bg-blue-600 px-6 py-3 font-bold hover:bg-blue-500 transition"
+                    >
+                        Ver detalles del estreno
+                    </motion.button>
+                </div>
             </div>
 
-            <style>{`
-/* 💥 OCULTAR LA ETIQUETA AUTOMÁTICAMENTE CUANDO HAY MODAL */
-.modal-abierto .etiqueta-estreno {
-  display: none !important;
-}
+            {/* GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-12 max-w-7xl mx-auto">
+                {estrenos.map((peli) => (
+                    <article
+                        key={peli.id}
+                        onClick={() => setActiva(peli)}
+                        className="group relative rounded-3xl overflow-hidden bg-black shadow-2xl cursor-pointer transition-all duration-500 hover:-translate-y-4 hover:shadow-blue-500/40"
+                    >
+                        <span className="absolute top-5 left-5 z-10 rounded-full bg-pink-600 px-4 py-1 text-xs font-bold">
+                            ESTRENO
+                        </span>
 
-/* ⭐ ETIQUETA ESTRENO */
-.etiqueta-estreno {
-  position: absolute;
-  top: 15px;
-  left: -40px;
-  background: #ec4899;
-  padding: 6px 40px;
-  color: white;
-  font-weight: bold;
-  font-size: 0.9rem;
-  transform: rotate(-45deg);
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-  pointer-events: none;
-  z-index: 10;
-  animation: pulso 1.5s infinite ease-in-out, brillo 2.5s infinite alternate;
-}
+                        <img
+                            src={peli.portada}
+                            className="h-[460px] w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
 
-@keyframes pulso {
-  0% { transform: rotate(-45deg) scale(1); }
-  50% { transform: rotate(-45deg) scale(1.1); }
-  100% { transform: rotate(-45deg) scale(1); }
-}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-6">
+                            <h3 className="text-xl font-bold mb-3">{peli.titulo}</h3>
+                            <button className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold">
+                                Ver detalles del estreno
+                            </button>
+                        </div>
+                    </article>
+                ))}
+            </div>
 
-@keyframes brillo {
-  0% { box-shadow: 0 0 8px rgba(255,255,255,0.3); }
-  100% { box-shadow: 0 0 20px rgba(255,255,255,0.8); }
-}
+            {/* MODAL */}
+            <AnimatePresence>
+                {activa && (
+                    <motion.div
+                        className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            setActiva(null);
+                            setNotificada(false);
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.85, y: 40, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.85, y: 40, opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="relative bg-slate-900 rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* X */}
+                            <button
+                                onClick={() => {
+                                    setActiva(null);
+                                    setNotificada(false);
+                                }}
+                                className="absolute top-4 right-4 text-2xl text-white/70 hover:text-white z-20"
+                            >
+                                ✕
+                            </button>
 
-body {
-  overflow-x: hidden;
-}
+                            <div className="overflow-y-auto p-8 max-h-[90vh] relative">
+                                <iframe
+                                    src={activa.trailer}
+                                    title="Trailer"
+                                    allowFullScreen
+                                    className="w-full h-[260px] md:h-[420px] rounded-2xl mb-6"
+                                />
 
-.estrenos-container {
-  padding: 30px;
-  background: #000;
-  color: white;
-  min-height: 100vh;
-}
+                                <h2 className="text-4xl font-extrabold mb-4">{activa.titulo}</h2>
+                                <p className="text-slate-300 mb-6">{activa.descripcion}</p>
 
-.titulo {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #3b82f6;
-  text-shadow: 0 0 25px #60a5fa;
-}
+                                {/* FECHA Y FORMATO */}
+                                <div className="flex flex-wrap gap-6 text-sm text-slate-400 mb-6">
+                                    {activa.fecha && (
+                                        <span className="flex items-center gap-1">
+                                            <HiCalendar className="w-5 h-5 text-blue-400" />
+                                            Estreno: {activa.fecha}
+                                        </span>
+                                    )}
+                                    {activa.formato && (
+                                        <span className="flex items-center gap-1">
+                                            <HiFilm className="w-5 h-5 text-purple-400" />
+                                            {activa.formato}
+                                        </span>
+                                    )}
+                                </div>
 
-/* 🔵 AQUÍ SE VUELVE GRID RESPONSIVO (no eliminé nada, solo reemplazado flex→grid) */
-.carrusel {
-  display: grid;
-  gap: 20px;
-  padding: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
+                                {/* INVITACIÓN */}
+                                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6">
+                                    <p className="text-base font-semibold">
+                                        Mira esta película en estreno en Cineverso. Entérate cuando esté disponible.
+                                    </p>
+                                </div>
 
-/* 📱 Ajuste opcional para pantallas pequeñas */
-@media (max-width: 500px) {
-  .card {
-    min-width: 150px;
-    height: 230px;
-  }
-}
+                                {/* NOTIFICACIÓN */}
+                                <button
+                                    onClick={() => handleNotificar(activa)}
+                                    className={`w-full rounded-2xl py-3 font-bold transition flex items-center justify-center gap-2 ${notificada
+                                        ? "bg-green-600"
+                                        : "bg-pink-600 hover:bg-pink-500"
+                                        }`}
+                                >
+                                    {notificada ? (
+                                        <>
+                                            <HiCheckCircle className="w-5 h-5" />
+                                            Te notificaremos cuando esté disponible
+                                        </>
+                                    ) : (
+                                        <>
+                                            <HiBell className="w-5 h-5" />
+                                            Notificarme cuando se estrene
+                                        </>
+                                    )}
+                                </button>
 
-.card {
-  position: relative;
-  min-width: 180px;
-  height: 270px;
-  cursor: pointer;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: transform 0.3s;
-  box-shadow: 0 0 18px rgba(59,130,246,0.3);
-}
+                                {/* MENSAJE CONFIRMACIÓN */}
+                                {notificada && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mt-4 text-center text-green-400 text-sm flex items-center justify-center gap-1"
+                                    >
+                                        <HiCheckCircle className="w-5 h-5" />
+                                        Perfecto, te avisaremos apenas esté disponible en nuestro catálogo
+                                    </motion.p>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-.card:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 35px #3b82f6;
-}
-
-.card-info {
-  position: absolute;
-  bottom: 0;
-  padding: 10px;
-  background: linear-gradient(transparent, black);
-}
-
-.card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,20,0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal {
-  width: 700px;
-  background: #0d0f18;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 0 40px #3b82f6;
-  margin-top: 80px;
-}
-
-.modal iframe {
-  width: 99%;
-  height: 250px;
-  border-radius: 10px;
-}
-
-.modal p {
-  font-size: 0.85rem;
-  line-height: 1.3;
-}
-
-.cerrar {
-  margin-top: 15px;
-  padding: 10px;
-  background: #3b82f6;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-}
-
-.estrella {
-  position: fixed;
-  top: -10px;
-  width: 5px;
-  height: 5px;
-  background: #93c5fd;
-  border-radius: 50%;
-  animation: caer 4s linear forwards;
-}
-
-@keyframes caer {
-  to {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-`}</style>
-
-</>);
+            {/* Tailwind personalizado para animación glow */}
+            <style jsx>{`
+                @keyframes pulseGlow {
+                    0%, 100% {
+                        box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.5);
+                    }
+                    50% {
+                        box-shadow: 0 0 25px rgba(236, 72, 153, 1), 0 0 50px rgba(236, 72, 153, 0.7);
+                    }
+                }
+                .animate-pulseGlow {
+                    animation: pulseGlow 2s infinite;
+                }
+            `}</style>
+        </section>
+    );
 }

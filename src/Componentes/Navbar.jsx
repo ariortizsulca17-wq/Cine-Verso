@@ -4,6 +4,8 @@ import { useTheme } from "../Context/ThemeContext";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { ZonaUsuario } from "./ZonaUsuario";
 import PeliculasData from "../Componentes/PeliculasData.jsx";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 import {
   FaBars,
@@ -26,6 +28,8 @@ export default function Navbar({ onAbrirLogin }) {
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
   const [carritoCount, setCarritoCount] = useState(0);
+  const [peliculas, setPeliculas] = useState([]);
+
 
   // 💡 Ref para manejar el timer del dropdown
   const categoryTimerRef = useRef(null);
@@ -93,6 +97,20 @@ export default function Navbar({ onAbrirLogin }) {
     setHistorial(guardado);
   }, []);
 
+  useEffect(() => {
+    const cargarPeliculas = async () => {
+      try {
+        const snap = await getDocs(collection(db, "peliculas"));
+        const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setPeliculas(lista);
+      } catch (error) {
+        console.error("Error al cargar películas desde Firestore:", error);
+      }
+    };
+
+    cargarPeliculas();
+  }, []);
+
 
   // 📋 Links del Dropdown de Categorías
   const categoryItems = [
@@ -147,28 +165,35 @@ export default function Navbar({ onAbrirLogin }) {
 
     setMostrarHistorial(false);
 
-    const query = value.toLowerCase();
+    const queryLower = value.toLowerCase().trim();
 
-    const filtradas = PeliculasData.filter((p) =>
-  (
-    p.titulo?.toLowerCase().includes(query) ||
-    p.genero?.toLowerCase().includes(query) ||
-    p.categoria?.toLowerCase().includes(query) ||
-    p.autor?.toLowerCase().includes(query) ||
-    p.duracion?.toLowerCase().includes(query) ||
-    p.anio?.toString().includes(query)
-  )
-).slice(0, 6);
+    const filtradas = peliculas.filter((p) => {
+      // Convertimos todos los campos a string y minúscula para comparar
+      const titulo = p.titulo?.toString().toLowerCase() || "";
+      const genero = p.genero?.toString().toLowerCase() || "";
+      const categoria = p.categoria?.toString().toLowerCase() || "";
+      const autor = p.autor?.toString().toLowerCase() || "";
+      const anio = p.anio?.toString() || "";
+
+      return (
+        titulo.includes(queryLower) ||
+        genero.includes(queryLower) ||
+        categoria.includes(queryLower) ||
+        autor.includes(queryLower) ||
+        anio.includes(queryLower)
+      );
+    }).slice(0, 6); // Limitar sugerencias a 6
 
     setSugerencias(filtradas);
   };
 
-
   const seleccionarSugerencia = (titulo) => {
     setBusqueda("");
     setSugerencias([]);
+    setMostrarHistorial(false);
     navigate(`/buscar?q=${encodeURIComponent(titulo)}`);
   };
+
 
   const seleccionarHistorial = (value) => {
     navigate(`/buscar?q=${encodeURIComponent(value)}`);
@@ -223,7 +248,7 @@ export default function Navbar({ onAbrirLogin }) {
           >
             <span
               className={`${navLinkBaseClasses} flex items-center cursor-pointer ${isCategoryOpen ? navLinkActiveClasses :
-                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
                 }`}
             >
               Categorías
@@ -297,9 +322,13 @@ export default function Navbar({ onAbrirLogin }) {
           {user?.rol === "admin" && (
             <NavLink
               to="/admin"
-              className="font-medium text-red-400 border-b-2 border-red-400 pb-1 hover:text-red-300 transition"
+              className="relative flex items-center px-4 py-2 font-bold text-cyan-400 
+               bg-gradient-to-r from-cyan-600/20 to-cyan-500/10 
+               rounded-lg border border-cyan-400 shadow-lg
+               hover:from-cyan-500/30 hover:to-cyan-400/20 hover:scale-105
+               transition-transform duration-300"
             >
-              Admin
+              Administrador
             </NavLink>
           )}
         </div>
@@ -545,12 +574,12 @@ export default function Navbar({ onAbrirLogin }) {
             <NavLink
               to="/admin"
               onClick={handleNavClick}
-              className="w-full text-center py-2 bg-red-900 text-red-300 hover:bg-red-700 transition"
+              className="w-full text-center py-2 px-4 rounded-lg font-bold 
+               bg-cyan-700 text-white hover:bg-cyan-600 shadow-lg flex items-center justify-center gap-2"
             >
-              Admin Panel
+              Administrador
             </NavLink>
           )}
-
           {/* LOGIN / REGISTRO (Mantenido) */}
           <div className="w-11/12 pt-3 space-y-3 border-t border-cyan-800 mt-4">
             {!isAuthenticated ? (
