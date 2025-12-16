@@ -83,12 +83,17 @@ export default function Favoritos() {
               </Link>
 
               <button
-                onClick={() => eliminarFavorito(peli.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  eliminarFavorito(peli.id);
+                }}
                 className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all shadow-md hover:shadow-red-500/30 z-10"
                 title="Eliminar de favoritos"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
+
             </motion.div>
           ))}
         </div>

@@ -143,7 +143,7 @@ export default function AdminInicio() {
 
     return (
         <div className={`p-6 md:p-10 min-h-full ${bgMain}`}>
-            <h1 className="text-4xl font-extrabold mb-2">Dashboard de Contenido 🎬</h1>
+            <h1 className="text-4xl font-extrabold mb-2">Panel Administrador</h1>
             <p className={theme === 'dark' ? 'text-gray-400 mb-8' : 'text-gray-600 mb-8'}>
                 Resumen de métricas clave y rendimiento.
             </p>

@@ -12,7 +12,7 @@ export default function PeliKids() {
   const [generoSeleccionado, setGeneroSeleccionado] = useState("Todos");
   const [loading, setLoading] = useState(true);
 
-  // 🔥 FIRESTORE: Kids / Familiar
+  // 🔥 FIRESTORE: Kids
   useEffect(() => {
     const q = query(
       collection(db, "peliculas"),
@@ -20,34 +20,34 @@ export default function PeliKids() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setPeliculas(data);
+      setPeliculas(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      );
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // 🎭 Géneros únicos
+  // 🎭 Géneros
   const generos = useMemo(
     () => ["Todos", ...new Set(peliculas.map((p) => p.genero))],
     [peliculas]
   );
 
-  // 🎬 Filtro por género
+  // 🎬 Filtro
   const peliculasFiltradas = useMemo(() => {
     return generoSeleccionado === "Todos"
       ? peliculas
       : peliculas.filter((p) => p.genero === generoSeleccionado);
   }, [generoSeleccionado, peliculas]);
 
-  // 🎨 ESTILOS (idénticos a tu diseño)
+  // 🎨 Estilos
   const btnBase =
-    "w-full text-left px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all duration-300";
+    "px-4 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap";
   const btnDefault =
     theme === "dark"
       ? "bg-[#1A1F25] text-gray-300 hover:bg-[#00C8D7]/20 hover:text-[#00C8D7]"
@@ -57,7 +57,7 @@ export default function PeliKids() {
 
   return (
     <div
-      className={`flex flex-col p-6 min-h-screen transition-colors duration-500 font-sans ${
+      className={`min-h-screen px-4 py-6 sm:p-6 overflow-x-hidden transition-colors duration-500 ${
         theme === "dark"
           ? "bg-[#0B1014] text-white"
           : "bg-[#f2f5f7] text-black"
@@ -66,15 +66,15 @@ export default function PeliKids() {
       {/* HEADER */}
       <header className="mb-8 text-center sm:text-left">
         <h1
-          className={`flex items-center justify-center sm:justify-start text-4xl font-extrabold mb-2 ${
+          className={`flex justify-center sm:justify-start items-center text-3xl sm:text-4xl font-extrabold mb-2 ${
             theme === "dark" ? "text-[#00C8D7]" : "text-[#007D85]"
           }`}
         >
-          <Smile className="w-8 h-8 mr-3" />
+          <Smile className="w-7 h-7 sm:w-8 sm:h-8 mr-3" />
           PeliKids: Cine Infantil y Familiar
         </h1>
         <p
-          className={`text-lg ${
+          className={`text-sm sm:text-lg ${
             theme === "dark" ? "text-gray-400" : "text-gray-600"
           }`}
         >
@@ -82,20 +82,21 @@ export default function PeliKids() {
         </p>
       </header>
 
-      {/* CONTENEDOR PRINCIPAL */}
-      <div className="md:grid md:grid-cols-4 md:gap-8">
+      {/* GRID PRINCIPAL */}
+      <div className="grid grid-cols-1 md:grid-cols-4 md:gap-8">
         {/* SIDEBAR */}
         <aside
-          className={`col-span-1 mb-8 md:mb-0 p-4 rounded-xl shadow-xl sticky top-4 self-start ${
+          className={`mb-6 md:mb-0 p-4 rounded-xl shadow-xl md:sticky md:top-4 self-start ${
             theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
           }`}
         >
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <h2 className="text-lg font-semibold mb-3 flex items-center">
             <Filter className="w-5 h-5 mr-2" />
             Filtrar por Género
           </h2>
 
-          <div className="flex flex-col gap-3">
+          {/* Mobile: horizontal | Desktop: vertical */}
+          <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
             {generos.map((g) => (
               <button
                 key={g}
@@ -113,19 +114,21 @@ export default function PeliKids() {
         {/* CONTENIDO */}
         <main className="md:col-span-3">
           {loading ? (
-            <p className="text-gray-400">Cargando películas...</p>
+            <p className="text-gray-400 text-center py-10">
+              Cargando películas...
+            </p>
           ) : peliculasFiltradas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-500/50 rounded-xl">
-              <p className="text-xl font-semibold text-gray-400">
+            <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-500/50 rounded-xl">
+              <p className="text-base sm:text-xl font-semibold text-gray-400 text-center px-4">
                 No hay películas de "{generoSeleccionado}" disponibles.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
               {peliculasFiltradas.map((peli) => (
                 <div
                   key={peli.id}
-                  className={`rounded-xl overflow-hidden shadow-2xl hover:scale-[1.03] transition-transform duration-300 relative ${
+                  className={`rounded-xl overflow-hidden shadow-xl hover:scale-[1.03] transition-transform duration-300 ${
                     theme === "dark" ? "bg-[#1A1F25]" : "bg-white"
                   }`}
                 >
@@ -133,17 +136,17 @@ export default function PeliKids() {
                     <img
                       src={peli.imagen}
                       alt={peli.titulo}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-40 sm:h-48 object-cover"
                     />
                     <div className="p-3">
-                      <h2 className="text-lg font-bold truncate hover:text-[#00C8D7] transition-colors">
+                      <h2 className="text-sm sm:text-lg font-bold truncate hover:text-[#00C8D7] transition-colors">
                         {peli.titulo}
                       </h2>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-xs sm:text-sm text-gray-400">
                         {peli.genero} • {peli.anio}
                       </p>
 
-                      {/* ⭐ Rating opcional */}
+                      {/* ⭐ Rating */}
                       {peli.rating && (
                         <span className="flex items-center text-yellow-500 text-xs mt-1">
                           <Star className="w-3 h-3 mr-1 fill-current" />
@@ -155,7 +158,7 @@ export default function PeliKids() {
 
                   <Link
                     to={`/detalle/${peli.id}`}
-                    className="block w-full text-center bg-[#00C8D7] text-black py-2 hover:bg-[#00E0FF] font-bold transition-colors text-sm uppercase tracking-wider"
+                    className="block w-full text-center bg-[#00C8D7] text-black py-2 hover:bg-[#00E0FF] font-bold transition-colors text-xs sm:text-sm uppercase tracking-wider"
                   >
                     Ver Detalle
                   </Link>

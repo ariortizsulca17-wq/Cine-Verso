@@ -1,3 +1,4 @@
+// ../Componentes/Navbar.jsx
 import { useState, useEffect, useRef } from "react"; // 💡 Importamos useRef
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../Context/ThemeContext";
@@ -11,6 +12,7 @@ import {
   FaBars,
   FaTimes,
   FaShoppingCart,
+  FaRegClock,
   FaSun,
   FaMoon,
   FaUserCircle,
@@ -201,6 +203,19 @@ export default function Navbar({ onAbrirLogin }) {
     closeMenu();
   };
 
+  // Eliminar una entrada especifica del historial
+  const borrarEntradaHistorial = (value) => {
+    const nuevo = historial.filter((h) => h !== value);
+    setHistorial(nuevo);
+    try {
+      localStorage.setItem("historialBusqueda", JSON.stringify(nuevo));
+    } catch {
+      // noop
+    }
+    // si ya no hay entradas, ocultar el panel
+    if (nuevo.length === 0) setMostrarHistorial(false);
+  };
+
   const borrarHistorial = () => {
     localStorage.removeItem("historialBusqueda");
     setHistorial([]);
@@ -346,8 +361,13 @@ export default function Navbar({ onAbrirLogin }) {
                 type="text"
                 value={busqueda}
                 onChange={manejarCambioBusqueda}
-                placeholder="Buscar..."
-                className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 w-32"
+                onFocus={() => {
+                  if (historial.length > 0 && busqueda.trim() === "") {
+                    setMostrarHistorial(true);
+                  }
+                }}
+                placeholder="Buscar película..."
+                className="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-400"
               />
               <button type="submit" className="text-cyan-500 text-lg ml-2">
                 <Search className="w-5 h-5" />
@@ -382,11 +402,25 @@ export default function Navbar({ onAbrirLogin }) {
                 {historial.map((h, i) => (
                   <div
                     key={i}
-                    onClick={() => seleccionarHistorial(h)}
-                    className={`px-2 py-1 text-sm cursor-pointer rounded ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"
+                    className={`px-2 py-1 text-sm rounded ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"
                       }`}
                   >
-                    {h}
+                    <div
+                      onClick={() => seleccionarHistorial(h)}
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span className="truncate">{h}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          borrarEntradaHistorial(h);
+                        }}
+                        className="ml-3 text-xs text-red-400 hover:text-red-300"
+                        title="Eliminar"
+                      >
+                        ✖
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -395,6 +429,8 @@ export default function Navbar({ onAbrirLogin }) {
 
 
           </div>
+
+
 
           {/* 🌓 TEMA */}
           <button
@@ -445,8 +481,13 @@ export default function Navbar({ onAbrirLogin }) {
                 type="text"
                 value={busqueda}
                 onChange={manejarCambioBusqueda}
-                placeholder="Buscar película..."
-                className="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-400"
+                onFocus={() => {
+                  if (historial.length > 0 && busqueda.trim() === "") {
+                    setMostrarHistorial(true);
+                  }
+                }}
+                placeholder="Buscar..."
+                className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 w-32"
               />
               <button type="submit" className="text-cyan-400 text-xl ml-2">
                 <Search className="w-5 h-5" />
@@ -480,15 +521,26 @@ export default function Navbar({ onAbrirLogin }) {
                 </div>
 
                 {historial.map((h, i) => (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      seleccionarHistorial(h);
-                      closeMenu();
-                    }}
-                    className="px-3 py-1 text-gray-300 text-sm cursor-pointer hover:bg-gray-700 rounded"
-                  >
-                    {h}
+                  <div key={i} className="px-3 py-1 text-gray-300 text-sm rounded flex items-center justify-between">
+                    <div
+                      onClick={() => {
+                        seleccionarHistorial(h);
+                        closeMenu();
+                      }}
+                      className="flex-1 pr-2 cursor-pointer"
+                    >
+                      {h}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        borrarEntradaHistorial(h);
+                      }}
+                      className="ml-2 text-xs text-red-400 hover:text-red-300"
+                      title="Eliminar"
+                    >
+                      ✖
+                    </button>
                   </div>
                 ))}
               </div>
