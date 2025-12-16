@@ -1,20 +1,22 @@
 // src/Componentes/DashboardAdmi/DashboardLayout.jsx
-import { Outlet } from "react-router-dom"; // 👈 Nueva importación
+import { Outlet } from "react-router-dom";
 import DashboardNav from "./DashboardNav";
-
-// import DashboardContent from "./DashboardContent"; // 🚫 Ya no es necesario importar esto
+import { useTheme } from "../../Context/ThemeContext"; // Importamos ThemeContext
 
 export default function DashboardLayout() {
-  return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+  const { theme } = useTheme(); // Extraemos el theme
 
+  const bgClass = theme === "dark" ? "bg-[#0B1014] text-white" : "bg-gray-100 text-gray-900";
+
+  return (
+    <div className={`flex min-h-screen ${bgClass}`}>
       {/* 📌 NAV LATERAL */}
-      <DashboardNav />
+      <DashboardNav theme={theme} />
 
       {/* 📌 CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-6 overflow-y-auto">
-        {/* 💡 SOLUCIÓN: Outlet renderiza el contenido de la ruta anidada */}
-        <Outlet /> 
+        {/* 💡 Outlet renderiza el contenido de la ruta anidada */}
+        <Outlet />
       </main>
     </div>
   );

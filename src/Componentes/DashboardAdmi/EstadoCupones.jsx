@@ -1,3 +1,4 @@
+// src/Componentes/DashboardAdmi/EstadosCupones.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
 import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
@@ -11,8 +12,10 @@ import {
   Calendar,
   RefreshCw
 } from "lucide-react";
+import { useTheme } from "../../Context/ThemeContext";
 
 export default function EstadosCupones() {
+  const { theme } = useTheme();
   const [cupones, setCupones] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +38,6 @@ export default function EstadosCupones() {
     return () => unsubscribe();
   }, []);
 
-  // Cambiar estado de ACTIVO / INACTIVO
   const toggleEstado = async (cupon) => {
     try {
       await updateDoc(doc(db, "cupones", cupon.id), {
@@ -48,19 +50,25 @@ export default function EstadosCupones() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-gray-400 flex flex-col items-center">
+      <div className={`p-8 text-center flex flex-col items-center ${theme === "dark" ? "text-gray-400" : "text-gray-700"}`}>
         <RefreshCw className="w-6 h-6 animate-spin mb-2" />
         Cargando cupones...
       </div>
     );
   }
 
+  // Colores dinámicos según tema
+  const bgCard = theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-300";
+  const textPrimary = theme === "dark" ? "text-white" : "text-gray-900";
+  const textSecondary = theme === "dark" ? "text-gray-400" : "text-gray-600";
+  const bgButton = theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300";
+
   return (
-    <div className="p-6 md:p-10 bg-gray-900 min-h-full text-white">
-      <h1 className="text-4xl font-extrabold mb-3 border-b border-gray-700 pb-3">
+    <div className={`p-6 md:p-10 min-h-full ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+      <h1 className={`text-4xl font-extrabold mb-3 border-b pb-3 ${theme === "dark" ? "border-gray-700 text-white" : "border-gray-300 text-gray-900"}`}>
         Estados de Cupones
       </h1>
-      <p className="text-gray-500 mb-6">
+      <p className={`${textSecondary} mb-6`}>
         Administra y controla los cupones activos e inactivos.
       </p>
 
@@ -73,37 +81,29 @@ export default function EstadosCupones() {
           return (
             <div
               key={cupon.id}
-              className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center justify-between shadow-md"
+              className={`rounded-xl p-5 flex items-center justify-between shadow-md border ${bgCard}`}
             >
-              {/* Info principal */}
               <div>
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-cyan-400" />
+                <h2 className={`text-xl font-bold flex items-center gap-2 ${textPrimary}`}>
+                  <Tag className={`w-5 h-5 text-cyan-400`} />
                   {cupon.codigo}
                 </h2>
 
-                <p className="text-gray-400 flex items-center gap-2 mt-1">
+                <p className={`flex items-center gap-2 mt-1 ${textSecondary}`}>
                   <Percent className="w-4 h-4" />
-                  Descuento: <span className="text-white">{cupon.descuento}%</span>
+                  Descuento: <span className={textPrimary}>{cupon.descuento}%</span>
                 </p>
 
-                <p className="text-gray-400 flex items-center gap-2">
+                <p className={`flex items-center gap-2 ${textSecondary}`}>
                   <Calendar className="w-4 h-4" />
-                  Expira:{" "}
-                  <span className="text-white">
-                    {fechaExp}
-                  </span>
+                  Expira: <span className={textPrimary}>{fechaExp}</span>
                 </p>
 
-                <p className="text-gray-400">
-                  Usos:{" "}
-                  <span className="text-white">
-                    {cupon.usosActuales} / {cupon.limiteUso === 0 ? "∞" : cupon.limiteUso}
-                  </span>
+                <p className={textSecondary}>
+                  Usos: <span className={textPrimary}>{cupon.usosActuales} / {cupon.limiteUso === 0 ? "∞" : cupon.limiteUso}</span>
                 </p>
               </div>
 
-              {/* Estado + botón */}
               <div className="flex flex-col items-center">
                 {cupon.activo ? (
                   <span className="flex items-center text-green-400 text-sm font-semibold mb-2">
@@ -119,7 +119,7 @@ export default function EstadosCupones() {
 
                 <button
                   onClick={() => toggleEstado(cupon)}
-                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-full transition shadow"
+                  className={`p-2 rounded-full transition shadow ${bgButton}`}
                 >
                   {cupon.activo ? (
                     <ToggleRight className="w-7 h-7 text-green-400" />
