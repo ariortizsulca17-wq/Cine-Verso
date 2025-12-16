@@ -23,7 +23,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     useEffect(() => {
         if (emailRef.current) emailRef.current.focus();
     }, []);
-
+//Los comentarios en español se refieren a las secciones del código.
     // ============================
     //   ENVÍO DEL FORMULARIO
     // ============================
