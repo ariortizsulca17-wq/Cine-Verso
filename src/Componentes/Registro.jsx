@@ -1,20 +1,20 @@
+// ✅ src/Componentes/Registro.jsx
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext.jsx";
+import { useTheme } from "../Context/ThemeContext.jsx"; // <-- Importamos ThemeContext
 import { Camera, UserCircle } from "lucide-react";
 import { User, UserCircle2 } from "lucide-react";
 
-
 export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }) {
     const { register, loginWithGoogle } = useAuth();
+    const { theme } = useTheme(); // <-- Extraemos theme
 
     const [username, setUsername] = useState("");
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
-    const [gender, setGender] = useState(""); // ⭐ Agregado del componente de tu compañera
-
+    const [gender, setGender] = useState("");
     const [error, setError] = useState("");
 
     const emailRef = useRef(null);
@@ -23,10 +23,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
     useEffect(() => {
         if (emailRef.current) emailRef.current.focus();
     }, []);
-//Los comentarios en español se refieren a las secciones del código.
-    // ============================
-    //   ENVÍO DEL FORMULARIO
-    // ============================
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -35,7 +32,7 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
             await register(email, password, {
                 username,
                 avatarFile,
-                gender, // ⭐ Se envía correctamente a Firebase
+                gender,
             });
 
             if (onRegistroExitoso) onRegistroExitoso();
@@ -54,9 +51,6 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
         }
     };
 
-    // ============================
-    //       TRADUCCIÓN ERRORES
-    // ============================
     function traducirError(code) {
         switch (code) {
             case "auth/email-already-in-use":
@@ -70,9 +64,6 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
         }
     }
 
-    // ============================
-    //      MANEJO DEL AVATAR
-    // ============================
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         setAvatarFile(file);
@@ -90,34 +81,36 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
         fileInputRef.current.click();
     };
 
-    // ============================
-    //          JSX
-    // ============================
+    // --- Clases dinámicas según theme ---
+    const bgClass = theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900';
+    const inputBg = theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-600';
+    const btnPrimary = theme === 'dark' ? 'bg-cyan-600 hover:bg-cyan-700 text-white' : 'bg-cyan-500 hover:bg-cyan-600 text-white';
+    const btnSecondary = theme === 'dark' ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white';
+    const btnGoogle = theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-gray-200 border-gray-300 text-gray-900 hover:bg-gray-300';
+    const errorClass = theme === 'dark' ? 'text-red-400 bg-red-900/30 border-red-700' : 'text-red-700 bg-red-200 border-red-400';
+    const labelClass = theme === 'dark' ? 'text-gray-300' : 'text-gray-700';
+    const avatarBg = theme === 'dark' ? 'bg-gray-800 border-cyan-500/50' : 'bg-gray-200 border-cyan-500/50';
+
     return (
         <div 
-    className="text-white max-h-[88vh] overflow-y-auto pr-2 max-w-lg mx-auto"
-    style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "#4b5563 #1f2937"
-    }}
->
+            className={`max-h-[88vh] overflow-y-auto pr-2 max-w-lg mx-auto ${bgClass}`}
+            style={{ scrollbarWidth: "thin", scrollbarColor: "#4b5563 #1f2937" }}
+        >
             <h1 className="text-3xl font-bold text-center mb-5 text-cyan-300 tracking-wide">
                 Crear cuenta
             </h1>
 
             {error && (
-                <p className="mb-4 text-sm text-red-400 bg-red-900/30 border border-red-700 rounded p-2">
+                <p className={`mb-4 text-sm rounded p-2 border ${errorClass}`}>
                     {error}
                 </p>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
-                {/* === SECCIÓN AVATAR COMPACTA === */}
-                <div className="flex items-center gap-4 p-3 border border-gray-700/50 rounded-lg bg-gray-900/50">
-
-                    {/* Previsualización + botón cámara */}
-                    <div className="relative w-16 h-16 rounded-full bg-gray-800 overflow-hidden border-2 border-cyan-500/50 flex-shrink-0">
+                {/* Avatar */}
+                <div className={`flex items-center gap-4 p-3 border rounded-lg ${avatarBg}`}>
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                         {avatarPreview ? (
                             <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                         ) : (
@@ -134,15 +127,14 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                         </div>
                     </div>
 
-                    {/* Botón para seleccionar archivo */}
                     <div className="flex-1">
-                        <label className="block text-sm mb-1 text-gray-300">
+                        <label className={`block text-sm mb-1 ${labelClass}`}>
                             Foto de Perfil (Opcional)
                         </label>
                         <button
                             type="button"
                             onClick={handleButtonClick}
-                            className="w-full text-left px-3 py-1 bg-gray-700 text-cyan-300 rounded-lg text-sm font-medium hover:bg-gray-600 transition shadow-sm border border-gray-600 truncate"
+                            className={`w-full text-left px-3 py-1 rounded-lg text-sm font-medium hover:opacity-80 transition shadow-sm border truncate ${avatarBg}`}
                         >
                             {avatarFile ? `Archivo: ${avatarFile.name}` : "Seleccionar un archivo..."}
                         </button>
@@ -157,14 +149,12 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
-                {/* === NOMBRE DE USUARIO === */}
+                {/* Nombre de usuario */}
                 <div>
-                    <label className="block text-sm mb-1 text-gray-300">
-                        Nombre de usuario
-                    </label>
+                    <label className={`block text-sm mb-1 ${labelClass}`}>Nombre de usuario</label>
                     <input
                         type="text"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 ${inputBg}`}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="ej: abigail_27"
@@ -172,13 +162,13 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
-                {/* === EMAIL === */}
+                {/* Email */}
                 <div>
-                    <label className="block text-sm mb-1 text-gray-300">Correo electrónico</label>
+                    <label className={`block text-sm mb-1 ${labelClass}`}>Correo electrónico</label>
                     <input
                         ref={emailRef}
                         type="email"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 ${inputBg}`}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="tucorreo@ejemplo.com"
@@ -186,12 +176,12 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
-                {/* === CONTRASEÑA === */}
+                {/* Contraseña */}
                 <div>
-                    <label className="block text-sm mb-1 text-gray-300">Contraseña</label>
+                    <label className={`block text-sm mb-1 ${labelClass}`}>Contraseña</label>
                     <input
                         type="password"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 ${inputBg}`}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Mínimo 6 caracteres"
@@ -199,81 +189,56 @@ export default function Registro({ onRegistroExitoso, onLoginExitoso, irALogin }
                     />
                 </div>
 
-                {/* === GÉNERO PROFESIONAL === */}
+                {/* Género */}
                 <div>
-                    <label className="block text-sm mb-2 text-gray-300">Género (opcional)</label>
-
+                    <label className={`block text-sm mb-2 ${labelClass}`}>Género (opcional)</label>
                     <div className="grid grid-cols-2 gap-3">
-
-                        {/* Mujer */}
                         <button
                             type="button"
                             onClick={() => setGender("Femenino")}
                             className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition
-                ${gender === "Femenino"
-                                    ? "border-pink-500 bg-pink-600/30 text-pink-300"
-                                    : "border-gray-600 bg-gray-800 text-gray-300"
-                                }`}
+                                ${gender === "Femenino" ? "border-pink-500 bg-pink-600/30 text-pink-300" : "border-gray-600 bg-gray-800 text-gray-300"}`}
                         >
-                            <UserCircle2 className="w-5 h-5" />
-                            Mujer
+                            <UserCircle2 className="w-5 h-5" /> Mujer
                         </button>
-
-                        {/* Hombre */}
                         <button
                             type="button"
                             onClick={() => setGender("Masculino")}
                             className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-sm transition
-                ${gender === "Masculino"
-                                    ? "border-blue-500 bg-blue-600/30 text-blue-300"
-                                    : "border-gray-600 bg-gray-800 text-gray-300"
-                                }`}
+                                ${gender === "Masculino" ? "border-blue-500 bg-blue-600/30 text-blue-300" : "border-gray-600 bg-gray-800 text-gray-300"}`}
                         >
-                            <User className="w-5 h-5" />
-                            Hombre
+                            <User className="w-5 h-5" /> Hombre
                         </button>
-
                     </div>
                 </div>
 
-
-                {/* === BOTONES === */}
+                {/* Botones */}
                 <div className="flex gap-3 pt-3">
-                    <button
-                        type="submit"
-                        className="flex-1 bg-cyan-600 hover:bg-cyan-700 py-2 rounded-lg transition font-medium"
-                    >
+                    <button type="submit" className={`flex-1 py-2 rounded-lg transition font-medium ${btnPrimary}`}>
                         Registrarse
                     </button>
-                    <button
-                        type="button"
-                        onClick={irALogin}
-                        className="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition font-medium"
-                    >
+                    <button type="button" onClick={irALogin} className={`flex-1 py-2 rounded-lg transition font-medium ${btnSecondary}`}>
                         Iniciar sesión
                     </button>
                 </div>
             </form>
 
-  
-            {/* === GOOGLE LOGIN === */}
-<div className="mt-4"> 
-    <button
-        type="button"
-        onClick={handleGoogle}
-        className="w-full bg-gray-800 border border-gray-700 rounded-md py-2 text-sm 
-        hover:bg-gray-700 transition flex items-center justify-center gap-2"
-        style={{ maxWidth: "260px", margin: "0 auto" }}
-    >
-        <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"
-            alt="Google Logo"
-            className="w-4 h-4"
-        />
-        Continuar con Google
-    </button>
-</div>
-
+            {/* Google Login */}
+            <div className="mt-4">
+                <button
+                    type="button"
+                    onClick={handleGoogle}
+                    className={`w-full border rounded-md py-2 text-sm flex items-center justify-center gap-2 ${btnGoogle}`}
+                    style={{ maxWidth: "260px", margin: "0 auto" }}
+                >
+                    <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"
+                        alt="Google Logo"
+                        className="w-4 h-4"
+                    />
+                    Continuar con Google
+                </button>
+            </div>
         </div>
     );
 }

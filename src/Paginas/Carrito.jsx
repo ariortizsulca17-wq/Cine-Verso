@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where } from "firebase/firestore";
 import { useAuth } from "../Context/AuthContext";
-import { X } from "lucide-react";
+import { useTheme } from "../Context/ThemeContext"; // <-- Importamos ThemeContext
 import {
   Trash2, ShoppingCart, Loader, CreditCard, Banknote, Minus, Plus,
   CheckCircle, XCircle, ChevronLeft, Mail, Percent, AlertTriangle, Check
-} from "lucide-react"; // Importamos iconos nuevos para mejor UX
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 // Definición de métodos de pago
@@ -21,18 +20,26 @@ export default function Carrito() {
   const [carrito, setCarrito] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [metodoPago, setMetodoPago] = useState("tarjeta");
-
-  // Lógica de Cupón
   const [inputCupon, setInputCupon] = useState("");
-  const [descuento, setDescuento] = useState(0); // Valor de descuento aplicado
-  const [cuponAplicado, setCuponAplicado] = useState(null); // String del cupón aplicado
-  const [cuponError, setCuponError] = useState(""); // Mensaje de error de cupón
+  const [descuento, setDescuento] = useState(0);
+  const [cuponAplicado, setCuponAplicado] = useState(null);
+  const [cuponError, setCuponError] = useState("");
 
   const { user } = useAuth();
 
-  const PRECIO_BASE = 19.99;
+  const { theme } = useTheme(); // <-- Extraemos el theme del contexto
 
+  const PRECIO_BASE = 9.99;
   // --- Lógica del Carrito (Mantenida) ---
+   // Variables de estilos dinámicos según el tema
+  const cardBg = theme === "dark" ? "bg-[#1A1F25] border-gray-700 text-white" : "bg-white border-gray-300 text-gray-900";
+  const inputClass = theme === "dark" ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-600";
+  const btnPrimary = theme === "dark" ? "bg-[#00C8D7] hover:bg-[#00E0FF] text-gray-900" : "bg-cyan-500 hover:bg-cyan-600 text-white";
+  const btnDanger = theme === "dark" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-red-500 hover:bg-red-600 text-white";
+  const textWarning = theme === "dark" ? "text-yellow-400" : "text-yellow-600";
+  const textError = theme === "dark" ? "text-red-500" : "text-red-700";
+  const textSuccess = theme === "dark" ? "text-green-400" : "text-green-600";
+
 
   useEffect(() => {
     const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -295,16 +302,17 @@ export default function Carrito() {
   // --- Renderizado y UI/UX Ajustado ---
 
   return (
-    <div className="min-h-screen bg-[#0B1014] p-4 sm:p-8 text-gray-100 flex flex-col items-center">
+     <div className={`min-h-screen p-4 sm:p-8 flex flex-col items-center  ${theme === "dark" ? "bg-[#0B1014] text-gray-100" : "bg-gray-100 text-gray-900"}`}>
       <div className="max-w-6xl w-full mx-auto rounded-xl p-6 md:p-10">
-
-        {/* Título y Navegación */}
+        {/* Título y navegación */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-extrabold text-[#00C8D7] mb-2 leading-tight">
+          <h1 className={`text-4xl font-extrabold mb-2 leading-tight ${theme === "dark" ? "text-[#00C8D7]" : "text-cyan-700"}`}>
             <ShoppingCart className="inline-block w-8 h-8 mr-2 text-cyan-500" />
             TU CARRITO
           </h1>
-          <p className="text-gray-400 text-base sm:text-lg font-light">Tienes {totalUnico} {totalUnico === 1 ? 'película única' : 'películas únicas'} ({totalItems} items)</p>
+          <p className={theme === "dark" ? "text-gray-400" : "text-gray-700"}>
+            Tienes {carrito.length} {carrito.length === 1 ? 'película' : 'películas'}
+          </p>
           <div className="mt-4">
             <a href="/" className="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition font-medium text-sm">
               <ChevronLeft className="w-4 h-4 mr-1" />

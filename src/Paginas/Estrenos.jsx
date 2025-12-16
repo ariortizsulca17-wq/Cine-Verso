@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { HiCalendar, HiFilm, HiBell, HiCheckCircle } from "react-icons/hi";
-
+import { useTheme } from "../Context/ThemeContext"; // 🔑 Importa el contexto
 
 // =============================
 // 💾 DATA
@@ -120,222 +120,215 @@ function PopcornBackground() {
 // ⭐ COMPONENTE PRINCIPAL
 // =============================
 export default function Estrenos() {
-    const [activa, setActiva] = useState(null);
-    const [notificada, setNotificada] = useState(false);
-    const estrenoDestacado = estrenos[0];
+  const [activa, setActiva] = useState(null);
+  const [notificada, setNotificada] = useState(false);
+  const estrenoDestacado = estrenos[0];
 
-    useEffect(() => {
-        document.body.style.overflow = activa ? "hidden" : "auto";
-        return () => (document.body.style.overflow = "auto");
-    }, [activa]);
+  const { theme } = useTheme(); // 🔑 Obtener theme
 
-    // Guardar notificación en Firestore
-    const handleNotificar = async (peli) => {
-        await addDoc(collection(db, "estrenos"), {
-            peliculaId: peli.id,
-            titulo: peli.titulo,
-            createdAt: serverTimestamp(),
-        });
-        setNotificada(true);
-    };
+  useEffect(() => {
+    document.body.style.overflow = activa ? "hidden" : "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [activa]);
 
-    return (
-        <section className="relative min-h-screen bg-slate-950 text-slate-100 px-6 py-20 overflow-hidden">
-            <PopcornBackground />
+  const handleNotificar = async (peli) => {
+    await addDoc(collection(db, "estrenos"), {
+      peliculaId: peli.id,
+      titulo: peli.titulo,
+      createdAt: serverTimestamp(),
+    });
+    setNotificada(true);
+  };
 
-            {/* HERO */}
-            <header className="relative text-center mb-20">
-                <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-purple-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.9)]">
-                    Estrenos en Cartelera
-                </h1>
-                <p className="mt-6 text-slate-400 max-w-2xl mx-auto">
-                    Vive primero las historias que están por llegar a la pantalla grande
-                </p>
-            </header>
+  // 🔑 Clases condicionales según tema
+  const bgColor = theme === "dark" ? "bg-slate-950" : "bg-gray-100";
+  const textColor = theme === "dark" ? "text-slate-100" : "text-gray-900";
+  const subTextColor = theme === "dark" ? "text-slate-400" : "text-gray-700";
+  const cardBg = theme === "dark" ? "bg-black" : "bg-white";
+  const modalBg = theme === "dark" ? "bg-slate-900" : "bg-gray-200";
+  const btnNotificar = notificada
+    ? "bg-green-600 text-white"
+    : "bg-pink-600 text-white hover:bg-pink-500";
 
-            {/* DESTACADO */}
-            <div className="max-w-6xl mx-auto mb-24 relative rounded-3xl overflow-hidden shadow-2xl border-4 border-pink-500 animate-pulseGlow">
-                <img
-                    src={estrenoDestacado.portada}
-                    alt={estrenoDestacado.titulo}
-                    className="w-full h-[520px] md:h-[600px] object-cover rounded-3xl"
+  return (
+    <section className={`relative min-h-screen px-6 py-20 overflow-hidden ${bgColor} ${textColor}`}>
+      <PopcornBackground />
+
+      {/* HERO */}
+      <header className="relative text-center mb-20">
+        <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-purple-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.9)]">
+          Estrenos en Cartelera
+        </h1>
+        <p className={`mt-6 max-w-2xl mx-auto ${subTextColor}`}>
+          Vive primero las historias que están por llegar a la pantalla grande
+        </p>
+      </header>
+
+      {/* DESTACADO */}
+      <div className={`max-w-6xl mx-auto mb-24 relative rounded-3xl overflow-hidden shadow-2xl border-4 border-pink-500 animate-pulseGlow`}>
+        <img
+          src={estrenoDestacado.portada}
+          alt={estrenoDestacado.titulo}
+          className="w-full h-[520px] md:h-[600px] object-cover rounded-3xl"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex flex-col justify-end p-10">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-pink-500 font-bold tracking-widest mb-2"
+          >
+            ⭐ ESTRENO DESTACADO
+          </motion.span>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-4xl md:text-5xl font-extrabold mb-4"
+          >
+            {estrenoDestacado.titulo}
+          </motion.h2>
+
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            onClick={() => setActiva(estrenoDestacado)}
+            className="w-fit rounded-xl bg-blue-600 px-6 py-3 font-bold hover:bg-blue-500 transition"
+          >
+            Ver detalles del estreno
+          </motion.button>
+        </div>
+      </div>
+
+      {/* GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-12 max-w-7xl mx-auto">
+        {estrenos.map((peli) => (
+          <article
+            key={peli.id}
+            onClick={() => setActiva(peli)}
+            className={`group relative rounded-3xl overflow-hidden shadow-2xl cursor-pointer transition-all duration-500 hover:-translate-y-4 hover:shadow-blue-500/40 ${cardBg}`}
+          >
+            <span className="absolute top-5 left-5 z-10 rounded-full bg-pink-600 px-4 py-1 text-xs font-bold">
+              ESTRENO
+            </span>
+
+            <img
+              src={peli.portada}
+              className="h-[460px] w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-6">
+              <h3 className="text-xl font-bold mb-3">{peli.titulo}</h3>
+              <button className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold">
+                Ver detalles del estreno
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* MODAL */}
+      <AnimatePresence>
+        {activa && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setActiva(null);
+              setNotificada(false);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 40, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.85, y: 40, opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className={`relative rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden ${modalBg}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* X */}
+              <button
+                onClick={() => {
+                  setActiva(null);
+                  setNotificada(false);
+                }}
+                className="absolute top-4 right-4 text-2xl text-white/70 hover:text-white z-20"
+              >
+                ✕
+              </button>
+
+              <div className="overflow-y-auto p-8 max-h-[90vh] relative">
+                <iframe
+                  src={activa.trailer}
+                  title="Trailer"
+                  allowFullScreen
+                  className="w-full h-[260px] md:h-[420px] rounded-2xl mb-6"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex flex-col justify-end p-10">
-                    <motion.span
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-pink-500 font-bold tracking-widest mb-2"
-                    >
-                        ⭐ ESTRENO DESTACADO
-                    </motion.span>
 
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-4xl md:text-5xl font-extrabold mb-4"
-                    >
-                        {estrenoDestacado.titulo}
-                    </motion.h2>
+                <h2 className="text-4xl font-extrabold mb-4">{activa.titulo}</h2>
+                <p className={`${subTextColor} mb-6`}>{activa.descripcion}</p>
 
-                    <motion.button
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        onClick={() => setActiva(estrenoDestacado)}
-                        className="w-fit rounded-xl bg-blue-600 px-6 py-3 font-bold hover:bg-blue-500 transition"
-                    >
-                        Ver detalles del estreno
-                    </motion.button>
+                {/* FECHA Y FORMATO */}
+                <div className={`flex flex-wrap gap-6 text-sm mb-6 ${subTextColor}`}>
+                  {activa.fecha && (
+                    <span className="flex items-center gap-1">
+                      <HiCalendar className="w-5 h-5 text-blue-400" />
+                      Estreno: {activa.fecha}
+                    </span>
+                  )}
+                  {activa.formato && (
+                    <span className="flex items-center gap-1">
+                      <HiFilm className="w-5 h-5 text-purple-400" />
+                      {activa.formato}
+                    </span>
+                  )}
                 </div>
-            </div>
 
-            {/* GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-12 max-w-7xl mx-auto">
-                {estrenos.map((peli) => (
-                    <article
-                        key={peli.id}
-                        onClick={() => setActiva(peli)}
-                        className="group relative rounded-3xl overflow-hidden bg-black shadow-2xl cursor-pointer transition-all duration-500 hover:-translate-y-4 hover:shadow-blue-500/40"
-                    >
-                        <span className="absolute top-5 left-5 z-10 rounded-full bg-pink-600 px-4 py-1 text-xs font-bold">
-                            ESTRENO
-                        </span>
+                {/* INVITACIÓN */}
+                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6">
+                  <p className="text-base font-semibold">
+                    Mira esta película en estreno en Cineverso. Entérate cuando esté disponible.
+                  </p>
+                </div>
 
-                        <img
-                            src={peli.portada}
-                            className="h-[460px] w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
+                {/* NOTIFICACIÓN */}
+                <button
+                  onClick={() => handleNotificar(activa)}
+                  className={`w-full rounded-2xl py-3 font-bold transition flex items-center justify-center gap-2 ${btnNotificar}`}
+                >
+                  {notificada ? (
+                    <>
+                      <HiCheckCircle className="w-5 h-5" />
+                      Te notificaremos cuando esté disponible
+                    </>
+                  ) : (
+                    <>
+                      <HiBell className="w-5 h-5" />
+                      Notificarme cuando se estrene
+                    </>
+                  )}
+                </button>
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-6">
-                            <h3 className="text-xl font-bold mb-3">{peli.titulo}</h3>
-                            <button className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold">
-                                Ver detalles del estreno
-                            </button>
-                        </div>
-                    </article>
-                ))}
-            </div>
-
-            {/* MODAL */}
-            <AnimatePresence>
-                {activa && (
-                    <motion.div
-                        className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => {
-                            setActiva(null);
-                            setNotificada(false);
-                        }}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.85, y: 40, opacity: 0 }}
-                            animate={{ scale: 1, y: 0, opacity: 1 }}
-                            exit={{ scale: 0.85, y: 40, opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="relative bg-slate-900 rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* X */}
-                            <button
-                                onClick={() => {
-                                    setActiva(null);
-                                    setNotificada(false);
-                                }}
-                                className="absolute top-4 right-4 text-2xl text-white/70 hover:text-white z-20"
-                            >
-                                ✕
-                            </button>
-
-                            <div className="overflow-y-auto p-8 max-h-[90vh] relative">
-                                <iframe
-                                    src={activa.trailer}
-                                    title="Trailer"
-                                    allowFullScreen
-                                    className="w-full h-[260px] md:h-[420px] rounded-2xl mb-6"
-                                />
-
-                                <h2 className="text-4xl font-extrabold mb-4">{activa.titulo}</h2>
-                                <p className="text-slate-300 mb-6">{activa.descripcion}</p>
-
-                                {/* FECHA Y FORMATO */}
-                                <div className="flex flex-wrap gap-6 text-sm text-slate-400 mb-6">
-                                    {activa.fecha && (
-                                        <span className="flex items-center gap-1">
-                                            <HiCalendar className="w-5 h-5 text-blue-400" />
-                                            Estreno: {activa.fecha}
-                                        </span>
-                                    )}
-                                    {activa.formato && (
-                                        <span className="flex items-center gap-1">
-                                            <HiFilm className="w-5 h-5 text-purple-400" />
-                                            {activa.formato}
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* INVITACIÓN */}
-                                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-6 mb-6">
-                                    <p className="text-base font-semibold">
-                                        Mira esta película en estreno en Cineverso. Entérate cuando esté disponible.
-                                    </p>
-                                </div>
-
-                                {/* NOTIFICACIÓN */}
-                                <button
-                                    onClick={() => handleNotificar(activa)}
-                                    className={`w-full rounded-2xl py-3 font-bold transition flex items-center justify-center gap-2 ${notificada
-                                        ? "bg-green-600"
-                                        : "bg-pink-600 hover:bg-pink-500"
-                                        }`}
-                                >
-                                    {notificada ? (
-                                        <>
-                                            <HiCheckCircle className="w-5 h-5" />
-                                            Te notificaremos cuando esté disponible
-                                        </>
-                                    ) : (
-                                        <>
-                                            <HiBell className="w-5 h-5" />
-                                            Notificarme cuando se estrene
-                                        </>
-                                    )}
-                                </button>
-
-                                {/* MENSAJE CONFIRMACIÓN */}
-                                {notificada && (
-                                    <motion.p
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="mt-4 text-center text-green-400 text-sm flex items-center justify-center gap-1"
-                                    >
-                                        <HiCheckCircle className="w-5 h-5" />
-                                        Perfecto, te avisaremos apenas esté disponible en nuestro catálogo
-                                    </motion.p>
-                                )}
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                {/* MENSAJE CONFIRMACIÓN */}
+                {notificada && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 text-center text-green-400 text-sm flex items-center justify-center gap-1"
+                  >
+                    <HiCheckCircle className="w-5 h-5" />
+                    Perfecto, te avisaremos apenas esté disponible en nuestro catálogo
+                  </motion.p>
                 )}
-            </AnimatePresence>
-
-            {/* Tailwind personalizado para animación glow */}
-            <style jsx>{`
-                @keyframes pulseGlow {
-                    0%, 100% {
-                        box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.5);
-                    }
-                    50% {
-                        box-shadow: 0 0 25px rgba(236, 72, 153, 1), 0 0 50px rgba(236, 72, 153, 0.7);
-                    }
-                }
-                .animate-pulseGlow {
-                    animation: pulseGlow 2s infinite;
-                }
-            `}</style>
-        </section>
-    );
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
 }

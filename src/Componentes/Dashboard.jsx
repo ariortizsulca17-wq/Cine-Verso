@@ -1,52 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Context/AuthContext';
+import { useTheme } from '../Context/ThemeContext'; // <-- Importamos ThemeContext
 import DashboardNav from './DashboardNav';
 import DashboardContent from './DashboardContent';
 
 export default function Dashboard() {
     const { user, loading, updateProfileData, updateAvatar } = useAuth();
+    const { theme } = useTheme(); // <-- Extraemos theme
 
-    // --- 1. Estado principal (Solo los campos usados en el formulario) ---
     const [activeTab, setActiveTab] = useState('profile');
     const [formData, setFormData] = useState({
         nombre: '', 
         email: '', 
         fechaNacimiento: '', 
-        telefono: '', // Usaremos 'telefono' en todo el componente para simplificar.
+        telefono: '',
     });
     const [newAvatarFile, setNewAvatarFile] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
-    // --- 2. useEffect para Cargar Datos (Mapeo corregido) ---
     useEffect(() => {
         if (user && !loading) {
-            // Extraer nombre/apellido (si se usa displayName)
             const [firstName = ''] = user.displayName?.split(' ') || [''];
-            
             setFormData({
-                // Prioriza user.username, luego firstName, si no existe usa cadena vacía.
                 nombre: user.username || firstName || '', 
-                
                 email: user.email || '',
-                
-                // Mapeo unificado de teléfono: 
-                // Prioriza user.telefono, luego user.celular. Si no existe, usa cadena vacía.
                 telefono: user.telefono || user.celular || '', 
-                
                 fechaNacimiento: user.fechaNacimiento || '', 
-                
-                // NOTA: 'gender' no se incluye en formData ya que es de solo lectura 
-                // y se puede acceder directamente desde la prop 'user' en el hijo.
             });
         }
     }, [user, loading]);
 
-    // --- 3. Handlers ---
     const handleChange = (e) => {
-        // [e.target.name] será 'nombre', 'email', 'telefono', etc., 
-        // y coincidirá con las claves del estado formData.
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setSuccessMsg('');
     };
@@ -63,7 +49,6 @@ export default function Dashboard() {
         setSuccessMsg('');
 
         try {
-            // Se envía solo los campos definidos en formData
             await updateProfileData(formData); 
             
             if (newAvatarFile) {
@@ -82,18 +67,19 @@ export default function Dashboard() {
     if (loading || !user) return null;
 
     return (
-        <div className="flex justify-center items-start py-10 px-4 min-h-screen bg-gray-900">
+        <div className={`flex justify-center items-start py-10 px-4 min-h-screen
+            ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
             <div className="w-full max-w-6xl">
-                <h1 className="text-3xl font-extrabold uppercase tracking-widest text-white mb-8 md:hidden">
+                <h1 className={`text-3xl font-extrabold uppercase tracking-widest mb-8 md:hidden
+                    ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                     Mi Cuenta
                 </h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
-                    <DashboardNav activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <DashboardNav activeTab={activeTab} setActiveTab={setActiveTab} theme={theme} />
                     <DashboardContent 
                         activeTab={activeTab}
                         formData={formData}
-                        // setFormData ya no es necesario pasarlo
                         newAvatarFile={newAvatarFile}
                         handleFileChange={handleFileChange}
                         handleChange={handleChange}
@@ -101,7 +87,8 @@ export default function Dashboard() {
                         isSaving={isSaving}
                         error={error}
                         successMsg={successMsg}
-                        user={user} // Pasamos 'user' para acceder a gender y otras props
+                        user={user}
+                        theme={theme} // <-- Pasamos theme a hijos
                     />
                 </div>
             </div>

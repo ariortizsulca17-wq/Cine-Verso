@@ -14,20 +14,17 @@ import {
 import { auth, db } from "../lib/firebase";
 import Toast from "./Toast";
 import { comentariosPeliculas } from "../assets/comentariospeli";
+import { useTheme } from "../Context/ThemeContext"; // 🔑 Importamos ThemeContext
 
 function ComentariosPelicula({ peliculaId, onPromedioChange }) {
+  const { theme } = useTheme(); // 🔑 Obtenemos theme
   const [comentarios, setComentarios] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // NUEVO
   const [mensaje, setMensaje] = useState("");
   const [puntuacion, setPuntuacion] = useState(0);
-
-  // EDICIÓN INLINE
   const [editandoId, setEditandoId] = useState(null);
   const [editMensaje, setEditMensaje] = useState("");
   const [editPuntuacion, setEditPuntuacion] = useState(0);
-
   const [toast, setToast] = useState({ show: false, message: "" });
 
   const usuario = auth.currentUser;
@@ -51,7 +48,7 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
     const q = query(
       collection(db, "comentarios"),
       where("peliculaId", "==", Number(peliculaId)),
-      orderBy("createdAt", "asc") // 👈 NUEVOS ABAJO
+      orderBy("createdAt", "asc")
     );
 
     const unsub = onSnapshot(q, (snap) => {
@@ -72,11 +69,9 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
     return () => unsub();
   }, [peliculaId]);
 
-
   // ⭐ PROMEDIO
   useEffect(() => {
     if (comentarios.length === 0) return onPromedioChange(0);
-
     const total = comentarios.reduce((acc, c) => acc + (c.puntuacion || 0), 0);
     onPromedioChange(total / comentarios.length);
   }, [comentarios, onPromedioChange]);
@@ -96,7 +91,7 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
 
     setMensaje("");
     setPuntuacion(0);
-    setToast({ show: true, message: " Comentario publicado correctamente" });
+    setToast({ show: true, message: "Comentario publicado correctamente" });
   };
 
   // ✏️ ACTUALIZAR
@@ -118,11 +113,20 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
     setToast({ show: true, message: "Comentario eliminado correctamente" });
   };
 
-  if (loading) return <p className="text-gray-400">Cargando comentarios...</p>;
+  if (loading) return <p className={theme === "dark" ? "text-gray-400" : "text-gray-700"}>Cargando comentarios...</p>;
+
+  // 🔑 Colores según tema
+  const bgComentario = theme === "dark" ? "bg-[#0B1014]" : "bg-gray-100";
+  const bgComentarioMio = theme === "dark" ? "bg-[#0E1B22]" : "bg-cyan-100";
+  const borderComentario = theme === "dark" ? "border-[#00C8D7]/20" : "border-cyan-300";
+  const borderComentarioMio = theme === "dark" ? "border-[#00C8D7]" : "border-cyan-600";
+  const textComentario = theme === "dark" ? "text-gray-300" : "text-gray-900";
+  const textNombre = theme === "dark" ? "text-[#00C8D7]" : "text-cyan-700";
+  const textBoton = theme === "dark" ? "text-[#00C8D7]" : "text-cyan-700";
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold text-[#00C8D7] mb-6">Comentarios</h2>
+      <h2 className={`${textNombre} text-2xl font-bold mb-6`}>Comentarios</h2>
 
       {/* 💬 LISTA */}
       <div className="space-y-4 mb-10">
@@ -133,29 +137,26 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
             <div
               key={c.id}
               className={`
-        relative p-4 rounded-lg border
-        transition-all duration-300 ease-in-out
-        ${editandoId === c.id ? "scale-[1.02]" : "scale-100"}
-        ${esMio
-                  ? "bg-[#0E1B22] border-[#00C8D7] shadow-[0_0_12px_rgba(0,200,215,0.25)]"
-                  : "bg-[#0B1014] border-[#00C8D7]/20"
+                relative p-4 rounded-lg border transition-all duration-300 ease-in-out
+                ${editandoId === c.id ? "scale-[1.02]" : "scale-100"}
+                ${esMio
+                  ? `${bgComentarioMio} ${borderComentarioMio} shadow-[0_0_12px_rgba(0,200,215,0.25)]`
+                  : `${bgComentario} ${borderComentario}`
                 }
-      `}
+              `}
             >
-
               <div className="flex justify-between mb-2">
                 <div className="flex flex-col">
-                  <span className="font-bold text-[#00C8D7] flex items-center gap-2">
+                  <span className={`font-bold flex items-center gap-2 ${textNombre}`}>
                     {c.nombreUsuario}
-
                     {esMio && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[#00C8D7]/15 text-[#00C8D7] font-semibold">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[#00C8D7]/15 font-semibold">
                         Tu comentario
                       </span>
                     )}
                   </span>
                   {c.createdAt && (
-                    <span className="text-xs text-gray-400">
+                    <span className={theme === "dark" ? "text-xs text-gray-400" : "text-xs text-gray-600"}>
                       {formatearFecha(c.createdAt)}
                     </span>
                   )}
@@ -181,8 +182,7 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
                   <textarea
                     value={editMensaje}
                     onChange={(e) => setEditMensaje(e.target.value)}
-                    className="w-full bg-gray-800 text-white p-2 rounded mb-3
-             transition-all duration-300"
+                    className={`w-full p-2 rounded mb-3 transition-all duration-300 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"}`}
                   />
 
                   <div className="flex mb-3">
@@ -190,51 +190,31 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
                       <button
                         key={i}
                         onClick={() => setEditPuntuacion(i + 1)}
-                        className={`text-3xl transition transform hover:scale-125 ${i < editPuntuacion
-                          ? "text-yellow-400"
-                          : "text-gray-600"
-                          }`}
+                        className={`text-3xl transition transform hover:scale-125 ${i < editPuntuacion ? "text-yellow-400" : "text-gray-600"}`}
                       >
                         ★
                       </button>
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => actualizarComentario(c.id)}
-                    className="bg-[#00C8D7] text-black px-4 py-1 rounded mr-3"
-                  >
+                  <button className={`${textBoton} bg-[#00C8D7] px-4 py-1 rounded mr-3`} onClick={() => actualizarComentario(c.id)}>
                     Guardar
                   </button>
 
-                  <button
-                    onClick={() => setEditandoId(null)}
-                    className="text-gray-400"
-                  >
+                  <button className={theme === "dark" ? "text-gray-400" : "text-gray-600"} onClick={() => setEditandoId(null)}>
                     Cancelar
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-gray-300">{c.mensaje}</p>
+                  <p className={textComentario}>{c.mensaje}</p>
 
-                  {usuario?.uid === c.userId && (
+                  {esMio && (
                     <div className="flex gap-4 mt-3 text-sm">
-                      <button
-                        onClick={() => {
-                          setEditandoId(c.id);
-                          setEditMensaje(c.mensaje);
-                          setEditPuntuacion(c.puntuacion);
-                        }}
-                        className="text-[#00C8D7]"
-                      >
+                      <button onClick={() => { setEditandoId(c.id); setEditMensaje(c.mensaje); setEditPuntuacion(c.puntuacion); }} className={textBoton}>
                         Editar
                       </button>
-
-                      <button
-                        onClick={() => eliminarComentario(c.id)}
-                        className="text-red-400"
-                      >
+                      <button onClick={() => eliminarComentario(c.id)} className="text-red-400">
                         Eliminar
                       </button>
                     </div>
@@ -242,20 +222,19 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
                 </>
               )}
             </div>
-          );})}
+          );
+        })}
       </div>
 
       {/* 📝 FORMULARIO NUEVO */}
       {usuario && (
-        <div className="bg-[#0B1014] p-5 rounded-xl border border-[#00C8D7]/30">
-          <h3 className="text-lg font-bold text-[#00C8D7] mb-3">
-            Escribe tu comentario
-          </h3>
+        <div className={`${bgComentario} p-5 rounded-xl border ${borderComentario}`}>
+          <h3 className={`${textNombre} text-lg font-bold mb-3`}>Escribe tu comentario</h3>
 
           <textarea
             value={mensaje}
             onChange={(e) => setMensaje(e.target.value)}
-            className="w-full bg-gray-800 text-white p-2 rounded mb-3"
+            className={`w-full p-2 rounded mb-3 transition-all duration-300 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"}`}
           />
 
           <div className="flex mb-4">
@@ -263,8 +242,7 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
               <button
                 key={i}
                 onClick={() => setPuntuacion(i + 1)}
-                className={`text-4xl transition transform hover:scale-125 ${i < puntuacion ? "text-yellow-400" : "text-gray-600"
-                  }`}
+                className={`text-4xl transition transform hover:scale-125 ${i < puntuacion ? "text-yellow-400" : theme === "dark" ? "text-gray-600" : "text-gray-400"}`}
               >
                 ★
               </button>
@@ -274,10 +252,7 @@ function ComentariosPelicula({ peliculaId, onPromedioChange }) {
           <button
             disabled={puntuacion === 0}
             onClick={publicarComentario}
-            className={`px-6 py-2 rounded-lg font-bold ${puntuacion === 0
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-[#00C8D7] hover:bg-[#00E0FF] text-black"
-              }`}
+            className={`px-6 py-2 rounded-lg font-bold transition ${puntuacion === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#00C8D7] hover:bg-[#00E0FF] text-black"}`}
           >
             Publicar
           </button>
